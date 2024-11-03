@@ -90,11 +90,11 @@ TEST_RUNNER.run({
           },
           canConsumeShows: true,
         } as ExchangeSessionAndCheckCapabilityResponse;
-        // 2024-11-01 01:xx:xx UTC
+        // 2025-01-01 01:xx:xx UTC
         let handler = new SyncMeterReadingHandler(
           BIGTABLE,
           clientMock,
-          () => new Date(1730422832156),
+          () => new Date(1735696113000),
         );
 
         // Execute
@@ -110,7 +110,7 @@ TEST_RUNNER.run({
 
         // Verify
         assertThat(
-          (await BIGTABLE.row(`t1#2024-10-31#consumer1`).get())[0].data,
+          (await BIGTABLE.row(`t1#2024-12-31#consumer1`).get())[0].data,
           eqData({
             w: {
               "season1#ep1": {

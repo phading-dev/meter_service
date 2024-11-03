@@ -23,18 +23,19 @@ import { LRUCache } from "lru-cache";
 export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHandlerInterface {
   public static create(): ProcessDailyMeterReadingHandler {
     return new ProcessDailyMeterReadingHandler(
+      BATCH_SIZE_OF_DAILY_PROCESSING_CONUMSERS_FOR_ONE_PUBLISHER,
       BIGTABLE,
       SERVICE_CLIENT,
-      BATCH_SIZE_OF_DAILY_PROCESSING_CONUMSERS_FOR_ONE_PUBLISHER,
     );
   }
 
+  private static ONE_KB_IN_B = 1024;
   private cache: LRUCache<string, Promise<GetVideoDurationAndSizeResponse>>;
 
   public constructor(
+    private batchSize: number,
     private bigtable: Table,
     private serviceClient: NodeServiceClient,
-    private batchSize: number,
     private interruptAggregation: () => void = () => {},
     private interruptFinalWrite: () => void = () => {},
   ) {
@@ -110,22 +111,22 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
       for (let seasonId in row.data["a"]) {
         let watchTimeSec = row.data["a"][seasonId][0].value;
         incrementColumn(data, "a", seasonId, watchTimeSec);
-        data["t"]["w"].value += watchTimeSec;
+        incrementColumn(data, "t", "w", watchTimeSec);
       }
     }
-    let bytesPromise = new Array<Promise<number>>();
+    let kbsPromises = new Array<Promise<number>>();
     for (let row of rows) {
       for (let seasonIdAndEpisodeId in row.data["w"]) {
-        bytesPromise.push(
-          this.getTransimittedBytes(
+        kbsPromises.push(
+          this.getTransimittedKbs(
             seasonIdAndEpisodeId,
             row.data["w"][seasonIdAndEpisodeId][0].value,
           ),
         );
       }
     }
-    (await Promise.all(bytesPromise)).forEach(
-      (bytes) => (data["t"]["b"].value += bytes),
+    (await Promise.all(kbsPromises)).forEach((kbs) =>
+      incrementColumn(data, "t", "kb", kbs),
     );
     let newCursor =
       rows.length === limit ? rows[rows.length - 1].id : undefined;
@@ -145,7 +146,7 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     this.interruptAggregation();
   }
 
-  private async getTransimittedBytes(
+  private async getTransimittedKbs(
     seasonIdAndEpisodeId: string,
     watchTimeMs: number,
   ): Promise<number> {
@@ -158,7 +159,10 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
       });
     }
     let { videoDurationSec, videoSize } = await responsePromise;
-    return Math.ceil((videoSize / videoDurationSec) * (watchTimeMs / 1000));
+    return Math.ceil(
+      ((videoSize / videoDurationSec) * (watchTimeMs / 1000)) /
+        ProcessDailyMeterReadingHandler.ONE_KB_IN_B,
+    );
   }
 
   private async writeOutputRows(
@@ -179,7 +183,7 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
         data: {
           t: {
             w: data["t"]["w"].value,
-            b: data["t"]["b"].value,
+            kb: data["t"]["kb"].value,
           },
         },
       },

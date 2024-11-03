@@ -83,12 +83,7 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
         },
       ],
     });
-    let endDate: string;
-    if (rows.length === 0) {
-      endDate = todayString;
-    } else {
-      endDate = rows[0].id.split("#")[1];
-    }
+    let endDate = rows.length === 0 ? todayString : rows[0].id.split("#")[1];
     let [year, month] = endDate.split("-");
     return `${year}-${month}`;
   }

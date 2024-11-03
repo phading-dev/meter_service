@@ -123,7 +123,7 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
               w: {
                 value: 0,
               },
-              b: {
+              kb: {
                 value: 0,
               },
             },
@@ -164,7 +164,7 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     let watchTimeSec = Math.ceil(watchTimeMs / 1000);
     let multipliedWatchTimeSec = Math.ceil((watchTimeMs * grade) / 1000);
 
-    incrementColumn(consumerData, "w", seasonId, watchTimeSec);
+    incrementColumn(consumerData, "a", seasonId, watchTimeSec);
     incrementColumn(consumerData, "t", `w`, multipliedWatchTimeSec);
     incrementColumn(consumerMonthData, "t", `w`, multipliedWatchTimeSec);
 

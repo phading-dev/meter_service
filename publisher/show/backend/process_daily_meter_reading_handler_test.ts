@@ -23,7 +23,7 @@ async function initData() {
           w: {
             value: 0,
           },
-          b: {
+          kb: {
             value: 0,
           },
         },
@@ -45,10 +45,10 @@ async function initData() {
             value: 1000,
           },
           "season1#ep2": {
-            value: 300,
+            value: 500,
           },
           "season2#ep2": {
-            value: 1000,
+            value: 8000,
           },
         },
         a: {
@@ -112,6 +112,21 @@ async function initData() {
         },
       },
     },
+    {
+      key: `t3#2024-10-30#publisher2#consumer4`,
+      data: {
+        w: {
+          "season1#ep1": {
+            value: 2000,
+          },
+        },
+        a: {
+          season1: {
+            value: 3000,
+          },
+        },
+      },
+    },
   ]);
 }
 
@@ -128,7 +143,7 @@ function createClientMock(): NodeServiceClientMock {
         request.body.episodeId === "ep1"
       ) {
         return {
-          videoSize: 3600,
+          videoSize: 360000,
           videoDurationSec: 60,
         } as GetVideoDurationAndSizeResponse;
       } else if (
@@ -136,7 +151,7 @@ function createClientMock(): NodeServiceClientMock {
         request.body.episodeId === "ep2"
       ) {
         return {
-          videoSize: 10200,
+          videoSize: 1020000,
           videoDurationSec: 500,
         } as GetVideoDurationAndSizeResponse;
       } else if (
@@ -144,7 +159,7 @@ function createClientMock(): NodeServiceClientMock {
         request.body.episodeId === "ep2"
       ) {
         return {
-          videoSize: 950,
+          videoSize: 95000,
           videoDurationSec: 200,
         } as GetVideoDurationAndSizeResponse;
       } else if (
@@ -152,7 +167,7 @@ function createClientMock(): NodeServiceClientMock {
         request.body.episodeId === "ep3"
       ) {
         return {
-          videoSize: 10000,
+          videoSize: 1000000,
           videoDurationSec: 100,
         } as GetVideoDurationAndSizeResponse;
       } else {
@@ -166,14 +181,14 @@ TEST_RUNNER.run({
   name: "ProcessDailyMeterReadingHandlerTest",
   cases: [
     {
-      name: "CompleteProcessingInOneRun",
+      name: "CompleteProcessingInOneShot",
       execute: async () => {
         // Prepare
         await initData();
         let handler = new ProcessDailyMeterReadingHandler(
+          2,
           BIGTABLE,
           createClientMock(),
-          2,
         );
 
         // Execute
@@ -182,11 +197,8 @@ TEST_RUNNER.run({
         });
 
         // Verify
-        let [finalPublisherRow] = await BIGTABLE.row(
-          "f2#publisher1#2024-10-30",
-        ).get();
         assertThat(
-          finalPublisherRow.data,
+          (await BIGTABLE.row("f2#publisher1#2024-10-30").get())[0].data,
           eqData({
             a: {
               season1: {
@@ -203,25 +215,22 @@ TEST_RUNNER.run({
               w: {
                 value: 59,
               },
-              b: {
-                value: 181,
+              kb: {
+                value: 24,
               },
             },
           }),
           "final publisher data",
         );
-        let [tempMonthPublisherRow] = await BIGTABLE.row(
-          "t5#2024-10#publisher1#30",
-        ).get();
         assertThat(
-          tempMonthPublisherRow.data,
+          (await BIGTABLE.row("t5#2024-10#publisher1#30").get())[0].data,
           eqData({
             t: {
               w: {
                 value: 59,
               },
-              b: {
-                value: 181,
+              kb: {
+                value: 24,
               },
             },
           }),
@@ -239,6 +248,13 @@ TEST_RUNNER.run({
           eq(false),
           "one of data row deleted",
         );
+        assertThat(
+          (
+            await BIGTABLE.row(`t3#2024-10-30#publisher2#consumer4`).exists()
+          )[0],
+          eq(true),
+          "extra data row exists",
+        );
       },
       tearDown: async () => {
         await Promise.all([BIGTABLE.deleteRows("t"), BIGTABLE.deleteRows("f")]);
@@ -252,9 +268,9 @@ TEST_RUNNER.run({
         let aggreagtionError: Error;
         let finalWriteError: Error;
         let handler = new ProcessDailyMeterReadingHandler(
+          2,
           BIGTABLE,
           createClientMock(),
-          2,
           () => {
             if (aggreagtionError) {
               throw aggreagtionError;
@@ -296,8 +312,8 @@ TEST_RUNNER.run({
               w: {
                 value: 54,
               },
-              b: {
-                value: 178,
+              kb: {
+                value: 22,
               },
             },
             c: {
@@ -339,8 +355,8 @@ TEST_RUNNER.run({
               w: {
                 value: 59,
               },
-              b: {
-                value: 181,
+              kb: {
+                value: 24,
               },
             },
             c: {
@@ -382,8 +398,8 @@ TEST_RUNNER.run({
               w: {
                 value: 59,
               },
-              b: {
-                value: 181,
+              kb: {
+                value: 24,
               },
             },
             c: {
@@ -410,9 +426,6 @@ TEST_RUNNER.run({
 
         // Verify
         assertThat(error.message, containStr("fake write"), "write error");
-        let [finalPublisherRow] = await BIGTABLE.row(
-          "f2#publisher1#2024-10-30",
-        ).get();
         let finalPublisherData: any = {
           a: {
             season1: {
@@ -429,31 +442,28 @@ TEST_RUNNER.run({
             w: {
               value: 59,
             },
-            b: {
-              value: 181,
+            kb: {
+              value: 24,
             },
           },
         };
         assertThat(
-          finalPublisherRow.data,
+          (await BIGTABLE.row("f2#publisher1#2024-10-30").get())[0].data,
           eqData(finalPublisherData),
           "final publisher data",
         );
-        let [tempMonthPublisherRow] = await BIGTABLE.row(
-          "t5#2024-10#publisher1#30",
-        ).get();
         let tempMonthPublisherData: any = {
           t: {
             w: {
               value: 59,
             },
-            b: {
-              value: 181,
+            kb: {
+              value: 24,
             },
           },
         };
         assertThat(
-          tempMonthPublisherRow.data,
+          (await BIGTABLE.row("t5#2024-10#publisher1#30").get())[0].data,
           eqData(tempMonthPublisherData),
           "temp month publisher data",
         );
@@ -479,19 +489,13 @@ TEST_RUNNER.run({
         });
 
         // Verify
-        [finalPublisherRow] = await BIGTABLE.row(
-          "f2#publisher1#2024-10-30",
-        ).get();
         assertThat(
-          finalPublisherRow.data,
+          (await BIGTABLE.row("f2#publisher1#2024-10-30").get())[0].data,
           eqData(finalPublisherData),
           "final publisher data",
         );
-        [tempMonthPublisherRow] = await BIGTABLE.row(
-          "t5#2024-10#publisher1#30",
-        ).get();
         assertThat(
-          tempMonthPublisherRow.data,
+          (await BIGTABLE.row("t5#2024-10#publisher1#30").get())[0].data,
           eqData(tempMonthPublisherData),
           "temp month publisher data",
         );

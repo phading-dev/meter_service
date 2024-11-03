@@ -27,20 +27,24 @@ export function incrementColumn(
       value: value,
     };
   } else {
-    data[columnFamily][columnName].value += value;
+    value += data[columnFamily][columnName].value;
+    data[columnFamily][columnName].value = value;
+  }
+  if (value >= Number.MAX_SAFE_INTEGER) {
+    throw new Error(
+      `FATAL! Column ${columnFamily}:${columnName} has exceeded MAX_SAFE_INTEGER!`,
+    );
   }
 }
 
 // Normalizes data read from bigtable that comes with an array of values by taking only the first value.
 export function normalizeData(data: any): any {
-  let dataToReturn: any = {};
   for (let columnFamily in data) {
-    dataToReturn[columnFamily] = {};
     for (let column in data[columnFamily]) {
-      dataToReturn[columnFamily][column] = {
+      data[columnFamily][column] = {
         value: data[columnFamily][column][0].value,
       };
     }
   }
-  return dataToReturn;
+  return data;
 }

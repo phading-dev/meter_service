@@ -16,9 +16,9 @@ Storage utilization target: 4
 
 ```shell
 cbt -project test -instance test createtable SINGLE
-cbt -project test -instance test createfamily SINGLE w:maxversions=1:intsum # watch time aggregated. Columns follow ${seasonId}#${epiosdeId} or ${seasonId} pattern.
-cbt -project test -instance test createfamily SINGLE a:maxversions=1:intsum # watch time aggregated and adjusted, multiplied by grade. Columns follow ${seasonId} pattern.
-cbt -project test -instance test createfamily SINGLE t:maxversions=1:intsum # total aggregated. Columns can be money (USD), watch time or transmitted bytes.
+cbt -project test -instance test createfamily SINGLE w:maxversions=1:intsum # watch time live aggregated. Columns follow ${seasonId}#${epiosdeId} pattern.
+cbt -project test -instance test createfamily SINGLE a:maxversions=1 # watch time further aggregated and/or multiplied by grade. Columns follow ${seasonId} pattern.
+cbt -project test -instance test createfamily SINGLE t:maxversions=1 # total aggregated. Columns can be watch time or transmitted bytes.
 cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or completion
 ```
 
@@ -57,7 +57,7 @@ cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or
         value: number
       - name: t:w # total watch time multiplied by grade in sec
         value: number
-      - name: t:b # total transmitted bytes
+      - name: t:kb # total transmitted KiB
         value: number
       - name: c:r # Cursor to resume aggregation
         value: string
@@ -68,28 +68,22 @@ cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or
     columns:
       - name: t:w # total watch time multiplied by grade in sec
         value: number
-      - name: t:b # total transmitted bytes
+      - name: t:kb # total transmitted KiB
         value: number
 - row:
     key: t7#${month}#${publisherId}
     columns:
-      - name: t:USDe # total earnings in USD
+      - name: t:w # total watch time multiplied by grade in sec
         value: number
-      - name: t:USDp # total platform cut cost in USD
+      - name: t:mb # total transmitted MiB
         value: number
-      - name: t:USDn # total network cost in USD
-        value: number
-      - name: t:USDs # total storage cost in USD
-        value: number
-      - name: t:USDu # total upload cost in USD
-        value: number
-      - name: t:p # placeholder
+      - name: c:p # Whether aggregation is completed. Empty string means false. Otherwise true.
         value: string
 # Next f5
 - row:
     key: f1#${consumerId}#${date}
     columns:
-      - name: w:${seasonId} # watch time in sec
+      - name: a:${seasonId} # watch time in sec
         value: number
       - name: t:w # total watch time multiplied by grade in sec
         value: number
@@ -100,25 +94,23 @@ cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or
         value: number
       - name: t:w # total watch time multiplied by grade in sec
         value: number
-      - name: t:b # total transmitted bytes
+      - name: t:kb # total transmitted KiB
         value: number
 - row:
     key: f3#${consumerId}#${month}
     columns:
-      - name: t:USDc # total cost in USD
+      - name: t:w # total watch time multiplied by grade in sec
         value: number
 - row:
     key: f4#${publisherId}#${month}
     columns:
-      - name: t:USDe # total earnings in USD
+      - name: t:w # total watch time multiplied by grade in sec
         value: number
-      - name: t:USDp # total platform cut cost in USD
+      - name: t:mb # total transmitted MiB
         value: number
-      - name: t:USDn # total network cost in USD
+      - name: t:smbh # storage as MiB x hour
         value: number
-      - name: t:USDs # total storage cost in USD
-        value: number
-      - name: t:USDu # total upload cost in USD
+      - name: t:umb # uploaded MiB
         value: number
 - row:
     key: l1

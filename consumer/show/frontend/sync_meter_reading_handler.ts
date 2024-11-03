@@ -1,5 +1,9 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { toDateISOString, toToday } from "../../../common/date_helper";
+import {
+  CACHE_SIZE_OF_SESSION,
+  CACHE_TTL_MS_OF_SESSION,
+} from "../../../common/params";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
 import { SyncMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/consumer/show/frontend/handler";
@@ -30,8 +34,8 @@ export class SyncMeterReadingHandler extends SyncMeterReadingHandlerInterface {
   ) {
     super();
     this.lruCache = new LRUCache({
-      max: 10000,
-      ttl: 60000, // ms
+      max: CACHE_SIZE_OF_SESSION,
+      ttl: CACHE_TTL_MS_OF_SESSION,
     });
   }
 

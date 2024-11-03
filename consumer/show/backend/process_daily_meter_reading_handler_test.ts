@@ -82,7 +82,7 @@ TEST_RUNNER.run({
         assertThat(
           (await BIGTABLE.row("f1#consumer1#2024-10-30").get())[0].data,
           eqData({
-            w: {
+            a: {
               season1: {
                 value: 4,
               },
@@ -113,9 +113,20 @@ TEST_RUNNER.run({
           "consumer1 month day",
         );
         assertThat(
-          (await BIGTABLE.row("t6#2024-10#consumer1").exists())[0],
-          eq(true),
-          "consumer1 month",
+          (await BIGTABLE.row("t6#2024-10#consumer1").get())[0].data,
+          eqData({
+            t: {
+              w: {
+                value: 0,
+              },
+            },
+            c: {
+              p: {
+                value: "",
+              },
+            },
+          }),
+          "consumer1 month data",
         );
         assertThat(
           (await BIGTABLE.row("t3#2024-10-30#publisher1#consumer1").get())[0]
@@ -163,15 +174,33 @@ TEST_RUNNER.run({
           }),
           "publisher3",
         );
+        let defaultPublisherMonthData = {
+          t: {
+            w: {
+              value: 0,
+            },
+            kb: {
+              value: 0,
+            },
+          },
+          c: {
+            r: {
+              value: "",
+            },
+            p: {
+              value: "",
+            },
+          },
+        };
         assertThat(
-          (await BIGTABLE.row("t4#2024-10-30#publisher1").exists())[0],
-          eq(true),
-          "publisher1 avaialble",
+          (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
+          eqData(defaultPublisherMonthData),
+          "publisher1 month data",
         );
         assertThat(
-          (await BIGTABLE.row("t4#2024-10-30#publisher3").exists())[0],
-          eq(true),
-          "publisher3 avaialble",
+          (await BIGTABLE.row("t4#2024-10-30#publisher3").get())[0].data,
+          eqData(defaultPublisherMonthData),
+          "publisher3 month data",
         );
         assertThat(
           (await BIGTABLE.row("t1#2024-10-30#consumer1").exists())[0],

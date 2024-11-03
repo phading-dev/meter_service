@@ -9,7 +9,7 @@ TEST_RUNNER.run({
   name: "GetMonthlyBatchHandlerTest",
   cases: [
     {
-      name: "GetFirstBatch_GetSecondBatch_GetLastEmptyBatch",
+      name: "GetFirstBatch_GetSecondBatch",
       execute: async () => {
         // Prepare
         await BIGTABLE.insert([

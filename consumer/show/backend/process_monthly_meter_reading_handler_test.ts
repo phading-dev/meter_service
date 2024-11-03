@@ -101,8 +101,8 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f3#consumer1#2024-10").get())[0].data,
           eqData({
             t: {
-              USDc: {
-                value: 3,
+              w: {
+                value: 900,
               },
             },
           }),
@@ -119,6 +119,11 @@ TEST_RUNNER.run({
           "one data row deleted",
         );
         assertThat(
+          (await BIGTABLE.row("t2#2024-10#consumer2#20").exists())[0],
+          eq(true),
+          "extra data row exists",
+        );
+        assertThat(
           clientMock.request.descriptor,
           eq(GENERATE_BILLING_STATEMENT),
           "RC descriptor",
@@ -131,29 +136,14 @@ TEST_RUNNER.run({
               month: "2024-10",
               items: [
                 {
-                  price: {
-                    productType: ProductType.SHOW,
-                    money: {
-                      amount: 10,
-                      currency: "USD",
-                    },
-                    divideBy: 3600,
-                  },
+                  productType: ProductType.SHOW,
                   quantity: 900,
-                  subTotal: {
-                    amount: 3,
-                    currency: "USD",
-                  },
                 },
               ],
-              total: {
-                amount: 3,
-                currency: "USD",
-              },
             },
             GENERATE_BILLING_STATEMENT_REQUEST_BODY,
           ),
-          "request",
+          "generate billing request",
         );
       },
       tearDown: async () => {
@@ -212,8 +202,8 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f3#consumer1#2024-10").get())[0].data,
           eqData({
             t: {
-              USDc: {
-                value: 3,
+              w: {
+                value: 900,
               },
             },
           }),
@@ -230,6 +220,11 @@ TEST_RUNNER.run({
           "one data row deleted",
         );
         assertThat(
+          (await BIGTABLE.row("t2#2024-10#consumer2#20").exists())[0],
+          eq(true),
+          "extra data row exists",
+        );
+        assertThat(
           clientMock.request.descriptor,
           eq(GENERATE_BILLING_STATEMENT),
           "RC descriptor",
@@ -242,29 +237,14 @@ TEST_RUNNER.run({
               month: "2024-10",
               items: [
                 {
-                  price: {
-                    productType: ProductType.SHOW,
-                    money: {
-                      amount: 10,
-                      currency: "USD",
-                    },
-                    divideBy: 3600,
-                  },
+                  productType: ProductType.SHOW,
                   quantity: 900,
-                  subTotal: {
-                    amount: 3,
-                    currency: "USD",
-                  },
                 },
               ],
-              total: {
-                amount: 3,
-                currency: "USD",
-              },
             },
             GENERATE_BILLING_STATEMENT_REQUEST_BODY,
           ),
-          "request",
+          "generate billing request",
         );
 
         // Execute

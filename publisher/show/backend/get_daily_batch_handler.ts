@@ -81,10 +81,6 @@ export class GetDailyBatchHandler extends GetDailyBatchHandlerInterface {
         },
       ],
     });
-    if (rows.length === 0) {
-      return todayString;
-    } else {
-      return rows[0].id.split("#")[1];
-    }
+    return rows.length === 0 ? todayString : rows[0].id.split("#")[1];
   }
 }
