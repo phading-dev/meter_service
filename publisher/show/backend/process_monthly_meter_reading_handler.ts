@@ -9,8 +9,8 @@ import {
 } from "../../../common/date_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { generateEarningsStatement } from "@phading/commerce_service_interface/publisher/show/backend/client";
-import { ProductType } from "@phading/price";
+import { generateEarningsStatement } from "@phading/commerce_service_interface/publisher/backend/client";
+import { MeterType } from "@phading/commerce_service_interface/publisher/backend/interface";
 import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/publisher/show/backend/handler";
 import {
   ProcessMonthlyMeterReadingRequestBody,
@@ -161,26 +161,22 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
       generateEarningsStatement(this.serviceClient, {
         accountId,
         month,
-        items: [
+        readings: [
           {
-            productType: ProductType.SHOW,
-            quantity: totalWatchTimeSec,
+            meterType: MeterType.SHOW_WATCH_TIME_SEC,
+            reading: totalWatchTimeSec,
           },
           {
-            productType: ProductType.PLATFORM_CUT_SHOW,
-            quantity: totalWatchTimeSec * -1,
+            meterType: MeterType.NETWORK_TRANSMITTED_MB,
+            reading: totalMbs,
           },
           {
-            productType: ProductType.NETWORK,
-            quantity: totalMbs * -1,
+            meterType: MeterType.STORAGE_MB_HOUR,
+            reading: storageResponse.mbh,
           },
           {
-            productType: ProductType.STORAGE,
-            quantity: storageResponse.mbh * -1,
-          },
-          {
-            productType: ProductType.UPLAOD,
-            quantity: uploadResponse.mb * -1,
+            meterType: MeterType.UPLOAD_MB,
+            reading: uploadResponse.mb,
           },
         ],
       }),

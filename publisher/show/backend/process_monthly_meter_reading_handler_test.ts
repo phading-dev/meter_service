@@ -5,8 +5,8 @@ import {
   GENERATE_EARNINGS_STATEMENT,
   GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
   GenerateEarningsStatementResponse,
-} from "@phading/commerce_service_interface/publisher/show/backend/interface";
-import { ProductType } from "@phading/price";
+  MeterType,
+} from "@phading/commerce_service_interface/publisher/backend/interface";
 import {
   GET_STORAGE_METER_READING,
   GET_STORAGE_METER_READING_REQUEST_BODY,
@@ -177,26 +177,22 @@ TEST_RUNNER.run({
             {
               accountId: "publisher1",
               month: "2024-10",
-              items: [
+              readings: [
                 {
-                  productType: ProductType.SHOW,
-                  quantity: 112,
+                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
+                  reading: 112,
                 },
                 {
-                  productType: ProductType.PLATFORM_CUT_SHOW,
-                  quantity: -112,
+                  meterType: MeterType.NETWORK_TRANSMITTED_MB,
+                  reading: 123,
                 },
                 {
-                  productType: ProductType.NETWORK,
-                  quantity: -123,
+                  meterType: MeterType.STORAGE_MB_HOUR,
+                  reading: 3334,
                 },
                 {
-                  productType: ProductType.STORAGE,
-                  quantity: -3334,
-                },
-                {
-                  productType: ProductType.UPLAOD,
-                  quantity: -8899,
+                  meterType: MeterType.UPLOAD_MB,
+                  reading: 8899,
                 },
               ],
             },
@@ -318,26 +314,22 @@ TEST_RUNNER.run({
             {
               accountId: "publisher1",
               month: "2024-10",
-              items: [
+              readings: [
                 {
-                  productType: ProductType.SHOW,
-                  quantity: 112,
+                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
+                  reading: 112,
                 },
                 {
-                  productType: ProductType.PLATFORM_CUT_SHOW,
-                  quantity: -112,
+                  meterType: MeterType.NETWORK_TRANSMITTED_MB,
+                  reading: 123,
                 },
                 {
-                  productType: ProductType.NETWORK,
-                  quantity: -123,
+                  meterType: MeterType.STORAGE_MB_HOUR,
+                  reading: 3334,
                 },
                 {
-                  productType: ProductType.STORAGE,
-                  quantity: -3334,
-                },
-                {
-                  productType: ProductType.UPLAOD,
-                  quantity: -8899,
+                  meterType: MeterType.UPLOAD_MB,
+                  reading: 8899,
                 },
               ],
             },

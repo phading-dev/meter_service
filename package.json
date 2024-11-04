@@ -28,8 +28,7 @@
   },
   "dependencies": {
     "@google-cloud/bigtable": "^5.1.2",
-    "@phading/commerce_service_interface": "^0.3.5",
-    "@phading/price": "^0.3.3",
+    "@phading/commerce_service_interface": "^0.3.7",
     "@phading/product_meter_service_interface": "^0.4.7",
     "@phading/product_service_interface": "^0.6.31",
     "@phading/user_service_interface": "^0.17.5",

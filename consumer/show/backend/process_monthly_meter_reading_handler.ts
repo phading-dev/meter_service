@@ -5,8 +5,8 @@ import {
 } from "../../../common/bigtable_data_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { generateBillingStatement } from "@phading/commerce_service_interface/consumer/show/backend/client";
-import { ProductType } from "@phading/price";
+import { generateBillingStatement } from "@phading/commerce_service_interface/consumer/backend/client";
+import { MeterType } from "@phading/commerce_service_interface/consumer/backend/interface";
 import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/consumer/show/backend/handler";
 import {
   ProcessMonthlyMeterReadingRequestBody,
@@ -118,10 +118,10 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
       generateBillingStatement(this.serviceClient, {
         accountId,
         month,
-        items: [
+        readings: [
           {
-            productType: ProductType.SHOW,
-            quantity: totalWatchTimeSec,
+            meterType: MeterType.SHOW_WATCH_TIME_SEC,
+            reading: totalWatchTimeSec,
           },
         ],
       }),

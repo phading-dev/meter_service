@@ -4,8 +4,8 @@ import { ProcessMonthlyMeterReadingHandler } from "./process_monthly_meter_readi
 import {
   GENERATE_BILLING_STATEMENT,
   GENERATE_BILLING_STATEMENT_REQUEST_BODY,
-} from "@phading/commerce_service_interface/consumer/show/backend/interface";
-import { ProductType } from "@phading/price";
+  MeterType,
+} from "@phading/commerce_service_interface/consumer/backend/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import {
@@ -134,10 +134,10 @@ TEST_RUNNER.run({
             {
               accountId: "consumer1",
               month: "2024-10",
-              items: [
+              readings: [
                 {
-                  productType: ProductType.SHOW,
-                  quantity: 900,
+                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
+                  reading: 900,
                 },
               ],
             },
@@ -235,10 +235,10 @@ TEST_RUNNER.run({
             {
               accountId: "consumer1",
               month: "2024-10",
-              items: [
+              readings: [
                 {
-                  productType: ProductType.SHOW,
-                  quantity: 900,
+                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
+                  reading: 900,
                 },
               ],
             },
