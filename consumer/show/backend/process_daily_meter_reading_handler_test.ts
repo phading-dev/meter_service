@@ -128,7 +128,7 @@ TEST_RUNNER.run({
         assertThat(
           (await BIGTABLE.row("f1#consumer1#2024-10-30").get())[0].data,
           eqData({
-            a: {
+            w: {
               season1: {
                 value: 4,
               },
@@ -137,6 +137,17 @@ TEST_RUNNER.run({
               },
               season3: {
                 value: 10,
+              },
+            },
+            a: {
+              season1: {
+                value: 24,
+              },
+              season2: {
+                value: 196,
+              },
+              season3: {
+                value: 300,
               },
             },
             t: {
@@ -178,6 +189,14 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("t3#2024-10-30#publisher1#consumer1").get())[0]
             .data,
           eqData({
+            w: {
+              season1: {
+                value: 4,
+              },
+              season2: {
+                value: 40,
+              },
+            },
             a: {
               season1: {
                 value: 24,
@@ -198,6 +217,11 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("t3#2024-10-30#publisher3#consumer1").get())[0]
             .data,
           eqData({
+            w: {
+              season3: {
+                value: 10,
+              },
+            },
             a: {
               season3: {
                 value: 300,
@@ -333,9 +357,14 @@ TEST_RUNNER.run({
         assertThat(
           (await BIGTABLE.row("f1#consumer1#2024-10-30").get())[0].data,
           eqData({
-            a: {
+            w: {
               season1: {
                 value: 2,
+              },
+            },
+            a: {
+              season1: {
+                value: 20,
               },
             },
             t: {
@@ -377,6 +406,11 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("t3#2024-10-30#publisher1#consumer1").get())[0]
             .data,
           eqData({
+            w: {
+              season1: {
+                value: 2,
+              },
+            },
             a: {
               season1: {
                 value: 20,
@@ -494,9 +528,14 @@ TEST_RUNNER.run({
         assertThat(
           (await BIGTABLE.row("f1#consumer1#2024-10-30").get())[0].data,
           eqData({
-            a: {
+            w: {
               season1: {
                 value: 2,
+              },
+            },
+            a: {
+              season1: {
+                value: 20,
               },
             },
             t: {
@@ -538,6 +577,11 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("t3#2024-10-30#publisher1#consumer1").get())[0]
             .data,
           eqData({
+            w: {
+              season1: {
+                value: 2,
+              },
+            },
             a: {
               season1: {
                 value: 20,

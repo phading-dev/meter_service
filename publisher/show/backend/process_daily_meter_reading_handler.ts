@@ -93,9 +93,10 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     });
     for (let row of rows) {
       for (let seasonId in row.data["a"]) {
-        let watchTimeSec = row.data["a"][seasonId][0].value;
-        incrementColumn(data, "a", seasonId, watchTimeSec);
-        incrementColumn(data, "t", "w", watchTimeSec);
+        incrementColumn(data, "w", seasonId, row.data["w"][seasonId][0].value);
+        let watchTimeSecGraded = row.data["a"][seasonId][0].value;
+        incrementColumn(data, "a", seasonId, watchTimeSecGraded);
+        incrementColumn(data, "t", "w", watchTimeSecGraded);
       }
       incrementColumn(data, "t", "kb", row.data["t"]["kb"][0].value);
     }

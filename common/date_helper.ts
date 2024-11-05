@@ -22,6 +22,13 @@ export function toToday(date: Date): Date {
   return date;
 }
 
+// Convert to yesterday's date wrt. the timezone. `date` is changed in place.
+export function toYesterday(date: Date): Date {
+  toToday(date);
+  date.setUTCDate(date.getUTCDate() - 1);
+  return date;
+}
+
 // Returns the timestamp of the start of the month wrt. the timezone.
 export function toMonthTimeMsWrtTimezone(monthISOString: string): number {
   return new Date(

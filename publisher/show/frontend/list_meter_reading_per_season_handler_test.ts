@@ -1,10 +1,10 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { ListMeterReadingPerSeasonHandler } from "./list_meter_reading_per_season_handler";
-import { LIST_METER_READING_PER_SEASON_RESPONSE } from "@phading/product_meter_service_interface/consumer/show/frontend/interface";
+import { LIST_METER_READING_PER_SEASON_RESPONSE } from "@phading/product_meter_service_interface/publisher/show/frontend/interface";
 import {
   GET_SEASON_NAME,
   GetSeasonNameResponse,
-} from "@phading/product_service_interface/consumer/show/backend/interface";
+} from "@phading/product_service_interface/publisher/show/backend/interface";
 import {
   EXCHANGE_SESSION_AND_CHECK_CAPABILITY,
   ExchangeSessionAndCheckCapabilityResponse,
@@ -23,7 +23,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f1#consumer1#2024-12-31",
+            key: "f2#publisher1#2024-12-31",
             data: {
               w: {
                 season1: {
@@ -45,6 +45,9 @@ TEST_RUNNER.run({
                 w: {
                   value: 300,
                 },
+                kb: {
+                  value: 1000,
+                },
               },
             },
           },
@@ -54,9 +57,9 @@ TEST_RUNNER.run({
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               return {
                 userSession: {
-                  accountId: "consumer1",
+                  accountId: "publisher1",
                 },
-                canConsumeShows: true,
+                canPublishShows: true,
               } as ExchangeSessionAndCheckCapabilityResponse;
             } else if (request.descriptor === GET_SEASON_NAME) {
               switch (request.body.seasonId) {
@@ -125,7 +128,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f1#consumer1#2024-11-03",
+            key: "f2#publisher1#2024-11-03",
             data: {
               w: {
                 season1: {
@@ -156,9 +159,9 @@ TEST_RUNNER.run({
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               return {
                 userSession: {
-                  accountId: "consumer1",
+                  accountId: "publisher1",
                 },
-                canConsumeShows: true,
+                canPublishShows: true,
               } as ExchangeSessionAndCheckCapabilityResponse;
             } else if (request.descriptor === GET_SEASON_NAME) {
               switch (request.body.seasonId) {
@@ -233,7 +236,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f1#consumer1#2024-11-04",
+            key: "f2#publisher1#2024-11-04",
             data: {
               w: {
                 season1: {
@@ -264,9 +267,9 @@ TEST_RUNNER.run({
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               return {
                 userSession: {
-                  accountId: "consumer1",
+                  accountId: "publisher1",
                 },
-                canConsumeShows: true,
+                canPublishShows: true,
               } as ExchangeSessionAndCheckCapabilityResponse;
             } else {
               throw new Error("Not handled");
@@ -311,7 +314,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f1#consumer1#2024-11-03",
+            key: "f2#publisher1#2024-11-03",
             data: {
               t: {
                 w: {
@@ -326,9 +329,9 @@ TEST_RUNNER.run({
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               return {
                 userSession: {
-                  accountId: "consumer1",
+                  accountId: "publisher1",
                 },
-                canConsumeShows: true,
+                canPublishShows: true,
               } as ExchangeSessionAndCheckCapabilityResponse;
             } else {
               throw new Error("Not handled");

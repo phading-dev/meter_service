@@ -78,15 +78,15 @@ TEST_RUNNER.run({
               readings: [
                 {
                   date: "2024-12-01",
-                  watchTimeSec: 100,
+                  watchTimeSecGraded: 100,
                 },
                 {
                   date: "2024-12-05",
-                  watchTimeSec: 2000,
+                  watchTimeSecGraded: 2000,
                 },
                 {
                   date: "2024-12-10",
-                  watchTimeSec: 30000,
+                  watchTimeSecGraded: 30000,
                 },
               ],
             },

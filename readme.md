@@ -16,8 +16,8 @@ Storage utilization target: 4
 
 ```shell
 cbt -project test -instance test createtable SINGLE
-cbt -project test -instance test createfamily SINGLE w:maxversions=1:intsum # watch time live aggregated. Columns follow ${seasonId}#${epiosdeId} pattern.
-cbt -project test -instance test createfamily SINGLE a:maxversions=1 # watch time further aggregated and/or multiplied by grade. Columns follow ${seasonId} pattern.
+cbt -project test -instance test createfamily SINGLE w:maxversions=1:intsum # watch time live or offline aggregated. Columns follow ${seasonId}#${epiosdeId} or ${seasonId} pattern.
+cbt -project test -instance test createfamily SINGLE a:maxversions=1 # watch time adjusted, multiplied by grade. Columns follow ${seasonId} pattern.
 cbt -project test -instance test createfamily SINGLE t:maxversions=1 # total aggregated. Columns can be watch time or transmitted bytes.
 cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or completion
 ```
@@ -46,6 +46,8 @@ cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or
 - row:
     key: t3#${date}#${publisherId}#${consumerId}
     columns:
+      - name: w:${seasonId} # watch time in sec
+        value: number
       - name: a:${seasonId} # watch time multiplied by grade in sec
         value: number
       - name: t:kb # total transmitted KiB
@@ -53,6 +55,8 @@ cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or
 - row:
     key: t4#${date}#${publisherId}
     columns:
+      - name: w:${seasonId} # watch time in sec
+        value: number
       - name: a:${seasonId} # watch time multiplied by grade in sec
         value: number
       - name: t:w # total watch time multiplied by grade in sec
@@ -83,13 +87,17 @@ cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or
 - row:
     key: f1#${consumerId}#${date}
     columns:
-      - name: a:${seasonId} # watch time in sec (not multiplied by grade)
+      - name: w:${seasonId} # watch time in sec
+        value: number
+      - name: a:${seasonId} # watch time multiplied by grade in sec
         value: number
       - name: t:w # total watch time multiplied by grade in sec
         value: number
 - row:
     key: f2#${publisherId}#${date}
     columns:
+      - name: w:${seasonId} # watch time in sec
+        value: number
       - name: a:${seasonId} # watch time multiplied by grade in sec
         value: number
       - name: t:w # total watch time multiplied by grade in sec

@@ -12,6 +12,9 @@ import { GetMonthlyBatchHandler as PublisherGetMonthlyBatchHandler } from "./pub
 import { LoadPublishersToProcessMonthlyHandler } from "./publisher/show/backend/load_publishers_to_process_monthly";
 import { ProcessDailyMeterReadingHandler as PublisherProcessDailyMeterReadingHandler } from "./publisher/show/backend/process_daily_meter_reading_handler";
 import { ProcessMonthlyMeterReadingHandler as PublisherProcessMonthlyMeterReadingHandler } from "./publisher/show/backend/process_monthly_meter_reading_handler";
+import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandler } from "./publisher/show/frontend/list_meter_reading_per_day_handler";
+import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./publisher/show/frontend/list_meter_reading_per_month_handler";
+import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./publisher/show/frontend/list_meter_reading_per_season_handler";
 import {
   GENERATE_BILLING_STATEMENT,
   GENERATE_BILLING_STATEMENT_REQUEST_BODY,
@@ -28,7 +31,12 @@ import {
   LIST_METER_READING_PER_SEASON_RESPONSE as CONSUMER_LIST_METER_READING_PER_SEASON_RESPONSE,
 } from "@phading/product_meter_service_interface/consumer/show/frontend/interface";
 import {
-  GET_SEASON_NAME,
+  LIST_METER_READINGS_PER_DAY_RESPONSE as PUBLISHER_LIST_METER_READINGS_PER_DAY_RESPONSE,
+  LIST_METER_READINGS_PER_MONTH_RESPONSE as PUBLISHER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
+  LIST_METER_READING_PER_SEASON_RESPONSE as PUBLISHER_LIST_METER_READING_PER_SEASON_RESPONSE,
+} from "@phading/product_meter_service_interface/publisher/show/frontend/interface";
+import {
+  GET_SEASON_NAME as CONSUMER_GET_SEASON_NAME,
   GET_SEASON_PUBLISHER_AND_GRADE,
   GET_VIDEO_DURATION_AND_SIZE,
   GetSeasonNameResponse,
@@ -36,6 +44,7 @@ import {
   GetVideoDurationAndSizeResponse,
 } from "@phading/product_service_interface/consumer/show/backend/interface";
 import {
+  GET_SEASON_NAME as PUBLISHER_GET_SEASON_NAME,
   GET_STORAGE_METER_READING,
   GET_UPLOAD_METER_READING,
   GetStorageMeterReadingResponse,
@@ -64,13 +73,26 @@ TEST_RUNNER.run({
         let clientMock = new (class extends NodeServiceClientMock {
           public async send(request: any): Promise<any> {
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
+              if (request.body.signedSession === "consumerSession1") {
+                return {
+                  userSession: {
+                    accountId: "consumer1",
+                  },
+                  canConsumeShows: true,
+                } as ExchangeSessionAndCheckCapabilityResponse;
+              } else {
+                return {
+                  userSession: {
+                    accountId: "publisher1",
+                  },
+                  canPublishShows: true,
+                } as ExchangeSessionAndCheckCapabilityResponse;
+              }
+            } else if (request.descriptor === CONSUMER_GET_SEASON_NAME) {
               return {
-                userSession: {
-                  accountId: "consumer1",
-                },
-                canConsumeShows: true,
-              } as ExchangeSessionAndCheckCapabilityResponse;
-            } else if (request.descriptor === GET_SEASON_NAME) {
+                seasonName: "name1",
+              } as GetSeasonNameResponse;
+            } else if (request.descriptor === PUBLISHER_GET_SEASON_NAME) {
               return {
                 seasonName: "name1",
               } as GetSeasonNameResponse;
@@ -119,7 +141,7 @@ TEST_RUNNER.run({
             episodeId: "ep1",
             watchTimeMs: 12300000,
           },
-          "session1",
+          "consumerSession1",
         );
 
         // 2024-11-05 18:xx:xx UTC
@@ -147,7 +169,7 @@ TEST_RUNNER.run({
             BIGTABLE,
             clientMock,
             () => new Date(1730831630000),
-          ).handle("", {}, "session1");
+          ).handle("", {}, "consumerSession1");
         assertThat(
           consumerListPerSeasonResponse,
           eqMessage(
@@ -159,6 +181,7 @@ TEST_RUNNER.run({
                     seasonName: "name1",
                   },
                   watchTimeSec: 12300,
+                  watchTimeSecGraded: 61500,
                 },
               ],
             },
@@ -177,7 +200,7 @@ TEST_RUNNER.run({
               startDate: "2024-11-04",
               endDate: "2024-11-05",
             },
-            "session1",
+            "consumerSession1",
           );
         assertThat(
           consumerListPerDayResponse,
@@ -186,7 +209,7 @@ TEST_RUNNER.run({
               readings: [
                 {
                   date: "2024-11-04",
-                  watchTimeSec: 61500,
+                  watchTimeSecGraded: 61500,
                 },
               ],
             },
@@ -213,6 +236,62 @@ TEST_RUNNER.run({
           {
             rowKey: publisherDailyBatchResponse.rowKeys[0],
           },
+        );
+
+        // 2024-11-05 18:xx:xx UTC
+        let publisherListPerSeasonResponse =
+          await new PublisherListMeterReadingPerSeasonHandler(
+            BIGTABLE,
+            clientMock,
+            () => new Date(1730831630000),
+          ).handle("", {}, "publisherSession1");
+        assertThat(
+          publisherListPerSeasonResponse,
+          eqMessage(
+            {
+              readings: [
+                {
+                  season: {
+                    seasonId: "season1",
+                    seasonName: "name1",
+                  },
+                  watchTimeSec: 12300,
+                  watchTimeSecGraded: 61500,
+                },
+              ],
+            },
+            PUBLISHER_LIST_METER_READING_PER_SEASON_RESPONSE,
+          ),
+          "publisher list per season",
+        );
+
+        let publisherListPerDayResponse =
+          await new PublisherListMeterReadingsPerDayHandler(
+            BIGTABLE,
+            clientMock,
+          ).handle(
+            "",
+            {
+              startDate: "2024-11-04",
+              endDate: "2024-11-05",
+            },
+            "publisherSession1",
+          );
+        assertThat(
+          publisherListPerDayResponse,
+          eqMessage(
+            {
+              readings: [
+                {
+                  date: "2024-11-04",
+                  watchTimeSecGraded: 61500,
+                  transmittedKb: 7208,
+                },
+              ],
+            },
+            PUBLISHER_LIST_METER_READINGS_PER_DAY_RESPONSE,
+          ),
+          "publisher list per day",
         );
 
         // 2024-12-05 18:xx:xx UTC
@@ -259,7 +338,7 @@ TEST_RUNNER.run({
           ).handle(
             "",
             { startMonth: "2024-11", endMonth: "2024-12" },
-            "session1",
+            "consumerSession1",
           );
         assertThat(
           consumerListPerMonthResponse,
@@ -268,7 +347,7 @@ TEST_RUNNER.run({
               readings: [
                 {
                   month: "2024-11",
-                  watchTimeSec: 61500,
+                  watchTimeSecGraded: 61500,
                 },
               ],
             },
@@ -333,6 +412,34 @@ TEST_RUNNER.run({
             GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
           ),
           "generating earnings request",
+        );
+
+        let publisherListPerMonthResponse =
+          await new PublisherListMeterReadingsPerMonthHandler(
+            BIGTABLE,
+            clientMock,
+          ).handle(
+            "",
+            { startMonth: "2024-11", endMonth: "2024-12" },
+            "publisherSession1",
+          );
+        assertThat(
+          publisherListPerMonthResponse,
+          eqMessage(
+            {
+              readings: [
+                {
+                  month: "2024-11",
+                  watchTimeSecGraded: 61500,
+                  transmittedMb: 8,
+                  storageMbh: 132,
+                  uploadMb: 332,
+                },
+              ],
+            },
+            PUBLISHER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
+          ),
+          "publisher list per month",
         );
       },
       tearDown: async () => {

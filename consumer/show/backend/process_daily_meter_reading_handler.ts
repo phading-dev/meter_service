@@ -225,13 +225,14 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     );
 
     let watchTimeSec = Math.ceil(watchTimeMs / 1000);
-    let multipliedWatchTimeSec = Math.ceil(
+    let watchTimeSecGraded = Math.ceil(
       (watchTimeMs * seasonResponse.grade) / 1000,
     );
 
-    incrementColumn(consumerData, "a", seasonId, watchTimeSec);
-    incrementColumn(consumerData, "t", `w`, multipliedWatchTimeSec);
-    incrementColumn(consumerMonthData, "t", `w`, multipliedWatchTimeSec);
+    incrementColumn(consumerData, "w", seasonId, watchTimeSec);
+    incrementColumn(consumerData, "a", seasonId, watchTimeSecGraded);
+    incrementColumn(consumerData, "t", `w`, watchTimeSecGraded);
+    incrementColumn(consumerMonthData, "t", `w`, watchTimeSecGraded);
 
     let publisherData = publishers.get(seasonResponse.publisherId);
     if (!publisherData) {
@@ -241,7 +242,8 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
       };
       publishers.set(seasonResponse.publisherId, publisherData);
     }
-    incrementColumn(publisherData, "a", seasonId, multipliedWatchTimeSec);
+    incrementColumn(publisherData, "w", seasonId, watchTimeSec);
+    incrementColumn(publisherData, "a", seasonId, watchTimeSecGraded);
     incrementColumn(publisherData, "t", "kb", transmittedKbs);
   }
 }

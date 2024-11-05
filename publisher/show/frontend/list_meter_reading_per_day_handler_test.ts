@@ -1,6 +1,6 @@
 import { BIGTABLE } from "../../../common/bigtable";
-import { ListMeterReadingsPerMonthHandler } from "./list_meter_reading_per_month_handler";
-import { LIST_METER_READINGS_PER_MONTH_RESPONSE } from "@phading/product_meter_service_interface/consumer/show/frontend/interface";
+import { ListMeterReadingsPerDayHandler } from "./list_meter_reading_per_day_handler";
+import { LIST_METER_READINGS_PER_DAY_RESPONSE } from "@phading/product_meter_service_interface/publisher/show/frontend/interface";
 import { ExchangeSessionAndCheckCapabilityResponse } from "@phading/user_session_service_interface/backend/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
@@ -8,7 +8,7 @@ import { assertThat } from "@selfage/test_matcher";
 import { TEST_RUNNER } from "@selfage/test_runner";
 
 TEST_RUNNER.run({
-  name: "ListMeterReadingsPerMonthHandlerTest",
+  name: "ListMeterReadingsPerDayHandlerTest",
   cases: [
     {
       name: "Default",
@@ -16,51 +16,45 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f3#consumer1#2024-09",
+            key: "f2#publisher1#2024-12-01",
             data: {
+              a: {
+                season1: {
+                  value: 200,
+                },
+              },
               t: {
                 w: {
                   value: 100,
                 },
-              },
-            },
-          },
-          {
-            key: "f3#consumer1#2024-10",
-            data: {
-              t: {
-                w: {
-                  value: 200,
+                kb: {
+                  value: 125,
                 },
               },
             },
           },
           {
-            key: "f3#consumer1#2024-12",
+            key: "f2#publisher1#2024-12-10",
             data: {
               t: {
                 w: {
-                  value: 300,
+                  value: 30000,
+                },
+                kb: {
+                  value: 32500,
                 },
               },
             },
           },
           {
-            key: "f3#consumer1#2025-01",
+            key: "f2#publisher1#2024-12-05",
             data: {
               t: {
                 w: {
-                  value: 400,
+                  value: 2000,
                 },
-              },
-            },
-          },
-          {
-            key: "f3#consumer1#2025-02",
-            data: {
-              t: {
-                w: {
-                  value: 500,
+                kb: {
+                  value: 2200,
                 },
               },
             },
@@ -69,43 +63,46 @@ TEST_RUNNER.run({
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
           userSession: {
-            accountId: "consumer1",
+            accountId: "publisher1",
           },
-          canConsumeShows: true,
+          canPublishShows: true,
         } as ExchangeSessionAndCheckCapabilityResponse;
-        let handler = new ListMeterReadingsPerMonthHandler(
-          BIGTABLE,
-          clientMock,
-        );
+        let handler = new ListMeterReadingsPerDayHandler(BIGTABLE, clientMock);
 
         // Execute
-        let resposne = await handler.handle(
+        let response = await handler.handle(
           "",
-          { startMonth: "2024-10", endMonth: "2025-01" },
+          {
+            startDate: "2024-12-01",
+            endDate: "2024-12-10",
+          },
           "session1",
         );
 
         // Verify
         assertThat(
-          resposne,
+          response,
           eqMessage(
             {
               readings: [
                 {
-                  month: "2024-10",
-                  watchTimeSecGraded: 200,
+                  date: "2024-12-01",
+                  watchTimeSecGraded: 100,
+                  transmittedKb: 125,
                 },
                 {
-                  month: "2024-12",
-                  watchTimeSecGraded: 300,
+                  date: "2024-12-05",
+                  watchTimeSecGraded: 2000,
+                  transmittedKb: 2200,
                 },
                 {
-                  month: "2025-01",
-                  watchTimeSecGraded: 400,
+                  date: "2024-12-10",
+                  watchTimeSecGraded: 30000,
+                  transmittedKb: 32500,
                 },
               ],
             },
-            LIST_METER_READINGS_PER_MONTH_RESPONSE,
+            LIST_METER_READINGS_PER_DAY_RESPONSE,
           ),
           "response",
         );

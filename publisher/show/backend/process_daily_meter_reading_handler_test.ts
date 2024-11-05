@@ -35,6 +35,14 @@ async function initData() {
     {
       key: `t3#2024-10-30#publisher1#consumer1`,
       data: {
+        w: {
+          season1: {
+            value: 1,
+          },
+          season2: {
+            value: 12,
+          },
+        },
         a: {
           season1: {
             value: 3,
@@ -53,6 +61,14 @@ async function initData() {
     {
       key: `t3#2024-10-30#publisher1#consumer2`,
       data: {
+        w: {
+          season1: {
+            value: 3,
+          },
+          season3: {
+            value: 5,
+          },
+        },
         a: {
           season1: {
             value: 1,
@@ -71,6 +87,11 @@ async function initData() {
     {
       key: `t3#2024-10-30#publisher1#consumer3`,
       data: {
+        w: {
+          season1: {
+            value: 1,
+          },
+        },
         a: {
           season1: {
             value: 2,
@@ -86,6 +107,11 @@ async function initData() {
     {
       key: `t3#2024-10-30#publisher1#consumer4`,
       data: {
+        w: {
+          season1: {
+            value: 2,
+          },
+        },
         a: {
           season1: {
             value: 3,
@@ -101,6 +127,11 @@ async function initData() {
     {
       key: `t3#2024-10-30#publisher2#consumer4`,
       data: {
+        w: {
+          season1: {
+            value: 1000,
+          },
+        },
         a: {
           season1: {
             value: 3000,
@@ -135,6 +166,17 @@ TEST_RUNNER.run({
         assertThat(
           (await BIGTABLE.row("f2#publisher1#2024-10-30").get())[0].data,
           eqData({
+            w: {
+              season1: {
+                value: 7,
+              },
+              season2: {
+                value: 12,
+              },
+              season3: {
+                value: 5,
+              },
+            },
             a: {
               season1: {
                 value: 9,
@@ -230,6 +272,17 @@ TEST_RUNNER.run({
         assertThat(
           (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
           eqData({
+            w: {
+              season1: {
+                value: 4,
+              },
+              season2: {
+                value: 12,
+              },
+              season3: {
+                value: 5,
+              },
+            },
             a: {
               season1: {
                 value: 4,
@@ -272,6 +325,17 @@ TEST_RUNNER.run({
         assertThat(
           (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
           eqData({
+            w: {
+              season1: {
+                value: 7,
+              },
+              season2: {
+                value: 12,
+              },
+              season3: {
+                value: 5,
+              },
+            },
             a: {
               season1: {
                 value: 9,
@@ -314,6 +378,17 @@ TEST_RUNNER.run({
         assertThat(
           (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
           eqData({
+            w: {
+              season1: {
+                value: 7,
+              },
+              season2: {
+                value: 12,
+              },
+              season3: {
+                value: 5,
+              },
+            },
             a: {
               season1: {
                 value: 9,
@@ -358,6 +433,17 @@ TEST_RUNNER.run({
         // Verify
         assertThat(error.message, containStr("fake write"), "write error");
         let finalPublisherData: any = {
+          w: {
+            season1: {
+              value: 7,
+            },
+            season2: {
+              value: 12,
+            },
+            season3: {
+              value: 5,
+            },
+          },
           a: {
             season1: {
               value: 9,

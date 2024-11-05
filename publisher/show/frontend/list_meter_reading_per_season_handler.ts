@@ -1,58 +1,47 @@
+import { ListMeterReadingPerSeasonHandlerInterface } from "@phading/product_meter_service_interface/publisher/show/frontend/handler";
 import { BIGTABLE } from "../../../common/bigtable";
-import { toDateISOString, toYesterday } from "../../../common/date_helper";
-import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { ListMeterReadingPerSeasonHandlerInterface } from "@phading/product_meter_service_interface/consumer/show/frontend/handler";
-import {
-  ListMeterReadingPerSeasonRequestBody,
-  ListMeterReadingPerSeasonResponse,
-} from "@phading/product_meter_service_interface/consumer/show/frontend/interface";
-import { MeterReadingPerSeason } from "@phading/product_meter_service_interface/consumer/show/frontend/meter_reading";
-import { getSeasonName } from "@phading/product_service_interface/consumer/show/backend/client";
+import { SERVICE_CLIENT } from "../../../common/service_client";
+import { ListMeterReadingPerSeasonRequestBody, ListMeterReadingPerSeasonResponse } from "@phading/product_meter_service_interface/publisher/show/frontend/interface";
+import { NodeServiceClient } from "@selfage/node_service_client";
 import { exchangeSessionAndCheckCapability } from "@phading/user_session_service_interface/backend/client";
 import { newBadRequestError, newUnauthorizedError } from "@selfage/http_error";
-import { NodeServiceClient } from "@selfage/node_service_client";
+import { toDateISOString, toYesterday } from "../../../common/date_helper";
+import { MeterReadingPerSeason } from "@phading/product_meter_service_interface/publisher/show/frontend/meter_reading";
+import { getSeasonName } from "@phading/product_service_interface/publisher/show/backend/client";
 
 export class ListMeterReadingPerSeasonHandler extends ListMeterReadingPerSeasonHandlerInterface {
   public static create(): ListMeterReadingPerSeasonHandler {
-    return new ListMeterReadingPerSeasonHandler(
-      BIGTABLE,
-      SERVICE_CLIENT,
-      () => new Date(),
-    );
+    return new ListMeterReadingPerSeasonHandler(BIGTABLE, SERVICE_CLIENT,
+      () => new Date(),);
   }
 
-  public constructor(
-    private bigtable: Table,
-    private serviceClient: NodeServiceClient,
-    private getNowDate: () => Date,
-  ) {
+  public constructor(private bigtable: Table, private serviceClient: NodeServiceClient,
+    private getNowDate: () => Date,) {
     super();
   }
 
-  public async handle(
-    loggingPrefix: string,
-    body: ListMeterReadingPerSeasonRequestBody,
-    sessionStr: string,
-  ): Promise<ListMeterReadingPerSeasonResponse> {
-    let date = body.date ? new Date(body.date) : toYesterday(this.getNowDate());
+  public async handle(loggingPrefix: string, body: ListMeterReadingPerSeasonRequestBody, sessionStr: string): Promise<ListMeterReadingPerSeasonResponse> {
+    let date = body.date
+      ? new Date(body.date)
+      : toYesterday(this.getNowDate());
     if (isNaN(date.valueOf())) {
       throw newBadRequestError(`"date" is not a valid date.`);
     }
-    let { userSession, canConsumeShows } =
+    let { userSession, canPublishShows } =
       await exchangeSessionAndCheckCapability(this.serviceClient, {
         signedSession: sessionStr,
-        checkCanConsumeShows: true,
+        checkCanPublishShows: true,
       });
-    if (!canConsumeShows) {
+    if (!canPublishShows) {
       throw newUnauthorizedError(
         `Account ${userSession.accountId} not allowed to list meter reading per season.`,
       );
     }
-
+    
     let dateString = toDateISOString(date);
     let [rows] = await this.bigtable.getRows({
-      keys: [`f1#${userSession.accountId}#${dateString}`],
+      keys: [`f2#${userSession.accountId}#${dateString}`],
       filter: [
         {
           family: /^[a|w]$/,

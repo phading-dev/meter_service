@@ -2,12 +2,12 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { toDateISOString } from "../../../common/date_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { ListMeterReadingsPerDayHandlerInterface } from "@phading/product_meter_service_interface/consumer/show/frontend/handler";
+import { ListMeterReadingsPerDayHandlerInterface } from "@phading/product_meter_service_interface/publisher/show/frontend/handler";
 import {
   ListMeterReadingsPerDayRequestBody,
   ListMeterReadingsPerDayResponse,
-} from "@phading/product_meter_service_interface/consumer/show/frontend/interface";
-import { MeterReadingPerDay } from "@phading/product_meter_service_interface/consumer/show/frontend/meter_reading";
+} from "@phading/product_meter_service_interface/publisher/show/frontend/interface";
+import { MeterReadingPerDay } from "@phading/product_meter_service_interface/publisher/show/frontend/meter_reading";
 import { exchangeSessionAndCheckCapability } from "@phading/user_session_service_interface/backend/client";
 import { newBadRequestError, newUnauthorizedError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
@@ -46,20 +46,20 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
     if (startDate >= endDate) {
       throw newBadRequestError(`"startDate" must be smaller than "endDate".`);
     }
-    let { userSession, canConsumeShows } =
+    let { userSession, canPublishShows } =
       await exchangeSessionAndCheckCapability(this.serviceClient, {
         signedSession: sessionStr,
-        checkCanConsumeShows: true,
+        checkCanPublishShows: true,
       });
-    if (!canConsumeShows) {
+    if (!canPublishShows) {
       throw newUnauthorizedError(
         `Account ${userSession.accountId} not allowed to list meter reading per day.`,
       );
     }
 
     let [rows] = await this.bigtable.getRows({
-      start: `f1#${userSession.accountId}#${toDateISOString(startDate)}`,
-      end: `f1#${userSession.accountId}#${toDateISOString(endDate)}`,
+      start: `f2#${userSession.accountId}#${toDateISOString(startDate)}`,
+      end: `f2#${userSession.accountId}#${toDateISOString(endDate)}`,
       filter: [
         {
           family: /^t$/,
@@ -76,6 +76,7 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
         return {
           date: row.id.split("#")[2],
           watchTimeSecGraded: row.data["t"]["w"][0].value,
+          transmittedKb: row.data["t"]["kb"][0].value,
         };
       },
     );
