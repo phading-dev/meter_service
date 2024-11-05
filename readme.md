@@ -46,9 +46,9 @@ cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or
 - row:
     key: t3#${date}#${publisherId}#${consumerId}
     columns:
-      - name: w:${seasonId}#${episodeId} # watch time in ms
-        value: number
       - name: a:${seasonId} # watch time multiplied by grade in sec
+        value: number
+      - name: t:kb # total transmitted KiB
         value: number
 - row:
     key: t4#${date}#${publisherId}
@@ -83,7 +83,7 @@ cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or
 - row:
     key: f1#${consumerId}#${date}
     columns:
-      - name: a:${seasonId} # watch time in sec
+      - name: a:${seasonId} # watch time in sec (not multiplied by grade)
         value: number
       - name: t:w # total watch time multiplied by grade in sec
         value: number

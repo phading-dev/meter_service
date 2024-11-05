@@ -12,7 +12,11 @@ import {
   SyncMeterReadingResponse,
 } from "@phading/product_meter_service_interface/consumer/show/frontend/interface";
 import { exchangeSessionAndCheckCapability } from "@phading/user_session_service_interface/backend/client";
-import { newBadRequestError, newUnauthorizedError } from "@selfage/http_error";
+import {
+  newBadRequestError,
+  newNotAcceptableError,
+  newUnauthorizedError,
+} from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 import { LRUCache } from "lru-cache";
 
@@ -25,6 +29,7 @@ export class SyncMeterReadingHandler extends SyncMeterReadingHandlerInterface {
     );
   }
 
+  private static ONE_MONTH_IN_MS = 30 * 24 * 60 * 60 * 1000;
   private lruCache: LRUCache<string, string>;
 
   public constructor(
@@ -52,6 +57,11 @@ export class SyncMeterReadingHandler extends SyncMeterReadingHandlerInterface {
     }
     if (!body.watchTimeMs) {
       throw newBadRequestError(`"watchTimeMs" is required.`);
+    }
+    if (body.watchTimeMs > SyncMeterReadingHandler.ONE_MONTH_IN_MS) {
+      throw newNotAcceptableError(
+        `"watchTimeMs" is unreasonably large, which is ${body.watchTimeMs}. It could be a bad actor.`,
+      );
     }
     let accountId = this.lruCache.get(sessionStr);
     if (!accountId) {

@@ -53,8 +53,9 @@ export class LoadPublishersToProcessMonthlyHandler extends LoadPublishersToProce
       },
     });
     let [month, timeMs] = this.getMonthAndTimeMs(rows);
-    let today = toToday(this.getNowDate());
-    let thisMonthTimeMs = toMonthTimeMsWrtTimezone(toMonthISOString(today));
+    let thisMonthTimeMs = toMonthTimeMsWrtTimezone(
+      toMonthISOString(toToday(this.getNowDate())),
+    );
     while (true) {
       if (timeMs === 0) {
         let date = new Date(month);

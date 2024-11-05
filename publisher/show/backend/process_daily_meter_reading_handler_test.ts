@@ -2,11 +2,6 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
 import { ProcessDailyMeterReadingHandler } from "../../../publisher/show/backend/process_daily_meter_reading_handler";
 import {
-  GET_VIDEO_DURATION_AND_SIZE,
-  GetVideoDurationAndSizeResponse,
-} from "@phading/product_service_interface/publisher/show/backend/interface";
-import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
-import {
   assertReject,
   assertThat,
   containStr,
@@ -40,17 +35,6 @@ async function initData() {
     {
       key: `t3#2024-10-30#publisher1#consumer1`,
       data: {
-        w: {
-          "season1#ep1": {
-            value: 1000,
-          },
-          "season1#ep2": {
-            value: 500,
-          },
-          "season2#ep2": {
-            value: 8000,
-          },
-        },
         a: {
           season1: {
             value: 3,
@@ -59,19 +43,16 @@ async function initData() {
             value: 40,
           },
         },
+        t: {
+          kb: {
+            value: 17,
+          },
+        },
       },
     },
     {
       key: `t3#2024-10-30#publisher1#consumer2`,
       data: {
-        w: {
-          "season1#ep1": {
-            value: 100,
-          },
-          "season3#ep3": {
-            value: 1000,
-          },
-        },
         a: {
           season1: {
             value: 1,
@@ -80,18 +61,23 @@ async function initData() {
             value: 10,
           },
         },
+        t: {
+          kb: {
+            value: 32,
+          },
+        },
       },
     },
     {
       key: `t3#2024-10-30#publisher1#consumer3`,
       data: {
-        w: {
-          "season1#ep1": {
-            value: 20,
-          },
-        },
         a: {
           season1: {
+            value: 2,
+          },
+        },
+        t: {
+          kb: {
             value: 2,
           },
         },
@@ -100,14 +86,14 @@ async function initData() {
     {
       key: `t3#2024-10-30#publisher1#consumer4`,
       data: {
-        w: {
-          "season1#ep1": {
-            value: 2,
-          },
-        },
         a: {
           season1: {
             value: 3,
+          },
+        },
+        t: {
+          kb: {
+            value: 1,
           },
         },
       },
@@ -115,66 +101,19 @@ async function initData() {
     {
       key: `t3#2024-10-30#publisher2#consumer4`,
       data: {
-        w: {
-          "season1#ep1": {
-            value: 2000,
-          },
-        },
         a: {
           season1: {
             value: 3000,
           },
         },
+        t: {
+          kb: {
+            value: 100,
+          },
+        },
       },
     },
   ]);
-}
-
-function createClientMock(): NodeServiceClientMock {
-  return new (class extends NodeServiceClientMock {
-    public async send(request: any): Promise<any> {
-      assertThat(
-        request.descriptor,
-        eq(GET_VIDEO_DURATION_AND_SIZE),
-        "service",
-      );
-      if (
-        request.body.seasonId === "season1" &&
-        request.body.episodeId === "ep1"
-      ) {
-        return {
-          videoSize: 360000,
-          videoDurationSec: 60,
-        } as GetVideoDurationAndSizeResponse;
-      } else if (
-        request.body.seasonId === "season1" &&
-        request.body.episodeId === "ep2"
-      ) {
-        return {
-          videoSize: 1020000,
-          videoDurationSec: 500,
-        } as GetVideoDurationAndSizeResponse;
-      } else if (
-        request.body.seasonId === "season2" &&
-        request.body.episodeId === "ep2"
-      ) {
-        return {
-          videoSize: 95000,
-          videoDurationSec: 200,
-        } as GetVideoDurationAndSizeResponse;
-      } else if (
-        request.body.seasonId === "season3" &&
-        request.body.episodeId === "ep3"
-      ) {
-        return {
-          videoSize: 1000000,
-          videoDurationSec: 100,
-        } as GetVideoDurationAndSizeResponse;
-      } else {
-        throw new Error("Unexpected");
-      }
-    }
-  })();
 }
 
 TEST_RUNNER.run({
@@ -185,11 +124,7 @@ TEST_RUNNER.run({
       execute: async () => {
         // Prepare
         await initData();
-        let handler = new ProcessDailyMeterReadingHandler(
-          2,
-          BIGTABLE,
-          createClientMock(),
-        );
+        let handler = new ProcessDailyMeterReadingHandler(2, BIGTABLE);
 
         // Execute
         await handler.handle("", {
@@ -216,7 +151,7 @@ TEST_RUNNER.run({
                 value: 59,
               },
               kb: {
-                value: 24,
+                value: 52,
               },
             },
           }),
@@ -230,7 +165,7 @@ TEST_RUNNER.run({
                 value: 59,
               },
               kb: {
-                value: 24,
+                value: 52,
               },
             },
           }),
@@ -270,7 +205,6 @@ TEST_RUNNER.run({
         let handler = new ProcessDailyMeterReadingHandler(
           2,
           BIGTABLE,
-          createClientMock(),
           () => {
             if (aggreagtionError) {
               throw aggreagtionError;
@@ -293,9 +227,8 @@ TEST_RUNNER.run({
 
         // Verify
         assertThat(error.message, containStr("fake agg"), "interrupted 1");
-        let [row] = await BIGTABLE.row("t4#2024-10-30#publisher1").get();
         assertThat(
-          row.data,
+          (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
           eqData({
             a: {
               season1: {
@@ -313,7 +246,7 @@ TEST_RUNNER.run({
                 value: 54,
               },
               kb: {
-                value: 22,
+                value: 49,
               },
             },
             c: {
@@ -336,9 +269,8 @@ TEST_RUNNER.run({
         );
 
         // Verify
-        [row] = await BIGTABLE.row("t4#2024-10-30#publisher1").get();
         assertThat(
-          row.data,
+          (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
           eqData({
             a: {
               season1: {
@@ -356,7 +288,7 @@ TEST_RUNNER.run({
                 value: 59,
               },
               kb: {
-                value: 24,
+                value: 52,
               },
             },
             c: {
@@ -379,9 +311,8 @@ TEST_RUNNER.run({
         );
 
         // Verify
-        [row] = await BIGTABLE.row("t4#2024-10-30#publisher1").get();
         assertThat(
-          row.data,
+          (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
           eqData({
             a: {
               season1: {
@@ -399,7 +330,7 @@ TEST_RUNNER.run({
                 value: 59,
               },
               kb: {
-                value: 24,
+                value: 52,
               },
             },
             c: {
@@ -443,7 +374,7 @@ TEST_RUNNER.run({
               value: 59,
             },
             kb: {
-              value: 24,
+              value: 52,
             },
           },
         };
@@ -458,7 +389,7 @@ TEST_RUNNER.run({
               value: 59,
             },
             kb: {
-              value: 24,
+              value: 52,
             },
           },
         };

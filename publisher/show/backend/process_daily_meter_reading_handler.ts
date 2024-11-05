@@ -3,46 +3,30 @@ import {
   incrementColumn,
   normalizeData,
 } from "../../../common/bigtable_data_helper";
-import {
-  BATCH_SIZE_OF_DAILY_PROCESSING_CONUMSERS_FOR_ONE_PUBLISHER,
-  CACHE_SIZE_OF_GET_VIDEO_DURATION_AND_SIZE,
-} from "../../../common/params";
-import { SERVICE_CLIENT } from "../../../common/service_client";
+import { BATCH_SIZE_OF_DAILY_PROCESSING_CONUMSERS_FOR_ONE_PUBLISHER } from "../../../common/params";
 import { Table } from "@google-cloud/bigtable";
 import { ProcessDailyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/publisher/show/backend/handler";
 import {
   ProcessDailyMeterReadingRequestBody,
   ProcessDailyMeterReadingResponse,
 } from "@phading/product_meter_service_interface/publisher/show/backend/interface";
-import { getVideoDurationAndSize } from "@phading/product_service_interface/publisher/show/backend/client";
-import { GetVideoDurationAndSizeResponse } from "@phading/product_service_interface/publisher/show/backend/interface";
 import { newBadRequestError } from "@selfage/http_error";
-import { NodeServiceClient } from "@selfage/node_service_client";
-import { LRUCache } from "lru-cache";
 
 export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHandlerInterface {
   public static create(): ProcessDailyMeterReadingHandler {
     return new ProcessDailyMeterReadingHandler(
       BATCH_SIZE_OF_DAILY_PROCESSING_CONUMSERS_FOR_ONE_PUBLISHER,
       BIGTABLE,
-      SERVICE_CLIENT,
     );
   }
-
-  private static ONE_KB_IN_B = 1024;
-  private cache: LRUCache<string, Promise<GetVideoDurationAndSizeResponse>>;
 
   public constructor(
     private batchSize: number,
     private bigtable: Table,
-    private serviceClient: NodeServiceClient,
     private interruptAggregation: () => void = () => {},
     private interruptFinalWrite: () => void = () => {},
   ) {
     super();
-    this.cache = new LRUCache({
-      max: CACHE_SIZE_OF_GET_VIDEO_DURATION_AND_SIZE,
-    });
   }
 
   public async handle(
@@ -113,21 +97,8 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
         incrementColumn(data, "a", seasonId, watchTimeSec);
         incrementColumn(data, "t", "w", watchTimeSec);
       }
+      incrementColumn(data, "t", "kb", row.data["t"]["kb"][0].value);
     }
-    let kbsPromises = new Array<Promise<number>>();
-    for (let row of rows) {
-      for (let seasonIdAndEpisodeId in row.data["w"]) {
-        kbsPromises.push(
-          this.getTransimittedKbs(
-            seasonIdAndEpisodeId,
-            row.data["w"][seasonIdAndEpisodeId][0].value,
-          ),
-        );
-      }
-    }
-    (await Promise.all(kbsPromises)).forEach((kbs) =>
-      incrementColumn(data, "t", "kb", kbs),
-    );
     let newCursor =
       rows.length === limit ? rows[rows.length - 1].id : undefined;
     let completed = newCursor ? "" : "1";
@@ -144,25 +115,6 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
       data,
     });
     this.interruptAggregation();
-  }
-
-  private async getTransimittedKbs(
-    seasonIdAndEpisodeId: string,
-    watchTimeMs: number,
-  ): Promise<number> {
-    let [seasonId, episodeId] = seasonIdAndEpisodeId.split("#");
-    let responsePromise = this.cache.get(seasonIdAndEpisodeId);
-    if (!responsePromise) {
-      responsePromise = getVideoDurationAndSize(this.serviceClient, {
-        seasonId,
-        episodeId,
-      });
-    }
-    let { videoDurationSec, videoSize } = await responsePromise;
-    return Math.ceil(
-      ((videoSize / videoDurationSec) * (watchTimeMs / 1000)) /
-        ProcessDailyMeterReadingHandler.ONE_KB_IN_B,
-    );
   }
 
   private async writeOutputRows(

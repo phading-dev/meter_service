@@ -1,6 +1,9 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { incrementColumn } from "../../../common/bigtable_data_helper";
-import { CACHE_SIZE_OF_GET_SEASON_PUBLISHER_AND_GRADE } from "../../../common/params";
+import {
+  CACHE_SIZE_OF_GET_SEASON_PUBLISHER_AND_GRADE,
+  CACHE_SIZE_OF_GET_VIDEO_DURATION_AND_SIZE,
+} from "../../../common/params";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
 import { ProcessDailyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/consumer/show/backend/handler";
@@ -8,9 +11,15 @@ import {
   ProcessDailyMeterReadingRequestBody,
   ProcessDailyMeterReadingResponse,
 } from "@phading/product_meter_service_interface/consumer/show/backend/interface";
-import { getSeasonPublisherAndGrade } from "@phading/product_service_interface/consumer/show/backend/client";
-import { GetSeasonPublisherAndGradeResponse } from "@phading/product_service_interface/consumer/show/backend/interface";
-import { newBadRequestError } from "@selfage/http_error";
+import {
+  getSeasonPublisherAndGrade,
+  getVideoDurationAndSize,
+} from "@phading/product_service_interface/consumer/show/backend/client";
+import {
+  GetSeasonPublisherAndGradeResponse,
+  GetVideoDurationAndSizeResponse,
+} from "@phading/product_service_interface/consumer/show/backend/interface";
+import { HttpError, StatusCode, newBadRequestError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 import { LRUCache } from "lru-cache";
 
@@ -19,15 +28,26 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     return new ProcessDailyMeterReadingHandler(BIGTABLE, SERVICE_CLIENT);
   }
 
-  private cache: LRUCache<string, Promise<GetSeasonPublisherAndGradeResponse>>;
+  private static ONE_KB_IN_B = 1024;
+  private seasonCache: LRUCache<
+    string,
+    Promise<GetSeasonPublisherAndGradeResponse>
+  >;
+  private episodeCache: LRUCache<
+    string,
+    Promise<GetVideoDurationAndSizeResponse>
+  >;
 
   public constructor(
     private bigtable: Table,
     private serviceClient: NodeServiceClient,
   ) {
     super();
-    this.cache = new LRUCache({
+    this.seasonCache = new LRUCache({
       max: CACHE_SIZE_OF_GET_SEASON_PUBLISHER_AND_GRADE,
+    });
+    this.episodeCache = new LRUCache({
+      max: CACHE_SIZE_OF_GET_VIDEO_DURATION_AND_SIZE,
     });
   }
 
@@ -55,13 +75,14 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
 
     let [_, todayString, accountId] = body.rowKey.split("#");
     let columns = rows[0].data["w"];
-    await this.writeOutputRows(todayString, accountId, columns);
+    await this.writeOutputRows(loggingPrefix, todayString, accountId, columns);
     // Marks the completion.
     await this.bigtable.row(body.rowKey).delete();
     return {};
   }
 
   private async writeOutputRows(
+    loggingPrefix: string,
     todayString: string,
     accountId: string,
     columns: any,
@@ -73,6 +94,7 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     for (let seasonIdAndEpisodeId in columns) {
       columnProcessingPromises.push(
         this.processColumn(
+          loggingPrefix,
           seasonIdAndEpisodeId,
           columns[seasonIdAndEpisodeId][0].value,
           todayString,
@@ -143,6 +165,7 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
   }
 
   private async processColumn(
+    loggingPrefix: string,
     seasonIdAndEpisodeId: string,
     watchTimeMs: number,
     date: string,
@@ -150,35 +173,75 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     consumerMonthData: any,
     publishers: Map<string, any>,
   ): Promise<void> {
-    let [seasonId] = seasonIdAndEpisodeId.split("#");
-    let cacheKey = `${seasonId}#${date}`;
-    let responsePromise = this.cache.get(cacheKey);
-    if (!responsePromise) {
-      responsePromise = getSeasonPublisherAndGrade(this.serviceClient, {
+    let [seasonId, episodeId] = seasonIdAndEpisodeId.split("#");
+    let seasonAndDate = `${seasonId}#${date}`;
+    let seasonResponsePromise = this.seasonCache.get(seasonAndDate);
+    if (!seasonResponsePromise) {
+      seasonResponsePromise = getSeasonPublisherAndGrade(this.serviceClient, {
         seasonId,
         date,
       });
-      this.cache.set(cacheKey, responsePromise);
+      this.seasonCache.set(seasonAndDate, seasonResponsePromise);
     }
-    let { publisherId, grade } = await responsePromise;
+    let seasonResponse: GetSeasonPublisherAndGradeResponse;
+    try {
+      seasonResponse = await seasonResponsePromise;
+    } catch (e) {
+      if (e instanceof HttpError && e.status === StatusCode.NotFound) {
+        console.log(
+          `${loggingPrefix} season ${seasonId} is not found. Might be a bad input from Sync RC. Ignore it.`,
+        );
+        return;
+      } else {
+        throw e;
+      }
+    }
+
+    // Sequentailly fetch video after season in case there is bad data.
+    let episodeResponsePromise = this.episodeCache.get(seasonIdAndEpisodeId);
+    if (!episodeResponsePromise) {
+      episodeResponsePromise = getVideoDurationAndSize(this.serviceClient, {
+        seasonId,
+        episodeId,
+      });
+    }
+    let episodeResponse: GetVideoDurationAndSizeResponse;
+    try {
+      episodeResponse = await episodeResponsePromise;
+    } catch (e) {
+      if (e instanceof HttpError && e.status === StatusCode.NotFound) {
+        console.log(
+          `${loggingPrefix} season ${seasonId} episode ${episodeId} is not found. Might be a bad input from Sync RC. Ignore it.`,
+        );
+        return;
+      } else {
+        throw e;
+      }
+    }
+    let transmittedKbs = Math.ceil(
+      ((episodeResponse.videoSize / episodeResponse.videoDurationSec) *
+        (watchTimeMs / 1000)) /
+        ProcessDailyMeterReadingHandler.ONE_KB_IN_B,
+    );
+
     let watchTimeSec = Math.ceil(watchTimeMs / 1000);
-    let multipliedWatchTimeSec = Math.ceil((watchTimeMs * grade) / 1000);
+    let multipliedWatchTimeSec = Math.ceil(
+      (watchTimeMs * seasonResponse.grade) / 1000,
+    );
 
     incrementColumn(consumerData, "a", seasonId, watchTimeSec);
     incrementColumn(consumerData, "t", `w`, multipliedWatchTimeSec);
     incrementColumn(consumerMonthData, "t", `w`, multipliedWatchTimeSec);
 
-    let publisherData = publishers.get(publisherId);
+    let publisherData = publishers.get(seasonResponse.publisherId);
     if (!publisherData) {
       publisherData = {
         w: {},
         a: {},
       };
-      publishers.set(publisherId, publisherData);
+      publishers.set(seasonResponse.publisherId, publisherData);
     }
-    publisherData["w"][seasonIdAndEpisodeId] = {
-      value: watchTimeMs,
-    };
     incrementColumn(publisherData, "a", seasonId, multipliedWatchTimeSec);
+    incrementColumn(publisherData, "t", "kb", transmittedKbs);
   }
 }
