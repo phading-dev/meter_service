@@ -1,55 +1,52 @@
 import { BIGTABLE } from "./common/bigtable";
-import { GetDailyBatchHandler as ConsumerGetDailyBatchHandler } from "./consumer/show/backend/get_daily_batch_handler";
-import { GetMonthlyBatchHandler as ConsumerGetMonthlyBatchHandler } from "./consumer/show/backend/get_monthly_batch_handler";
-import { ProcessDailyMeterReadingHandler as ConsumerProcessDailyMeterReadingHandler } from "./consumer/show/backend/process_daily_meter_reading_handler";
-import { ProcessMonthlyMeterReadingHandler as ConsumerProcessMonthlyMeterReadingHandler } from "./consumer/show/backend/process_monthly_meter_reading_handler";
-import { ListMeterReadingsPerDayHandler as ConsumerListMeterReadingsPerDayHandler } from "./consumer/show/frontend/list_meter_reading_per_day_handler";
-import { ListMeterReadingsPerMonthHandler as ConsumerListMeterReadingsPerMonthHandler } from "./consumer/show/frontend/list_meter_reading_per_month_handler";
-import { ListMeterReadingPerSeasonHandler as ConsumerListMeterReadingPerSeasonHandler } from "./consumer/show/frontend/list_meter_reading_per_season_handler";
-import { SyncMeterReadingHandler } from "./consumer/show/frontend/sync_meter_reading_handler";
-import { GetDailyBatchHandler as PublisherGetDailyBatchHandler } from "./publisher/show/backend/get_daily_batch_handler";
-import { GetMonthlyBatchHandler as PublisherGetMonthlyBatchHandler } from "./publisher/show/backend/get_monthly_batch_handler";
-import { LoadPublishersToProcessMonthlyHandler } from "./publisher/show/backend/load_publishers_to_process_monthly";
-import { ProcessDailyMeterReadingHandler as PublisherProcessDailyMeterReadingHandler } from "./publisher/show/backend/process_daily_meter_reading_handler";
-import { ProcessMonthlyMeterReadingHandler as PublisherProcessMonthlyMeterReadingHandler } from "./publisher/show/backend/process_monthly_meter_reading_handler";
-import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandler } from "./publisher/show/frontend/list_meter_reading_per_day_handler";
-import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./publisher/show/frontend/list_meter_reading_per_month_handler";
-import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./publisher/show/frontend/list_meter_reading_per_season_handler";
+import { GetDailyBatchHandler as ConsumerGetDailyBatchHandler } from "./show/backend/consumer/get_daily_batch_handler";
+import { GetMonthlyBatchHandler as ConsumerGetMonthlyBatchHandler } from "./show/backend/consumer/get_monthly_batch_handler";
+import { ProcessDailyMeterReadingHandler as ConsumerProcessDailyMeterReadingHandler } from "./show/backend/consumer/process_daily_meter_reading_handler";
+import { ProcessMonthlyMeterReadingHandler as ConsumerProcessMonthlyMeterReadingHandler } from "./show/backend/consumer/process_monthly_meter_reading_handler";
+import { GetDailyBatchHandler as PublisherGetDailyBatchHandler } from "./show/backend/publisher/get_daily_batch_handler";
+import { GetMonthlyBatchHandler as PublisherGetMonthlyBatchHandler } from "./show/backend/publisher/get_monthly_batch_handler";
+import { LoadPublishersToProcessMonthlyHandler } from "./show/backend/publisher/load_publishers_to_process_monthly";
+import { ProcessDailyMeterReadingHandler as PublisherProcessDailyMeterReadingHandler } from "./show/backend/publisher/process_daily_meter_reading_handler";
+import { ProcessMonthlyMeterReadingHandler as PublisherProcessMonthlyMeterReadingHandler } from "./show/backend/publisher/process_monthly_meter_reading_handler";
+import { ListMeterReadingsPerDayHandler as ConsumerListMeterReadingsPerDayHandler } from "./show/frontend/consumer/list_meter_reading_per_day_handler";
+import { ListMeterReadingsPerMonthHandler as ConsumerListMeterReadingsPerMonthHandler } from "./show/frontend/consumer/list_meter_reading_per_month_handler";
+import { ListMeterReadingPerSeasonHandler as ConsumerListMeterReadingPerSeasonHandler } from "./show/frontend/consumer/list_meter_reading_per_season_handler";
+import { SyncMeterReadingHandler } from "./show/frontend/consumer/sync_meter_reading_handler";
+import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandler } from "./show/frontend/publisher/list_meter_reading_per_day_handler";
+import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./show/frontend/publisher/list_meter_reading_per_month_handler";
+import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./show/frontend/publisher/list_meter_reading_per_season_handler";
 import {
   GENERATE_BILLING_STATEMENT,
   GENERATE_BILLING_STATEMENT_REQUEST_BODY,
   MeterType as ConsumerMeterType,
-} from "@phading/commerce_service_interface/consumer/backend/interface";
+} from "@phading/commerce_service_interface/backend/consumer/interface";
 import {
   GENERATE_EARNINGS_STATEMENT,
   GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
   MeterType as PublisherMeterType,
-} from "@phading/commerce_service_interface/publisher/backend/interface";
+} from "@phading/commerce_service_interface/backend/publisher/interface";
 import {
   LIST_METER_READINGS_PER_DAY_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_DAY_RESPONSE,
   LIST_METER_READINGS_PER_MONTH_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
   LIST_METER_READING_PER_SEASON_RESPONSE as CONSUMER_LIST_METER_READING_PER_SEASON_RESPONSE,
-} from "@phading/product_meter_service_interface/consumer/show/frontend/interface";
+} from "@phading/product_meter_service_interface/show/frontend/consumer/interface";
 import {
   LIST_METER_READINGS_PER_DAY_RESPONSE as PUBLISHER_LIST_METER_READINGS_PER_DAY_RESPONSE,
   LIST_METER_READINGS_PER_MONTH_RESPONSE as PUBLISHER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
   LIST_METER_READING_PER_SEASON_RESPONSE as PUBLISHER_LIST_METER_READING_PER_SEASON_RESPONSE,
-} from "@phading/product_meter_service_interface/publisher/show/frontend/interface";
+} from "@phading/product_meter_service_interface/show/frontend/publisher/interface";
 import {
-  GET_SEASON_NAME as CONSUMER_GET_SEASON_NAME,
+  GET_SEASON_NAME,
   GET_SEASON_PUBLISHER_AND_GRADE,
+  GET_STORAGE_METER_READING,
+  GET_UPLOAD_METER_READING,
   GET_VIDEO_DURATION_AND_SIZE,
   GetSeasonNameResponse,
   GetSeasonPublisherAndGradeResponse,
-  GetVideoDurationAndSizeResponse,
-} from "@phading/product_service_interface/consumer/show/backend/interface";
-import {
-  GET_SEASON_NAME as PUBLISHER_GET_SEASON_NAME,
-  GET_STORAGE_METER_READING,
-  GET_UPLOAD_METER_READING,
   GetStorageMeterReadingResponse,
   GetUploadMeterReadingResponse,
-} from "@phading/product_service_interface/publisher/show/backend/interface";
+  GetVideoDurationAndSizeResponse,
+} from "@phading/product_service_interface/show/backend/interface";
 import {
   LIST_ACCOUNTS,
   ListAccountsResponse,
@@ -88,11 +85,7 @@ TEST_RUNNER.run({
                   canPublishShows: true,
                 } as ExchangeSessionAndCheckCapabilityResponse;
               }
-            } else if (request.descriptor === CONSUMER_GET_SEASON_NAME) {
-              return {
-                seasonName: "name1",
-              } as GetSeasonNameResponse;
-            } else if (request.descriptor === PUBLISHER_GET_SEASON_NAME) {
+            } else if (request.descriptor === GET_SEASON_NAME) {
               return {
                 seasonName: "name1",
               } as GetSeasonNameResponse;
