@@ -50,7 +50,7 @@ import {
 import {
   LIST_ACCOUNTS,
   ListAccountsResponse,
-} from "@phading/user_service_interface/third_person/backend/interface";
+} from "@phading/user_service_interface/backend/interface";
 import {
   EXCHANGE_SESSION_AND_CHECK_CAPABILITY,
   ExchangeSessionAndCheckCapabilityResponse,

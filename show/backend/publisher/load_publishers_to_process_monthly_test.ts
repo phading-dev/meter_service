@@ -6,7 +6,7 @@ import {
   LIST_ACCOUNTS,
   LIST_ACCOUNTS_REQUEST_BODY,
   ListAccountsResponse,
-} from "@phading/user_service_interface/third_person/backend/interface";
+} from "@phading/user_service_interface/backend/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import {

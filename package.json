@@ -18,10 +18,9 @@
     "**/*.json"
   ],
   "devDependencies": {
-    "@selfage/cli": "^5.0.0",
-    "@selfage/generator_cli": "^3.2.0",
-    "@selfage/test_matcher": "^2.1.7",
-    "@selfage/test_runner": "^5.0.1",
+    "@selfage/cli": "^5.0.1",
+    "@selfage/test_matcher": "^2.1.8",
+    "@selfage/test_runner": "^5.2.0",
     "@selfage/tsconfig": "^1.1.0",
     "@types/node": "^22.5.4",
     "typescript": "^5.6.2"
@@ -31,14 +30,14 @@
     "@phading/commerce_service_interface": "^0.4.0",
     "@phading/product_meter_service_interface": "^0.5.0",
     "@phading/product_service_interface": "^0.7.0",
-    "@phading/user_service_interface": "^0.17.5",
+    "@phading/user_service_interface": "^0.18.0",
     "@phading/user_session_service_interface": "^0.8.9",
     "@selfage/env_var_getter": "^1.0.2",
-    "@selfage/http_error": "^1.1.1",
-    "@selfage/message": "^3.5.5",
-    "@selfage/node_service_client": "^1.2.2",
-    "@selfage/service_descriptor": "^4.3.0",
-    "@selfage/service_handler": "^6.0.1",
+    "@selfage/http_error": "^1.1.2",
+    "@selfage/message": "^3.5.6",
+    "@selfage/node_service_client": "^1.2.4",
+    "@selfage/service_descriptor": "^4.3.1",
+    "@selfage/service_handler": "^6.0.2",
     "express": "^4.21.1",
     "lru-cache": "^11.0.1"
   }

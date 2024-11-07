@@ -16,7 +16,7 @@ import {
   LoadPublishersToProcessMonthlyResponse,
 } from "@phading/product_meter_service_interface/show/backend/publisher/interface";
 import { AccountType } from "@phading/user_service_interface/account_type";
-import { listAccounts } from "@phading/user_service_interface/third_person/backend/client";
+import { listAccounts } from "@phading/user_service_interface/backend/client";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
 export class LoadPublishersToProcessMonthlyHandler extends LoadPublishersToProcessMonthlyHandlerInterface {
