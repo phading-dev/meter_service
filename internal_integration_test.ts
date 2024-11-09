@@ -72,16 +72,12 @@ TEST_RUNNER.run({
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               if (request.body.signedSession === "consumerSession1") {
                 return {
-                  userSession: {
-                    accountId: "consumer1",
-                  },
+                  accountId: "consumer1",
                   canConsumeShows: true,
                 } as ExchangeSessionAndCheckCapabilityResponse;
               } else {
                 return {
-                  userSession: {
-                    accountId: "publisher1",
-                  },
+                  accountId: "publisher1",
                   canPublishShows: true,
                 } as ExchangeSessionAndCheckCapabilityResponse;
               }

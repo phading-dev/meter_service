@@ -15,9 +15,7 @@ TEST_RUNNER.run({
         // Prepare
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
-          userSession: {
-            accountId: "consumer1",
-          },
+          accountId: "consumer1",
           canConsumeShows: true,
         } as ExchangeSessionAndCheckCapabilityResponse;
         // 2024-10-26 23:xx:xx
@@ -85,9 +83,7 @@ TEST_RUNNER.run({
         // Prepare
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
-          userSession: {
-            accountId: "consumer1",
-          },
+          accountId: "consumer1",
           canConsumeShows: true,
         } as ExchangeSessionAndCheckCapabilityResponse;
         // 2025-01-01 01:xx:xx UTC

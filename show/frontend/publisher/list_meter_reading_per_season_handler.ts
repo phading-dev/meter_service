@@ -39,20 +39,20 @@ export class ListMeterReadingPerSeasonHandler extends ListMeterReadingPerSeasonH
     if (isNaN(date.valueOf())) {
       throw newBadRequestError(`"date" is not a valid date.`);
     }
-    let { userSession, canPublishShows } =
+    let { accountId, canPublishShows } =
       await exchangeSessionAndCheckCapability(this.serviceClient, {
         signedSession: sessionStr,
         checkCanPublishShows: true,
       });
     if (!canPublishShows) {
       throw newUnauthorizedError(
-        `Account ${userSession.accountId} not allowed to list meter reading per season.`,
+        `Account ${accountId} not allowed to list meter reading per season.`,
       );
     }
 
     let dateString = toDateISOString(date);
     let [rows] = await this.bigtable.getRows({
-      keys: [`f2#${userSession.accountId}#${dateString}`],
+      keys: [`f2#${accountId}#${dateString}`],
       filter: [
         {
           family: /^[a|w]$/,

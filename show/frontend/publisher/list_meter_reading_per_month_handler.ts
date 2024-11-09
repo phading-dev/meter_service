@@ -46,20 +46,20 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
     if (startMonth >= endMonth) {
       throw newBadRequestError(`"startMonth" must be smaller than "endMonth".`);
     }
-    let { userSession, canPublishShows } =
+    let { accountId, canPublishShows } =
       await exchangeSessionAndCheckCapability(this.serviceClient, {
         signedSession: sessionStr,
         checkCanPublishShows: true,
       });
     if (!canPublishShows) {
       throw newUnauthorizedError(
-        `Account ${userSession.accountId} not allowed to list meter reading per month.`,
+        `Account ${accountId} not allowed to list meter reading per month.`,
       );
     }
 
     let [rows] = await this.bigtable.getRows({
-      start: `f4#${userSession.accountId}#${toMonthISOString(startMonth)}`,
-      end: `f4#${userSession.accountId}#${toMonthISOString(endMonth)}`,
+      start: `f4#${accountId}#${toMonthISOString(startMonth)}`,
+      end: `f4#${accountId}#${toMonthISOString(endMonth)}`,
       filter: {
         column: {
           cellLimit: 1,

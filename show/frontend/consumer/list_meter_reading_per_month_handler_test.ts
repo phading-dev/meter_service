@@ -68,9 +68,7 @@ TEST_RUNNER.run({
         ]);
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
-          userSession: {
-            accountId: "consumer1",
-          },
+          accountId: "consumer1",
           canConsumeShows: true,
         } as ExchangeSessionAndCheckCapabilityResponse;
         let handler = new ListMeterReadingsPerMonthHandler(

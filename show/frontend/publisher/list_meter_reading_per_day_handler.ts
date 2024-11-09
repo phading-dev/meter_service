@@ -46,20 +46,20 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
     if (startDate >= endDate) {
       throw newBadRequestError(`"startDate" must be smaller than "endDate".`);
     }
-    let { userSession, canPublishShows } =
+    let { accountId, canPublishShows } =
       await exchangeSessionAndCheckCapability(this.serviceClient, {
         signedSession: sessionStr,
         checkCanPublishShows: true,
       });
     if (!canPublishShows) {
       throw newUnauthorizedError(
-        `Account ${userSession.accountId} not allowed to list meter reading per day.`,
+        `Account ${accountId} not allowed to list meter reading per day.`,
       );
     }
 
     let [rows] = await this.bigtable.getRows({
-      start: `f2#${userSession.accountId}#${toDateISOString(startDate)}`,
-      end: `f2#${userSession.accountId}#${toDateISOString(endDate)}`,
+      start: `f2#${accountId}#${toDateISOString(startDate)}`,
+      end: `f2#${accountId}#${toDateISOString(endDate)}`,
       filter: [
         {
           family: /^t$/,

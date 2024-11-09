@@ -53,9 +53,7 @@ TEST_RUNNER.run({
           public async send(request: any): Promise<any> {
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               return {
-                userSession: {
-                  accountId: "consumer1",
-                },
+                accountId: "consumer1",
                 canConsumeShows: true,
               } as ExchangeSessionAndCheckCapabilityResponse;
             } else if (request.descriptor === GET_SEASON_NAME) {
@@ -155,9 +153,7 @@ TEST_RUNNER.run({
           public async send(request: any): Promise<any> {
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               return {
-                userSession: {
-                  accountId: "consumer1",
-                },
+                accountId: "consumer1",
                 canConsumeShows: true,
               } as ExchangeSessionAndCheckCapabilityResponse;
             } else if (request.descriptor === GET_SEASON_NAME) {
@@ -263,9 +259,7 @@ TEST_RUNNER.run({
           public async send(request: any): Promise<any> {
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               return {
-                userSession: {
-                  accountId: "consumer1",
-                },
+                accountId: "consumer1",
                 canConsumeShows: true,
               } as ExchangeSessionAndCheckCapabilityResponse;
             } else {
@@ -325,9 +319,7 @@ TEST_RUNNER.run({
           public async send(request: any): Promise<any> {
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               return {
-                userSession: {
-                  accountId: "consumer1",
-                },
+                accountId: "consumer1",
                 canConsumeShows: true,
               } as ExchangeSessionAndCheckCapabilityResponse;
             } else {

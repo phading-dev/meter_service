@@ -63,24 +63,24 @@ export class SyncMeterReadingHandler extends SyncMeterReadingHandlerInterface {
         `"watchTimeMs" is unreasonably large, which is ${body.watchTimeMs}. It could be a bad actor.`,
       );
     }
-    let accountId = this.lruCache.get(sessionStr);
-    if (!accountId) {
-      let { userSession, canConsumeShows } =
+    let accountIdCached = this.lruCache.get(sessionStr);
+    if (!accountIdCached) {
+      let { accountId, canConsumeShows } =
         await exchangeSessionAndCheckCapability(this.serviceClient, {
           signedSession: sessionStr,
           checkCanConsumeShows: true,
         });
       if (!canConsumeShows) {
         throw newUnauthorizedError(
-          `Account ${userSession.accountId} not allowed to sync meters of watch time.`,
+          `Account ${accountId} not allowed to sync meters of watch time.`,
         );
       }
-      this.lruCache.set(sessionStr, userSession.accountId);
-      accountId = userSession.accountId;
+      this.lruCache.set(sessionStr, accountId);
+      accountIdCached = accountId;
     }
     let today = toDateISOString(toToday(this.getNowDate()));
     await this.bigtable
-      .row(`t1#${today}#${accountId}`)
+      .row(`t1#${today}#${accountIdCached}`)
       .increment(`w:${body.seasonId}#${body.episodeId}`, body.watchTimeMs);
     return {};
   }

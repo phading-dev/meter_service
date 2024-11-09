@@ -62,9 +62,7 @@ TEST_RUNNER.run({
         ]);
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
-          userSession: {
-            accountId: "publisher1",
-          },
+          accountId: "publisher1",
           canPublishShows: true,
         } as ExchangeSessionAndCheckCapabilityResponse;
         let handler = new ListMeterReadingsPerDayHandler(BIGTABLE, clientMock);
