@@ -10,7 +10,10 @@ import {
   ProcessDailyMeterReadingRequestBody,
   ProcessDailyMeterReadingResponse,
 } from "@phading/product_meter_service_interface/show/backend/publisher/interface";
-import { newBadRequestError } from "@selfage/http_error";
+import {
+  newBadRequestError,
+  newInternalServerErrorError,
+} from "@selfage/http_error";
 
 export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHandlerInterface {
   public static create(): ProcessDailyMeterReadingHandler {
@@ -20,11 +23,14 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     );
   }
 
+  public interfereBeforeCheckPoint: () => Promise<void> = () =>
+    Promise.resolve();
+  public interruptAfterCheckPoint: () => void = () => {};
+  public interruptFinalWrite: () => void = () => {};
+
   public constructor(
     private batchSize: number,
     private bigtable: Table,
-    private interruptAggregation: () => void = () => {},
-    private interruptFinalWrite: () => void = () => {},
   ) {
     super();
   }
@@ -111,11 +117,38 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
         value: completed,
       },
     };
-    await this.bigtable.insert({
-      key: rowKey,
-      data,
-    });
-    this.interruptAggregation();
+    await this.interfereBeforeCheckPoint();
+    // Conditionally write the data only if c:p is still empty.
+    let [matched] = await this.bigtable.row(rowKey).filter(
+      [
+        {
+          family: /^c$/,
+        },
+        {
+          column: /^p$/,
+        },
+        {
+          column: {
+            cellLimit: 1,
+          },
+        },
+        {
+          value: /^$/,
+        },
+      ],
+      {
+        onMatch: [
+          {
+            method: "insert",
+            data,
+          },
+        ],
+      },
+    );
+    if (!matched) {
+      throw newInternalServerErrorError(`Row ${rowKey} is already completed.`);
+    }
+    this.interruptAfterCheckPoint();
   }
 
   private async writeOutputRows(

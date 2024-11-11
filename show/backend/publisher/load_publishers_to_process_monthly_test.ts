@@ -96,7 +96,8 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("l"), BIGTABLE.deleteRows("t")]);
+        await BIGTABLE.deleteRows("l");
+        await BIGTABLE.deleteRows("t");
       },
     },
     {
@@ -228,7 +229,8 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("l"), BIGTABLE.deleteRows("t")]);
+        await BIGTABLE.deleteRows("l");
+        await BIGTABLE.deleteRows("t");
       },
     },
     {
@@ -267,7 +269,8 @@ TEST_RUNNER.run({
         assertThat(clientMock.request, eq(undefined), "no request");
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("l"), BIGTABLE.deleteRows("t")]);
+        await BIGTABLE.deleteRows("l");
+        await BIGTABLE.deleteRows("t");
       },
     },
     {
@@ -362,7 +365,8 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("l"), BIGTABLE.deleteRows("t")]);
+        await BIGTABLE.deleteRows("l");
+        await BIGTABLE.deleteRows("t");
       },
     },
   ],

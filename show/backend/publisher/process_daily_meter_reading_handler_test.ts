@@ -234,7 +234,8 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("t"), BIGTABLE.deleteRows("f")]);
+        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("f");
       },
     },
     {
@@ -242,23 +243,10 @@ TEST_RUNNER.run({
       execute: async () => {
         // Prepare
         await initData();
-        let aggreagtionError: Error;
-        let finalWriteError: Error;
-        let handler = new ProcessDailyMeterReadingHandler(
-          2,
-          BIGTABLE,
-          () => {
-            if (aggreagtionError) {
-              throw aggreagtionError;
-            }
-          },
-          () => {
-            if (finalWriteError) {
-              throw finalWriteError;
-            }
-          },
-        );
-        aggreagtionError = new Error("fake agg");
+        let handler = new ProcessDailyMeterReadingHandler(2, BIGTABLE);
+        handler.interruptAfterCheckPoint = () => {
+          throw new Error("fake agg");
+        };
 
         // Execute
         let error = await assertReject(
@@ -421,7 +409,9 @@ TEST_RUNNER.run({
         );
 
         // Prepare
-        finalWriteError = new Error("fake write");
+        handler.interruptFinalWrite = () => {
+          throw new Error("fake write");
+        };
 
         // Execute
         error = await assertReject(
@@ -498,7 +488,7 @@ TEST_RUNNER.run({
         );
 
         // Prepare
-        finalWriteError = undefined;
+        handler.interruptFinalWrite = () => {};
 
         // Execute
         await handler.handle("", {
@@ -530,7 +520,80 @@ TEST_RUNNER.run({
         // Verify no action and no error
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("t"), BIGTABLE.deleteRows("f")]);
+        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("f");
+      },
+    },
+    {
+      name: "SimulatedWriteConflict",
+      execute: async () => {
+        // Prepare
+        await initData();
+        let handler = new ProcessDailyMeterReadingHandler(2, BIGTABLE);
+        handler.interfereBeforeCheckPoint = async () => {
+          await BIGTABLE.insert([
+            {
+              key: "t4#2024-10-30#publisher1",
+              data: {
+                t: {
+                  w: {
+                    value: 100,
+                  },
+                },
+                c: {
+                  p: {
+                    value: "1",
+                  },
+                },
+              },
+            },
+          ]);
+        };
+
+        // Execute
+        let error = await assertReject(
+          handler.handle("", {
+            rowKey: "t4#2024-10-30#publisher1",
+          }),
+        );
+
+        // Verify
+        assertThat(
+          error.message,
+          containStr("Row t4#2024-10-30#publisher1 is already completed"),
+          "error",
+        );
+        assertThat(
+          (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
+          eqData({
+            t: {
+              w: {
+                value: 100,
+              },
+              kb: {
+                value: 0,
+              },
+            },
+            c: {
+              r: {
+                value: "",
+              },
+              p: {
+                value: "1",
+              },
+            },
+          }),
+          "checkpoint data",
+        );
+        assertThat(
+          (await BIGTABLE.row("f2#publisher1#2024-10-30").exists())[0],
+          eq(false),
+          "final data not written",
+        );
+      },
+      tearDown: async () => {
+        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("f");
       },
     },
   ],

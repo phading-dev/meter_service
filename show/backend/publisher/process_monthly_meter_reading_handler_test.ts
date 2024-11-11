@@ -217,7 +217,8 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("t"), BIGTABLE.deleteRows("f")]);
+        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("f");
       },
     },
     {
@@ -247,10 +248,10 @@ TEST_RUNNER.run({
         let handler = new ProcessMonthlyMeterReadingHandler(
           BIGTABLE,
           clientMock,
-          () => {
-            throw new Error("fake error");
-          },
         );
+        handler.interruptAfterCheckPoint = () => {
+          throw new Error("fake error");
+        };
 
         // Execute
         let error = await assertReject(
@@ -361,7 +362,76 @@ TEST_RUNNER.run({
         // Verify no error and no actions
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("t"), BIGTABLE.deleteRows("f")]);
+        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("f");
+      },
+    },
+    {
+      name: "SimulatedWriteConflict",
+      execute: async () => {
+        // Prepare
+        await initData();
+        let clientMock = new NodeServiceClientMock();
+        let handler = new ProcessMonthlyMeterReadingHandler(
+          BIGTABLE,
+          clientMock,
+        );
+        handler.interfereBeforeCheckPoint = async () => {
+          await BIGTABLE.insert([
+            {
+              key: "t7#2024-10#publisher1",
+              data: {
+                t: {
+                  w: {
+                    value: 100,
+                  },
+                },
+                c: {
+                  p: {
+                    value: "1",
+                  },
+                },
+              },
+            },
+          ]);
+        };
+
+        // Execute
+        let error = await assertReject(
+          handler.handle("", {
+            rowKey: "t7#2024-10#publisher1",
+          }),
+        );
+
+        // Verify
+        assertThat(
+          error.message,
+          containStr("Row t7#2024-10#publisher1 is already completed"),
+          "error",
+        );
+        assertThat(
+          (await BIGTABLE.row("t7#2024-10#publisher1").get())[0].data,
+          eqData({
+            t: {
+              w: {
+                value: 100,
+              },
+              mb: {
+                value: 0,
+              },
+            },
+            c: {
+              p: {
+                value: "1",
+              },
+            },
+          }),
+          "checkpoint data",
+        );
+      },
+      tearDown: async () => {
+        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("f");
       },
     },
   ],

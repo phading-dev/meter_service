@@ -12,7 +12,10 @@ import {
   ProcessMonthlyMeterReadingRequestBody,
   ProcessMonthlyMeterReadingResponse,
 } from "@phading/product_meter_service_interface/show/backend/consumer/interface";
-import { newBadRequestError } from "@selfage/http_error";
+import {
+  newBadRequestError,
+  newInternalServerErrorError,
+} from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
 export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadingHandlerInterface {
@@ -20,10 +23,13 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
     return new ProcessMonthlyMeterReadingHandler(BIGTABLE, SERVICE_CLIENT);
   }
 
+  public interfereBeforeCheckPoint: () => Promise<void> = () =>
+    Promise.resolve();
+  public interruptAfterCheckPoint: () => void = () => {};
+
   public constructor(
     private bigtable: Table,
     private serviceClient: NodeServiceClient,
-    private interruptAfterCheckPoint: () => void = () => {},
   ) {
     super();
   }
@@ -88,12 +94,38 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
       incrementColumn(data, "t", "w", row.data["t"]["w"][0].value);
     }
     data["c"]["p"].value = "1";
-    await this.bigtable.insert([
+    let row = this.bigtable.row(rowKey);
+    await this.interfereBeforeCheckPoint();
+    // Conditionally write the data only if c:p is still empty.
+    let [matched] = await row.filter(
+      [
+        {
+          family: /^c$/,
+        },
+        {
+          column: /^p$/,
+        },
+        {
+          column: {
+            cellLimit: 1,
+          },
+        },
+        {
+          value: /^$/,
+        },
+      ],
       {
-        key: rowKey,
-        data,
+        onMatch: [
+          {
+            method: "insert",
+            data,
+          },
+        ],
       },
-    ]);
+    );
+    if (!matched) {
+      throw newInternalServerErrorError(`Row ${rowKey} is already completed.`);
+    }
     this.interruptAfterCheckPoint();
   }
 

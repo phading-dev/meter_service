@@ -1,4 +1,5 @@
-export let TIMEZONE_OFFSET = 8; // GMT-08:00. Only works with negative timezone offset.
+import { TIMEZONE_OFFSET } from "./params";
+
 export let TIMEZONE_OFFSET_STRING = TIMEZONE_OFFSET.toString().padStart(2, "0");
 
 export function toDateISOString(date: Date): string {

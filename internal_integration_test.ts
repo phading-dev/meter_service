@@ -432,11 +432,9 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await Promise.all([
-          BIGTABLE.deleteRows("t"),
-          BIGTABLE.deleteRows("f"),
-          BIGTABLE.deleteRows("l"),
-        ]);
+        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("f");
+        await BIGTABLE.deleteRows("l");
       },
     },
   ],

@@ -15,11 +15,11 @@ Storage utilization target: 4
 ## Table creation
 
 ```shell
-cbt -project test -instance test createtable SINGLE
-cbt -project test -instance test createfamily SINGLE w:maxversions=1:intsum # watch time live or offline aggregated. Columns follow ${seasonId}#${epiosdeId} or ${seasonId} pattern.
-cbt -project test -instance test createfamily SINGLE a:maxversions=1 # watch time adjusted, multiplied by grade. Columns follow ${seasonId} pattern.
-cbt -project test -instance test createfamily SINGLE t:maxversions=1 # total aggregated. Columns can be watch time or transmitted bytes.
-cbt -project test -instance test createfamily SINGLE c:maxversions=1 # cursor or completion
+cbt -project phading-dev -instance test-instance createtable SINGLE
+cbt -project phading-dev -instance test-instance createfamily SINGLE w:maxversions=1 # watch time live or offline aggregated. Columns follow ${seasonId}#${epiosdeId} or ${seasonId} pattern.
+cbt -project phading-dev -instance test-instance createfamily SINGLE a:maxversions=1 # watch time adjusted, multiplied by grade. Columns follow ${seasonId} pattern.
+cbt -project phading-dev -instance test-instance createfamily SINGLE t:maxversions=1 # total aggregated. Columns can be watch time or transmitted bytes.
+cbt -project phading-dev -instance test-instance createfamily SINGLE c:maxversions=1 # cursor or completion
 ```
 
 ## Schema & algorithm

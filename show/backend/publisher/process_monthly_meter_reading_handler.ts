@@ -20,7 +20,10 @@ import {
   getStorageMeterReading,
   getUploadMeterReading,
 } from "@phading/product_service_interface/show/backend/client";
-import { newBadRequestError } from "@selfage/http_error";
+import {
+  newBadRequestError,
+  newInternalServerErrorError,
+} from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
 export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadingHandlerInterface {
@@ -29,11 +32,13 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
   }
 
   private static ONE_MB_IN_KB = 1024;
+  public interfereBeforeCheckPoint: () => Promise<void> = () =>
+    Promise.resolve();
+  public interruptAfterCheckPoint: () => void = () => {};
 
   public constructor(
     private bigtable: Table,
     private serviceClient: NodeServiceClient,
-    private interruptAfterCheckPoint: () => void = () => {},
   ) {
     super();
   }
@@ -104,12 +109,37 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
       incrementColumn(data, "t", "mb", mbs);
     }
     data["c"]["p"].value = "1";
-    await this.bigtable.insert([
+    await this.interfereBeforeCheckPoint();
+    // Conditionally write the data only if c:p is still empty.
+    let [matched] = await this.bigtable.row(rowKey).filter(
+      [
+        {
+          family: /^c$/,
+        },
+        {
+          column: /^p$/,
+        },
+        {
+          column: {
+            cellLimit: 1,
+          },
+        },
+        {
+          value: /^$/,
+        },
+      ],
       {
-        key: rowKey,
-        data,
+        onMatch: [
+          {
+            method: "insert",
+            data,
+          },
+        ],
       },
-    ]);
+    );
+    if (!matched) {
+      throw newInternalServerErrorError(`Row ${rowKey} is already completed.`);
+    }
     this.interruptAfterCheckPoint();
   }
 
