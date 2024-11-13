@@ -80,16 +80,8 @@ export class LoadPublishersToProcessMonthlyHandler extends LoadPublishersToProce
       });
       let entries: Array<any> = response.accountIds.map((accountId) => {
         return {
-          key: `t7#${month}#${accountId}`,
+          key: `q5#${month}#${accountId}`,
           data: {
-            t: {
-              w: {
-                value: 0,
-              },
-              mb: {
-                value: 0,
-              },
-            },
             c: {
               p: {
                 value: "",

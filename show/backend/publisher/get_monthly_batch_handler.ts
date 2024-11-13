@@ -30,8 +30,8 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
     body: GetMonthlyBatchRequestBody,
   ): Promise<GetMonthlyBatchResponse> {
     let endMonth = await this.getEndMonth();
-    let end = `t7#${endMonth}`;
-    let start = body.cursor ? body.cursor + "0" : "t7#";
+    let end = `q5#${endMonth}`;
+    let start = body.cursor ? body.cursor + "0" : "q5#";
     let [rows] = await this.bigtable.getRows({
       start,
       end,
@@ -59,17 +59,17 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
     };
   }
 
-  // Either this month or the month of the first unprocessed date from t1# rows or t4# rows.
+  // Either this month or the month of the first unprocessed date from q1# rows or q3# rows.
   private async getEndMonth(): Promise<string> {
     let todayString = toDateISOString(toToday(this.getNowDate()));
-    let t1End = `t1#${todayString}`;
-    let t1Start = `t1#`;
-    let t4End = `t4#${todayString}`;
-    let t4Start = `t4#`;
-    let [[t1Rows], [t4Rows]] = await Promise.all([
+    let q1End = `q1#${todayString}`;
+    let q1Start = `q1#`;
+    let q3End = `q3#${todayString}`;
+    let q3Start = `q3#`;
+    let [[q1Rows], [q3Rows]] = await Promise.all([
       this.bigtable.getRows({
-        start: t1Start,
-        end: t1End,
+        start: q1Start,
+        end: q1End,
         limit: 1,
         filter: [
           {
@@ -85,8 +85,8 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
         ],
       }),
       this.bigtable.getRows({
-        start: t4Start,
-        end: t4End,
+        start: q3Start,
+        end: q3End,
         limit: 1,
         filter: [
           {
@@ -102,14 +102,14 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
         ],
       }),
     ]);
-    let t1EndDate =
-      t1Rows.length === 0 ? todayString : t1Rows[0].id.split("#")[1];
-    let t4EnDate =
-      t4Rows.length === 0 ? todayString : t4Rows[0].id.split("#")[1];
+    let q1EndDate =
+      q1Rows.length === 0 ? todayString : q1Rows[0].id.split("#")[1];
+    let q3EnDate =
+      q3Rows.length === 0 ? todayString : q3Rows[0].id.split("#")[1];
     let endDate =
-      new Date(t1EndDate).valueOf() < new Date(t4EnDate).valueOf()
-        ? t1EndDate
-        : t4EnDate;
+      new Date(q1EndDate).valueOf() < new Date(q3EnDate).valueOf()
+        ? q1EndDate
+        : q3EnDate;
     let [year, month] = endDate.split("-");
     return `${year}-${month}`;
   }

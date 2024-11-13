@@ -14,7 +14,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t7#2024-10#publisher1",
+            key: "q5#2024-10#publisher1",
             data: {
               c: {
                 p: {
@@ -24,7 +24,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t7#2024-10#publisher2",
+            key: "q5#2024-10#publisher2",
             data: {
               c: {
                 p: {
@@ -34,7 +34,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t7#2024-10#publisher3",
+            key: "q5#2024-10#publisher3",
             data: {
               c: {
                 p: {
@@ -44,7 +44,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t7#2024-11#publisher4",
+            key: "q5#2024-11#publisher4",
             data: {
               c: {
                 p: {
@@ -54,7 +54,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t1#2024-12-02#consumer1",
+            key: "q1#2024-12-02#consumer1",
             data: {
               w: {
                 "season1#ep1": {
@@ -64,10 +64,10 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t4#2024-12-02#consumer1",
+            key: "q3#2024-12-02#consumer1",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
@@ -89,8 +89,8 @@ TEST_RUNNER.run({
           response,
           eqMessage(
             {
-              rowKeys: ["t7#2024-10#publisher1", "t7#2024-10#publisher2"],
-              cursor: "t7#2024-10#publisher2",
+              rowKeys: ["q5#2024-10#publisher1", "q5#2024-10#publisher2"],
+              cursor: "q5#2024-10#publisher2",
             },
             GET_MONTHLY_BATCH_RESPONSE,
           ),
@@ -99,7 +99,7 @@ TEST_RUNNER.run({
 
         // Execute
         response = await handler.handle("", {
-          cursor: "t7#2024-10#publisher2",
+          cursor: "q5#2024-10#publisher2",
         });
 
         // Verify
@@ -107,7 +107,7 @@ TEST_RUNNER.run({
           response,
           eqMessage(
             {
-              rowKeys: ["t7#2024-10#publisher3"],
+              rowKeys: ["q5#2024-10#publisher3"],
             },
             GET_MONTHLY_BATCH_RESPONSE,
           ),
@@ -115,16 +115,16 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("q");
       },
     },
     {
-      name: "GetUntilUnprocessedT1Rows",
+      name: "GetUntilUnprocessedQ1Rows",
       execute: async () => {
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t7#2024-10#publisher1",
+            key: "q5#2024-10#publisher1",
             data: {
               c: {
                 p: {
@@ -134,7 +134,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t7#2024-11#publisher2",
+            key: "q5#2024-11#publisher2",
             data: {
               c: {
                 p: {
@@ -144,7 +144,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t1#2024-11-02#consumer1",
+            key: "q1#2024-11-02#consumer1",
             data: {
               w: {
                 "season1#ep1": {
@@ -154,10 +154,10 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t4#2024-12-02#consumer1",
+            key: "q3#2024-12-02#consumer1",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
@@ -179,7 +179,7 @@ TEST_RUNNER.run({
           response,
           eqMessage(
             {
-              rowKeys: ["t7#2024-10#publisher1"],
+              rowKeys: ["q5#2024-10#publisher1"],
             },
             GET_MONTHLY_BATCH_RESPONSE,
           ),
@@ -187,16 +187,16 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("q");
       },
     },
     {
-      name: "GetUntilUnprocessedT4Rows",
+      name: "GetUntilUnprocessedQ3Rows",
       execute: async () => {
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t7#2024-10#publisher1",
+            key: "q5#2024-10#publisher1",
             data: {
               c: {
                 p: {
@@ -206,7 +206,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t7#2024-11#publisher2",
+            key: "q5#2024-11#publisher2",
             data: {
               c: {
                 p: {
@@ -216,7 +216,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t1#2024-12-02#consumer1",
+            key: "q1#2024-12-02#consumer1",
             data: {
               w: {
                 "season1#ep1": {
@@ -226,10 +226,10 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "t4#2024-11-02#consumer1",
+            key: "q3#2024-11-02#consumer1",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
@@ -251,7 +251,7 @@ TEST_RUNNER.run({
           response,
           eqMessage(
             {
-              rowKeys: ["t7#2024-10#publisher1"],
+              rowKeys: ["q5#2024-10#publisher1"],
             },
             GET_MONTHLY_BATCH_RESPONSE,
           ),
@@ -259,7 +259,7 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("q");
       },
     },
   ],

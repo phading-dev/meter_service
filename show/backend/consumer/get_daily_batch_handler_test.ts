@@ -14,57 +14,51 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t1#2024-10-30#consumer1",
+            key: "q1#2024-10-30#consumer1",
             data: {
-              w: {
-                "season3#ep3": {
-                  value: 1000,
-                },
-                "season1#ep1": {
-                  value: 1000,
+              c: {
+                p: {
+                  value: "",
                 },
               },
             },
           },
           {
-            key: "t1#2024-10-30#consumer2",
+            key: "q1#2024-10-30#consumer2",
             data: {
-              w: {
-                "season3#ep3": {
-                  value: 1000,
+              c: {
+                p: {
+                  value: "",
                 },
               },
             },
           },
           {
-            key: "t1#2024-11-01#consumer1",
+            key: "q1#2024-11-01#consumer1",
             data: {
-              w: {
-                "season4#ep3": {
-                  value: 1000,
+              c: {
+                p: {
+                  value: "",
                 },
               },
             },
           },
           {
-            key: "t1#2024-10-26#consumer2",
+            key: "q1#2024-10-26#consumer2",
             data: {
-              w: {
-                "season1#ep2": {
-                  value: 300,
-                },
-                "season2#ep1": {
-                  value: 300,
+              c: {
+                p: {
+                  value: "",
                 },
               },
             },
           },
           {
-            key: "t1#2024-10-26#consumer1",
+            key: "q1#2024-10-26#consumer1",
             data: {
-              w: {
-                "season1#ep1": {
-                  value: 200,
+              c: {
+                p: {
+                  value: "",
                 },
               },
             },
@@ -86,8 +80,8 @@ TEST_RUNNER.run({
             response,
             eqMessage(
               {
-                rowKeys: ["t1#2024-10-26#consumer1", "t1#2024-10-26#consumer2"],
-                cursor: "t1#2024-10-26#consumer2",
+                rowKeys: ["q1#2024-10-26#consumer1", "q1#2024-10-26#consumer2"],
+                cursor: "q1#2024-10-26#consumer2",
               },
               GET_DAILY_BATCH_RESPONSE,
             ),
@@ -98,7 +92,7 @@ TEST_RUNNER.run({
         {
           // Execute
           let response = await handler.handle("", {
-            cursor: "t1#2024-10-26#consumer2",
+            cursor: "q1#2024-10-26#consumer2",
           });
 
           // Verify
@@ -106,8 +100,8 @@ TEST_RUNNER.run({
             response,
             eqMessage(
               {
-                rowKeys: ["t1#2024-10-30#consumer1", "t1#2024-10-30#consumer2"],
-                cursor: "t1#2024-10-30#consumer2",
+                rowKeys: ["q1#2024-10-30#consumer1", "q1#2024-10-30#consumer2"],
+                cursor: "q1#2024-10-30#consumer2",
               },
               GET_DAILY_BATCH_RESPONSE,
             ),
@@ -118,7 +112,7 @@ TEST_RUNNER.run({
         {
           // Execute
           let response = await handler.handle("", {
-            cursor: "t1#2024-10-30#consumer2",
+            cursor: "q1#2024-10-30#consumer2",
           });
 
           // Verify
@@ -135,7 +129,7 @@ TEST_RUNNER.run({
         }
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("t1#");
+        await BIGTABLE.deleteRows("q1#");
       },
     },
   ],

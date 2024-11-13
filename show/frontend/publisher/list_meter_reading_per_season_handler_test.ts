@@ -23,7 +23,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f2#publisher1#2024-12-31",
+            key: "f3#publisher1#2024-12-31",
             data: {
               w: {
                 season1: {
@@ -126,7 +126,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f2#publisher1#2024-11-03",
+            key: "f3#publisher1#2024-11-03",
             data: {
               w: {
                 season1: {
@@ -232,7 +232,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f2#publisher1#2024-11-04",
+            key: "f3#publisher1#2024-11-04",
             data: {
               w: {
                 season1: {
@@ -308,7 +308,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f2#publisher1#2024-11-03",
+            key: "f3#publisher1#2024-11-03",
             data: {
               t: {
                 w: {

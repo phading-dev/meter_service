@@ -30,8 +30,9 @@ export class GetDailyBatchHandler extends GetDailyBatchHandlerInterface {
     body: GetDailyBatchRequestBody,
   ): Promise<GetDailyBatchResponse> {
     let endDate = await this.getEndDate();
-    let end = `t4#${endDate}`;
-    let start = body.cursor ? body.cursor + "0" : "t4#";
+    let end = `q3#${endDate}`;
+    // `!` sign is smaller than `#` sign, so it can mark the start of the range even with #${checkpointId}.
+    let start = body.cursor ? body.cursor + "!" : "q3#";
     let [rows] = await this.bigtable.getRows({
       start,
       end,
@@ -59,11 +60,11 @@ export class GetDailyBatchHandler extends GetDailyBatchHandlerInterface {
     };
   }
 
-  // Either today or the unprocessed date from t1# rows.
+  // Either today or the unprocessed date from q1# rows.
   private async getEndDate(): Promise<string> {
     let todayString = toDateISOString(toToday(this.getNowDate()));
-    let end = `t1#${todayString}`;
-    let start = `t1#`;
+    let end = `q1#${todayString}`;
+    let start = `q1#`;
     let [rows] = await this.bigtable.getRows({
       start,
       end,

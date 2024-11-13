@@ -58,25 +58,26 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     if (!body.rowKey) {
       throw newBadRequestError(`"rowKey" is required.`);
     }
-    let [rows] = await this.bigtable.getRows({
-      keys: [body.rowKey],
+    // rowKey should be q1#${date}#${consumerId}
+    let queueExists = (await this.bigtable.row(body.rowKey).exists())[0];
+    if (!queueExists) {
+      console.log(
+        `${loggingPrefix} row ${body.rowKey} is not found because it has been processed.`,
+      );
+      return {};
+    }
+
+    let [_, todayString, accountId] = body.rowKey.split("#");
+    let [row] = await this.bigtable.row(`d1#${todayString}#${accountId}`).get({
       filter: {
         column: {
           cellLimit: 1,
         },
       },
     });
-    if (rows.length === 0) {
-      console.log(
-        `${loggingPrefix} row ${body.rowKey} is not found maybe because it has been processed.`,
-      );
-      return {};
-    }
-
-    let [_, todayString, accountId] = body.rowKey.split("#");
-    let columns = rows[0].data["w"];
+    let columns = row.data["w"];
     await this.writeOutputRows(loggingPrefix, todayString, accountId, columns);
-    // Marks the completion.
+    // Queue is completed.
     await this.bigtable.row(body.rowKey).delete();
     return {};
   }
@@ -113,17 +114,12 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
         data: consumerData,
       },
       {
-        key: `t2#${year}-${month}#${accountId}#${day}`,
+        key: `d2#${year}-${month}#${accountId}#${day}`,
         data: consumerMonthData,
       },
       {
-        key: `t6#${year}-${month}#${accountId}`,
+        key: `q2#${year}-${month}#${accountId}`,
         data: {
-          t: {
-            w: {
-              value: 0,
-            },
-          },
           c: {
             p: {
               value: "",
@@ -135,25 +131,14 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     publishers.forEach((data, publisherId) => {
       entries.push(
         {
-          key: `t3#${todayString}#${publisherId}#${accountId}`,
+          key: `d3#${todayString}#${publisherId}#${accountId}`,
           data,
         },
         {
-          key: `t4#${todayString}#${publisherId}`,
+          key: `q3#${todayString}#${publisherId}`,
           data: {
-            t: {
-              w: {
-                value: 0,
-              },
-              kb: {
-                value: 0,
-              },
-            },
             c: {
               r: {
-                value: "",
-              },
-              p: {
                 value: "",
               },
             },

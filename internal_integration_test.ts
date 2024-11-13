@@ -141,7 +141,7 @@ TEST_RUNNER.run({
         ).handle("", {});
         assertThat(
           consumerDailyBatchResponse.rowKeys,
-          isArray([eq("t1#2024-11-04#consumer1")]),
+          isArray([eq("q1#2024-11-04#consumer1")]),
           "consumer daily batch",
         );
 
@@ -216,16 +216,18 @@ TEST_RUNNER.run({
           ).handle("", {});
         assertThat(
           publisherDailyBatchResponse.rowKeys,
-          isArray([eq("t4#2024-11-04#publisher1")]),
+          isArray([eq("q3#2024-11-04#publisher1")]),
           "publisher daily batch",
         );
 
-        await new PublisherProcessDailyMeterReadingHandler(10, BIGTABLE).handle(
-          "",
-          {
-            rowKey: publisherDailyBatchResponse.rowKeys[0],
-          },
-        );
+        let checkpointId = 0;
+        await new PublisherProcessDailyMeterReadingHandler(
+          10,
+          BIGTABLE,
+          () => `${checkpointId++}`,
+        ).handle("", {
+          rowKey: publisherDailyBatchResponse.rowKeys[0],
+        });
 
         // 2024-11-05 18:xx:xx UTC
         let publisherListPerSeasonResponse =
@@ -292,7 +294,7 @@ TEST_RUNNER.run({
           ).handle("", {});
         assertThat(
           consumerMonthlyBatchResponse.rowKeys,
-          isArray([eq("t6#2024-11#consumer1")]),
+          isArray([eq("q2#2024-11#consumer1")]),
           "consumer monthly batch",
         );
 
@@ -363,7 +365,7 @@ TEST_RUNNER.run({
           ).handle("", {});
         assertThat(
           publisherMonthlyBatchResponse.rowKeys,
-          isArray([eq("t7#2024-11#publisher1")]),
+          isArray([eq("q5#2024-11#publisher1")]),
           "publisher monthly batch",
         );
 

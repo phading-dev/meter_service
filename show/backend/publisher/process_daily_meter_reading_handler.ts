@@ -1,3 +1,4 @@
+import crypto = require("crypto");
 import { BIGTABLE } from "../../../common/bigtable";
 import {
   incrementColumn,
@@ -10,27 +11,23 @@ import {
   ProcessDailyMeterReadingRequestBody,
   ProcessDailyMeterReadingResponse,
 } from "@phading/product_meter_service_interface/show/backend/publisher/interface";
-import {
-  newBadRequestError,
-  newInternalServerErrorError,
-} from "@selfage/http_error";
+import { newBadRequestError } from "@selfage/http_error";
 
 export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHandlerInterface {
   public static create(): ProcessDailyMeterReadingHandler {
     return new ProcessDailyMeterReadingHandler(
       BATCH_SIZE_OF_DAILY_PROCESSING_CONUMSERS_FOR_ONE_PUBLISHER,
       BIGTABLE,
+      () => crypto.randomUUID(),
     );
   }
 
-  public interfereBeforeCheckPoint: () => Promise<void> = () =>
-    Promise.resolve();
   public interruptAfterCheckPoint: () => void = () => {};
-  public interruptFinalWrite: () => void = () => {};
 
   public constructor(
     private batchSize: number,
     private bigtable: Table,
+    private generateUuid: () => string,
   ) {
     super();
   }
@@ -42,7 +39,8 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     if (!body.rowKey) {
       throw newBadRequestError(`"rowKey" is required.`);
     }
-    let [rows] = await this.bigtable.getRows({
+    // rowKey should be q3#{date}#${publisherId} or q3#{date}#${publisherId}#${checkpointId}
+    let [queueRows] = await this.bigtable.getRows({
       keys: [body.rowKey],
       filter: {
         column: {
@@ -50,43 +48,54 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
         },
       },
     });
-    if (rows.length === 0) {
+    if (queueRows.length === 0) {
       console.log(
-        `${loggingPrefix} row ${body.rowKey} is not found maybe because it has been processed.`,
+        `${loggingPrefix} row ${body.rowKey} is not found because it has been processed.`,
       );
       return {};
     }
-    let data = normalizeData(rows[0].data);
-    let [_, date, accountId] = body.rowKey.split("#");
-    while (!data["c"]["p"].value) {
-      await this.aggregateBatchAndCheckPoint(
-        body.rowKey,
+
+    let [_, date, accountId, checkpointId] = body.rowKey.split("#");
+    let data: any = {};
+    if (checkpointId) {
+      let [row] = await this.bigtable
+        .row(`d4#${date}#${accountId}#${checkpointId}`)
+        .get({
+          filter: {
+            column: {
+              cellLimit: 1,
+            },
+          },
+        });
+      data = normalizeData(row.data);
+    }
+    let queueKey = body.rowKey;
+    let cursor = queueRows[0].data["c"]["r"][0].value;
+    while (queueKey) {
+      [queueKey, cursor] = await this.aggregateBatchAndCheckPoint(
+        queueKey,
+        cursor,
         date,
         accountId,
         this.batchSize,
         data,
       );
     }
-    // Cleans up data rows.
-    await this.bigtable.deleteRows(`t3#${date}#${accountId}`);
-    await this.writeOutputRows(date, accountId, data);
-    // Marks the completion.
-    await this.bigtable.row(body.rowKey).delete();
     return {};
   }
 
   // Modifies `data` in place.
   private async aggregateBatchAndCheckPoint(
-    rowKey: string,
+    queueKey: string,
+    cursor: string,
     date: string,
     accountId: string,
     limit: number,
     data: any,
-  ): Promise<void> {
+  ): Promise<[string, string]> {
     // `+` sign is larger than `#` sign, so it can mark the end of the range.
-    let end = `t3#${date}#${accountId}+`;
-    let cursor = data["c"]["r"].value;
-    let start = cursor ? cursor + "0" : `t3#${date}#${accountId}`;
+    let end = `d3#${date}#${accountId}+`;
+    let start = cursor ? cursor + "0" : `d3#${date}#${accountId}`;
     let [rows] = await this.bigtable.getRows({
       start,
       end,
@@ -108,72 +117,47 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     }
     let newCursor =
       rows.length === limit ? rows[rows.length - 1].id : undefined;
-    let completed = newCursor ? "" : "1";
-    data["c"] = {
-      r: {
-        value: newCursor,
-      },
-      p: {
-        value: completed,
-      },
-    };
-    await this.interfereBeforeCheckPoint();
-    // Conditionally write the data only if c:p is still empty.
-    let [matched] = await this.bigtable.row(rowKey).filter(
-      [
+    let newQueueKey: string;
+    if (newCursor) {
+      let checkpointId = this.generateUuid();
+      newQueueKey = `q3#${date}#${accountId}#${checkpointId}`;
+      await this.bigtable.insert([
         {
-          family: /^c$/,
-        },
-        {
-          column: /^p$/,
-        },
-        {
-          column: {
-            cellLimit: 1,
+          key: newQueueKey,
+          data: {
+            c: {
+              r: {
+                value: newCursor,
+              },
+            },
           },
         },
         {
-          value: /^$/,
+          key: `d4#${date}#${accountId}#${checkpointId}`,
+          data,
         },
-      ],
-      {
-        onMatch: [
-          {
-            method: "insert",
-            data,
+      ]);
+    } else {
+      let [year, month, day] = date.split("-");
+      await this.bigtable.insert([
+        {
+          key: `f3#${accountId}#${date}`,
+          data,
+        },
+        {
+          key: `d5#${year}-${month}#${accountId}#${day}`,
+          data: {
+            t: {
+              w: data["t"]["w"].value,
+              kb: data["t"]["kb"].value,
+            },
           },
-        ],
-      },
-    );
-    if (!matched) {
-      throw newInternalServerErrorError(`Row ${rowKey} is already completed.`);
+        },
+      ]);
     }
+    // Queue is completed.
+    await this.bigtable.row(queueKey).delete();
     this.interruptAfterCheckPoint();
-  }
-
-  private async writeOutputRows(
-    date: string,
-    accountId: string,
-    data: any,
-  ): Promise<void> {
-    // cursor and completed columns are not needed in the final data.
-    delete data["c"];
-    let [year, month, day] = date.split("-");
-    await this.bigtable.insert([
-      {
-        key: `f2#${accountId}#${date}`,
-        data,
-      },
-      {
-        key: `t5#${year}-${month}#${accountId}#${day}`,
-        data: {
-          t: {
-            w: data["t"]["w"].value,
-            kb: data["t"]["kb"].value,
-          },
-        },
-      },
-    ]);
-    this.interruptFinalWrite();
+    return [newQueueKey, newCursor];
   }
 }

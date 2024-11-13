@@ -30,9 +30,9 @@ export class GetDailyBatchHandler extends GetDailyBatchHandlerInterface {
     body: GetDailyBatchRequestBody,
   ): Promise<GetDailyBatchResponse> {
     // Do not process today's data.
-    let end = `t1#${toDateISOString(toToday(this.getNowDate()))}`;
+    let end = `q1#${toDateISOString(toToday(this.getNowDate()))}`;
     // Add "0" to skip the start cursor.
-    let start = body.cursor ? body.cursor + "0" : `t1#`;
+    let start = body.cursor ? body.cursor + "0" : `q1#`;
     let [rows] = await this.bigtable.getRows({
       start,
       end,

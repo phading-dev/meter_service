@@ -31,9 +31,9 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
   ): Promise<GetMonthlyBatchResponse> {
     let endMonth = await this.getEndMonth();
     // Do not process today's data.
-    let end = `t6#${endMonth}`;
+    let end = `q2#${endMonth}`;
     // Add "0" to skip the start cursor.
-    let start = body.cursor ? body.cursor + "0" : `t6#`;
+    let start = body.cursor ? body.cursor + "0" : `q2#`;
     let [rows] = await this.bigtable.getRows({
       start,
       end,
@@ -61,11 +61,11 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
     };
   }
 
-  // Either this month or the month of the first unprocessed date from t1# rows.
+  // Either this month or the month of the first unprocessed date from q1# rows.
   private async getEndMonth(): Promise<string> {
     let todayString = toDateISOString(toToday(this.getNowDate()));
-    let end = `t1#${todayString}`;
-    let start = `t1#`;
+    let end = `q1#${todayString}`;
+    let start = `q1#`;
     let [rows] = await this.bigtable.getRows({
       start,
       end,

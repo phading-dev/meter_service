@@ -58,8 +58,8 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
     }
 
     let [rows] = await this.bigtable.getRows({
-      start: `f3#${accountId}#${toMonthISOString(startMonth)}`,
-      end: `f3#${accountId}#${toMonthISOString(endMonth)}`,
+      start: `f2#${accountId}#${toMonthISOString(startMonth)}`,
+      end: `f2#${accountId}#${toMonthISOString(endMonth)}`,
       filter: {
         column: {
           cellLimit: 1,

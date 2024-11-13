@@ -52,7 +52,7 @@ export class ListMeterReadingPerSeasonHandler extends ListMeterReadingPerSeasonH
 
     let dateString = toDateISOString(date);
     let [rows] = await this.bigtable.getRows({
-      keys: [`f2#${accountId}#${dateString}`],
+      keys: [`f3#${accountId}#${dateString}`],
       filter: [
         {
           family: /^[a|w]$/,

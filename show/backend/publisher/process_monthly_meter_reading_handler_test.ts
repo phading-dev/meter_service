@@ -17,27 +17,14 @@ import {
 } from "@phading/product_service_interface/show/backend/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
-import {
-  assertReject,
-  assertThat,
-  containStr,
-  eq,
-} from "@selfage/test_matcher";
+import { assertThat, eq } from "@selfage/test_matcher";
 import { TEST_RUNNER } from "@selfage/test_runner";
 
 async function initData() {
   await BIGTABLE.insert([
     {
-      key: "t7#2024-10#publisher1",
+      key: "q5#2024-10#publisher1",
       data: {
-        t: {
-          w: {
-            value: 0,
-          },
-          mb: {
-            value: 0,
-          },
-        },
         c: {
           p: {
             value: "",
@@ -46,7 +33,7 @@ async function initData() {
       },
     },
     {
-      key: "t5#2024-10#publisher1#01",
+      key: "d5#2024-10#publisher1#01",
       data: {
         t: {
           w: {
@@ -59,7 +46,7 @@ async function initData() {
       },
     },
     {
-      key: "t5#2024-10#publisher1#20",
+      key: "d5#2024-10#publisher1#20",
       data: {
         t: {
           w: {
@@ -72,7 +59,7 @@ async function initData() {
       },
     },
     {
-      key: "t5#2024-10#publisher2#01",
+      key: "d5#2024-10#publisher2#01",
       data: {
         t: {
           w: {
@@ -147,7 +134,7 @@ TEST_RUNNER.run({
 
         // Execute
         await handler.handle("", {
-          rowKey: "t7#2024-10#publisher1",
+          rowKey: "q5#2024-10#publisher1",
         });
 
         // Verify
@@ -201,236 +188,14 @@ TEST_RUNNER.run({
           "generate earnings request",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-10#publisher1").exists())[0],
+          (await BIGTABLE.row("q5#2024-10#publisher1").exists())[0],
           eq(false),
-          "original row deleted",
-        );
-        assertThat(
-          (await BIGTABLE.row("t5#2024-10#publisher1#01").exists())[0],
-          eq(false),
-          "one data row deleted",
-        );
-        assertThat(
-          (await BIGTABLE.row("t5#2024-10#publisher2#01").exists())[0],
-          eq(true),
-          "extra data row exists",
+          "publisher month queue deleted",
         );
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("t");
-        await BIGTABLE.deleteRows("f");
-      },
-    },
-    {
-      name: "InterruptAfterCheckPoint_ResumeAndMarkDone_ResumeWithNoAction",
-      execute: async () => {
-        // Prepare
-        await initData();
-        let clientMock = new (class extends NodeServiceClientMock {
-          public async send(request: any): Promise<any> {
-            switch (request.descriptor) {
-              case GET_STORAGE_METER_READING:
-                return {
-                  mbh: 3334,
-                } as GetStorageMeterReadingResponse;
-              case GET_UPLOAD_METER_READING:
-                return {
-                  mb: 8899,
-                } as GetUploadMeterReadingResponse;
-              case GENERATE_EARNINGS_STATEMENT:
-                this.request = request;
-                return {} as GenerateEarningsStatementResponse;
-              default:
-                throw new Error("Unexpected");
-            }
-          }
-        })();
-        let handler = new ProcessMonthlyMeterReadingHandler(
-          BIGTABLE,
-          clientMock,
-        );
-        handler.interruptAfterCheckPoint = () => {
-          throw new Error("fake error");
-        };
-
-        // Execute
-        let error = await assertReject(
-          handler.handle("", {
-            rowKey: "t7#2024-10#publisher1",
-          }),
-        );
-
-        // Verify
-        assertThat(error.message, containStr("fake"), "error");
-        assertThat(
-          (await BIGTABLE.row("t7#2024-10#publisher1").get())[0].data,
-          eqData({
-            t: {
-              w: {
-                value: 112,
-              },
-              mb: {
-                value: 123,
-              },
-            },
-            c: {
-              p: {
-                value: "1",
-              },
-            },
-          }),
-          "checkpoint data",
-        );
-        assertThat(clientMock.request, eq(undefined), "no RC");
-
-        // Execute
-        await handler.handle("", {
-          rowKey: "t7#2024-10#publisher1",
-        });
-
-        // Verify
-        assertThat(
-          (await BIGTABLE.row("f4#publisher1#2024-10").get())[0].data,
-          eqData({
-            t: {
-              w: {
-                value: 112,
-              },
-              mb: {
-                value: 123,
-              },
-              smbh: {
-                value: 3334,
-              },
-              umb: {
-                value: 8899,
-              },
-            },
-          }),
-          "final publisher data",
-        );
-        assertThat(
-          clientMock.request.body,
-          eqMessage(
-            {
-              accountId: "publisher1",
-              month: "2024-10",
-              readings: [
-                {
-                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
-                  reading: 112,
-                },
-                {
-                  meterType: MeterType.NETWORK_TRANSMITTED_MB,
-                  reading: 123,
-                },
-                {
-                  meterType: MeterType.STORAGE_MB_HOUR,
-                  reading: 3334,
-                },
-                {
-                  meterType: MeterType.UPLOAD_MB,
-                  reading: 8899,
-                },
-              ],
-            },
-            GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
-          ),
-          "generate earnings request",
-        );
-        assertThat(
-          (await BIGTABLE.row("t7#2024-10#publisher1").exists())[0],
-          eq(false),
-          "original row deleted",
-        );
-        assertThat(
-          (await BIGTABLE.row("t5#2024-10#publisher1#01").exists())[0],
-          eq(false),
-          "one data row deleted",
-        );
-        assertThat(
-          (await BIGTABLE.row("t5#2024-10#publisher2#01").exists())[0],
-          eq(true),
-          "extra data row exists",
-        );
-
-        // Execute
-        await handler.handle("", {
-          rowKey: "t7#2024-10#publisher1",
-        });
-
-        // Verify no error and no actions
-      },
-      tearDown: async () => {
-        await BIGTABLE.deleteRows("t");
-        await BIGTABLE.deleteRows("f");
-      },
-    },
-    {
-      name: "SimulatedWriteConflict",
-      execute: async () => {
-        // Prepare
-        await initData();
-        let clientMock = new NodeServiceClientMock();
-        let handler = new ProcessMonthlyMeterReadingHandler(
-          BIGTABLE,
-          clientMock,
-        );
-        handler.interfereBeforeCheckPoint = async () => {
-          await BIGTABLE.insert([
-            {
-              key: "t7#2024-10#publisher1",
-              data: {
-                t: {
-                  w: {
-                    value: 100,
-                  },
-                },
-                c: {
-                  p: {
-                    value: "1",
-                  },
-                },
-              },
-            },
-          ]);
-        };
-
-        // Execute
-        let error = await assertReject(
-          handler.handle("", {
-            rowKey: "t7#2024-10#publisher1",
-          }),
-        );
-
-        // Verify
-        assertThat(
-          error.message,
-          containStr("Row t7#2024-10#publisher1 is already completed"),
-          "error",
-        );
-        assertThat(
-          (await BIGTABLE.row("t7#2024-10#publisher1").get())[0].data,
-          eqData({
-            t: {
-              w: {
-                value: 100,
-              },
-              mb: {
-                value: 0,
-              },
-            },
-            c: {
-              p: {
-                value: "1",
-              },
-            },
-          }),
-          "checkpoint data",
-        );
-      },
-      tearDown: async () => {
-        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("q");
+        await BIGTABLE.deleteRows("d");
         await BIGTABLE.deleteRows("f");
       },
     },

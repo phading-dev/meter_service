@@ -79,8 +79,15 @@ export class SyncMeterReadingHandler extends SyncMeterReadingHandlerInterface {
       accountIdCached = accountId;
     }
     let today = toDateISOString(toToday(this.getNowDate()));
+    await this.bigtable.row(`q1#${today}#${accountIdCached}`).save({
+      c: {
+        p: {
+          value: "",
+        },
+      },
+    });
     await this.bigtable
-      .row(`t1#${today}#${accountIdCached}`)
+      .row(`d1#${today}#${accountIdCached}`)
       .increment(`w:${body.seasonId}#${body.episodeId}`, body.watchTimeMs);
     return {};
   }

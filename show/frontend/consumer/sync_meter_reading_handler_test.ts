@@ -3,7 +3,7 @@ import { eqData } from "../../../common/bigtable_data_matcher";
 import { SyncMeterReadingHandler } from "./sync_meter_reading_handler";
 import { ExchangeSessionAndCheckCapabilityResponse } from "@phading/user_session_service_interface/backend/interface";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
-import { assertThat } from "@selfage/test_matcher";
+import { assertThat, eq } from "@selfage/test_matcher";
 import { TEST_RUNNER } from "@selfage/test_runner";
 
 TEST_RUNNER.run({
@@ -38,7 +38,12 @@ TEST_RUNNER.run({
 
         // Verify
         assertThat(
-          (await BIGTABLE.row(`t1#2024-10-26#consumer1`).get())[0].data,
+          (await BIGTABLE.row(`q1#2024-10-26#consumer1`).exists())[0],
+          eq(true),
+          "enqueued",
+        );
+        assertThat(
+          (await BIGTABLE.row(`d1#2024-10-26#consumer1`).get())[0].data,
           eqData({
             w: {
               "season1#ep1": {
@@ -62,7 +67,7 @@ TEST_RUNNER.run({
 
         // Verify
         assertThat(
-          (await BIGTABLE.row(`t1#2024-10-26#consumer1`).get())[0].data,
+          (await BIGTABLE.row(`d1#2024-10-26#consumer1`).get())[0].data,
           eqData({
             w: {
               "season1#ep1": {
@@ -74,7 +79,8 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("t1#");
+        await BIGTABLE.deleteRows("d");
+        await BIGTABLE.deleteRows("q");
       },
     },
     {
@@ -106,7 +112,12 @@ TEST_RUNNER.run({
 
         // Verify
         assertThat(
-          (await BIGTABLE.row(`t1#2024-12-31#consumer1`).get())[0].data,
+          (await BIGTABLE.row(`q1#2024-12-31#consumer1`).exists())[0],
+          eq(true),
+          "enqueued",
+        );
+        assertThat(
+          (await BIGTABLE.row(`d1#2024-12-31#consumer1`).get())[0].data,
           eqData({
             w: {
               "season1#ep1": {

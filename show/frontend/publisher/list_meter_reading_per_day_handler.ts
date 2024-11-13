@@ -58,8 +58,8 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
     }
 
     let [rows] = await this.bigtable.getRows({
-      start: `f2#${accountId}#${toDateISOString(startDate)}`,
-      end: `f2#${accountId}#${toDateISOString(endDate)}`,
+      start: `f3#${accountId}#${toDateISOString(startDate)}`,
+      end: `f3#${accountId}#${toDateISOString(endDate)}`,
       filter: [
         {
           family: /^t$/,

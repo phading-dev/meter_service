@@ -21,7 +21,17 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t1#2024-10-30#consumer1",
+            key: "q1#2024-10-30#consumer1",
+            data: {
+              c: {
+                p: {
+                  value: "",
+                },
+              },
+            },
+          },
+          {
+            key: "d1#2024-10-30#consumer1",
             data: {
               w: {
                 "season1#ep1": {
@@ -121,7 +131,7 @@ TEST_RUNNER.run({
 
         // Execute
         await handler.handle("", {
-          rowKey: "t1#2024-10-30#consumer1",
+          rowKey: "q1#2024-10-30#consumer1",
         });
 
         // Verify
@@ -159,7 +169,7 @@ TEST_RUNNER.run({
           "final consumer1",
         );
         assertThat(
-          (await BIGTABLE.row("t2#2024-10#consumer1#30").get())[0].data,
+          (await BIGTABLE.row("d2#2024-10#consumer1#30").get())[0].data,
           eqData({
             t: {
               w: {
@@ -170,23 +180,12 @@ TEST_RUNNER.run({
           "consumer1 month day",
         );
         assertThat(
-          (await BIGTABLE.row("t6#2024-10#consumer1").get())[0].data,
-          eqData({
-            t: {
-              w: {
-                value: 0,
-              },
-            },
-            c: {
-              p: {
-                value: "",
-              },
-            },
-          }),
-          "consumer1 month data",
+          (await BIGTABLE.row("q2#2024-10#consumer1").exists())[0],
+          eq(true),
+          "consumer1 month enqueued",
         );
         assertThat(
-          (await BIGTABLE.row("t3#2024-10-30#publisher1#consumer1").get())[0]
+          (await BIGTABLE.row("d3#2024-10-30#publisher1#consumer1").get())[0]
             .data,
           eqData({
             w: {
@@ -214,7 +213,12 @@ TEST_RUNNER.run({
           "publisher1",
         );
         assertThat(
-          (await BIGTABLE.row("t3#2024-10-30#publisher3#consumer1").get())[0]
+          (await BIGTABLE.row("q3#2024-10-30#publisher1").exists())[0],
+          eq(true),
+          "publisher1 month enqueued",
+        );
+        assertThat(
+          (await BIGTABLE.row("d3#2024-10-30#publisher3#consumer1").get())[0]
             .data,
           eqData({
             w: {
@@ -235,42 +239,21 @@ TEST_RUNNER.run({
           }),
           "publisher3",
         );
-        let defaultPublisherMonthData = {
-          t: {
-            w: {
-              value: 0,
-            },
-            kb: {
-              value: 0,
-            },
-          },
-          c: {
-            r: {
-              value: "",
-            },
-            p: {
-              value: "",
-            },
-          },
-        };
         assertThat(
-          (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
-          eqData(defaultPublisherMonthData),
-          "publisher1 month data",
+          (await BIGTABLE.row("q3#2024-10-30#publisher3").exists())[0],
+          eq(true),
+          "publisher3 month enqueued",
         );
         assertThat(
-          (await BIGTABLE.row("t4#2024-10-30#publisher3").get())[0].data,
-          eqData(defaultPublisherMonthData),
-          "publisher3 month data",
-        );
-        assertThat(
-          (await BIGTABLE.row("t1#2024-10-30#consumer1").exists())[0],
+          (await BIGTABLE.row("q1#2024-10-30#consumer1").exists())[0],
           eq(false),
-          "consumer1 original data deleted",
+          "consumer1 queue deleted",
         );
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("t"), BIGTABLE.deleteRows("f")]);
+        await BIGTABLE.deleteRows("q");
+        await BIGTABLE.deleteRows("d");
+        await BIGTABLE.deleteRows("f");
       },
     },
     {
@@ -281,7 +264,7 @@ TEST_RUNNER.run({
 
         // Execute
         await handler.handle("", {
-          rowKey: "t1#2024-10-30#consumer1",
+          rowKey: "q1#2024-10-30#consumer1",
         });
 
         // Verify no error
@@ -293,7 +276,17 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t1#2024-10-30#consumer1",
+            key: "q1#2024-10-30#consumer1",
+            data: {
+              c: {
+                p: {
+                  value: "",
+                },
+              },
+            },
+          },
+          {
+            key: "d1#2024-10-30#consumer1",
             data: {
               w: {
                 "season1#ep1": {
@@ -350,7 +343,7 @@ TEST_RUNNER.run({
 
         // Execute
         await handler.handle("", {
-          rowKey: "t1#2024-10-30#consumer1",
+          rowKey: "q1#2024-10-30#consumer1",
         });
 
         // Verify
@@ -376,7 +369,7 @@ TEST_RUNNER.run({
           "final consumer1",
         );
         assertThat(
-          (await BIGTABLE.row("t2#2024-10#consumer1#30").get())[0].data,
+          (await BIGTABLE.row("d2#2024-10#consumer1#30").get())[0].data,
           eqData({
             t: {
               w: {
@@ -387,23 +380,12 @@ TEST_RUNNER.run({
           "consumer1 month day",
         );
         assertThat(
-          (await BIGTABLE.row("t6#2024-10#consumer1").get())[0].data,
-          eqData({
-            t: {
-              w: {
-                value: 0,
-              },
-            },
-            c: {
-              p: {
-                value: "",
-              },
-            },
-          }),
-          "consumer1 month data",
+          (await BIGTABLE.row("q2#2024-10#consumer1").exists())[0],
+          eq(true),
+          "consumer1 month enqueued",
         );
         assertThat(
-          (await BIGTABLE.row("t3#2024-10-30#publisher1#consumer1").get())[0]
+          (await BIGTABLE.row("d3#2024-10-30#publisher1#consumer1").get())[0]
             .data,
           eqData({
             w: {
@@ -424,37 +406,21 @@ TEST_RUNNER.run({
           }),
           "publisher1",
         );
-        let defaultPublisherMonthData = {
-          t: {
-            w: {
-              value: 0,
-            },
-            kb: {
-              value: 0,
-            },
-          },
-          c: {
-            r: {
-              value: "",
-            },
-            p: {
-              value: "",
-            },
-          },
-        };
         assertThat(
-          (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
-          eqData(defaultPublisherMonthData),
-          "publisher1 month data",
+          (await BIGTABLE.row("q3#2024-10-30#publisher1").exists())[0],
+          eq(true),
+          "publisher1 month enqueued",
         );
         assertThat(
-          (await BIGTABLE.row("t1#2024-10-30#consumer1").exists())[0],
+          (await BIGTABLE.row("q1#2024-10-30#consumer1").exists())[0],
           eq(false),
-          "consumer1 original data deleted",
+          "consumer1 queue deleted",
         );
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("t"), BIGTABLE.deleteRows("f")]);
+        await BIGTABLE.deleteRows("q");
+        await BIGTABLE.deleteRows("d");
+        await BIGTABLE.deleteRows("f");
       },
     },
     {
@@ -463,7 +429,17 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t1#2024-10-30#consumer1",
+            key: "q1#2024-10-30#consumer1",
+            data: {
+              c: {
+                p: {
+                  value: "",
+                },
+              },
+            },
+          },
+          {
+            key: "d1#2024-10-30#consumer1",
             data: {
               w: {
                 "season1#ep1": {
@@ -521,7 +497,7 @@ TEST_RUNNER.run({
 
         // Execute
         await handler.handle("", {
-          rowKey: "t1#2024-10-30#consumer1",
+          rowKey: "q1#2024-10-30#consumer1",
         });
 
         // Verify
@@ -547,7 +523,7 @@ TEST_RUNNER.run({
           "final consumer1",
         );
         assertThat(
-          (await BIGTABLE.row("t2#2024-10#consumer1#30").get())[0].data,
+          (await BIGTABLE.row("d2#2024-10#consumer1#30").get())[0].data,
           eqData({
             t: {
               w: {
@@ -558,23 +534,12 @@ TEST_RUNNER.run({
           "consumer1 month day",
         );
         assertThat(
-          (await BIGTABLE.row("t6#2024-10#consumer1").get())[0].data,
-          eqData({
-            t: {
-              w: {
-                value: 0,
-              },
-            },
-            c: {
-              p: {
-                value: "",
-              },
-            },
-          }),
-          "consumer1 month data",
+          (await BIGTABLE.row("q2#2024-10#consumer1").exists())[0],
+          eq(true),
+          "consumer1 month enqueued",
         );
         assertThat(
-          (await BIGTABLE.row("t3#2024-10-30#publisher1#consumer1").get())[0]
+          (await BIGTABLE.row("d3#2024-10-30#publisher1#consumer1").get())[0]
             .data,
           eqData({
             w: {
@@ -595,37 +560,21 @@ TEST_RUNNER.run({
           }),
           "publisher1",
         );
-        let defaultPublisherMonthData = {
-          t: {
-            w: {
-              value: 0,
-            },
-            kb: {
-              value: 0,
-            },
-          },
-          c: {
-            r: {
-              value: "",
-            },
-            p: {
-              value: "",
-            },
-          },
-        };
         assertThat(
-          (await BIGTABLE.row("t4#2024-10-30#publisher1").get())[0].data,
-          eqData(defaultPublisherMonthData),
-          "publisher1 month data",
+          (await BIGTABLE.row("q3#2024-10-30#publisher1").exists())[0],
+          eq(true),
+          "publisher1 month enqueued",
         );
         assertThat(
-          (await BIGTABLE.row("t1#2024-10-30#consumer1").exists())[0],
+          (await BIGTABLE.row("q1#2024-10-30#consumer1").exists())[0],
           eq(false),
-          "consumer1 original data deleted",
+          "consumer1 queue deleted",
         );
       },
       tearDown: async () => {
-        await Promise.all([BIGTABLE.deleteRows("t"), BIGTABLE.deleteRows("f")]);
+        await BIGTABLE.deleteRows("q");
+        await BIGTABLE.deleteRows("d");
+        await BIGTABLE.deleteRows("f");
       },
     },
   ],

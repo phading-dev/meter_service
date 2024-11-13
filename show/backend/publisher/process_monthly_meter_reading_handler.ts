@@ -1,8 +1,5 @@
 import { BIGTABLE } from "../../../common/bigtable";
-import {
-  incrementColumn,
-  normalizeData,
-} from "../../../common/bigtable_data_helper";
+import { incrementColumn } from "../../../common/bigtable_data_helper";
 import {
   toMonthISOString,
   toMonthTimeMsWrtTimezone,
@@ -20,10 +17,7 @@ import {
   getStorageMeterReading,
   getUploadMeterReading,
 } from "@phading/product_service_interface/show/backend/client";
-import {
-  newBadRequestError,
-  newInternalServerErrorError,
-} from "@selfage/http_error";
+import { newBadRequestError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
 export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadingHandlerInterface {
@@ -32,9 +26,6 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
   }
 
   private static ONE_MB_IN_KB = 1024;
-  public interfereBeforeCheckPoint: () => Promise<void> = () =>
-    Promise.resolve();
-  public interruptAfterCheckPoint: () => void = () => {};
 
   public constructor(
     private bigtable: Table,
@@ -50,47 +41,33 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
     if (!body.rowKey) {
       throw newBadRequestError(`"rowKey" is required.`);
     }
-    let [rows] = await this.bigtable.getRows({
-      keys: [body.rowKey],
-      filter: {
-        column: {
-          cellLimit: 1,
-        },
-      },
-    });
-    if (rows.length === 0) {
+    // rowKey should be q5#${date}#${consumerId}
+    let queueExists = (await this.bigtable.row(body.rowKey).exists())[0];
+    if (!queueExists) {
       console.log(
         `${loggingPrefix} row ${body.rowKey} is not found maybe because it has been processed.`,
       );
       return {};
     }
+
     let [_, month, accountId] = body.rowKey.split("#");
-    let data = normalizeData(rows[0].data);
-    if (!data["c"]["p"].value) {
-      await this.aggregateAndCheckPoint(body.rowKey, month, accountId, data);
-    }
-    // Cleans up data rows.
-    await this.bigtable.deleteRows(`t5#${month}#${accountId}`);
+    let data = await this.aggregate(month, accountId);
     await this.writeOutputRowsAndGenerateTransaction(
       month,
       accountId,
       data["t"]["w"].value,
       data["t"]["mb"].value,
     );
-    // Marks the completion.
+    // Queue is completed.
     await this.bigtable.row(body.rowKey).delete();
     return {};
   }
 
-  private async aggregateAndCheckPoint(
-    rowKey: string,
-    month: string,
-    accountId: string,
-    data: any,
-  ): Promise<void> {
+  private async aggregate(month: string, accountId: string): Promise<any> {
+    let data: any = {};
     // `+` sign is larger than `#` sign, so it can mark the end of the range.
-    let end = `t5#${month}#${accountId}+`;
-    let start = `t5#${month}#${accountId}`;
+    let end = `d5#${month}#${accountId}+`;
+    let start = `d5#${month}#${accountId}`;
     let [rows] = await this.bigtable.getRows({
       start,
       end,
@@ -108,39 +85,7 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
       );
       incrementColumn(data, "t", "mb", mbs);
     }
-    data["c"]["p"].value = "1";
-    await this.interfereBeforeCheckPoint();
-    // Conditionally write the data only if c:p is still empty.
-    let [matched] = await this.bigtable.row(rowKey).filter(
-      [
-        {
-          family: /^c$/,
-        },
-        {
-          column: /^p$/,
-        },
-        {
-          column: {
-            cellLimit: 1,
-          },
-        },
-        {
-          value: /^$/,
-        },
-      ],
-      {
-        onMatch: [
-          {
-            method: "insert",
-            data,
-          },
-        ],
-      },
-    );
-    if (!matched) {
-      throw newInternalServerErrorError(`Row ${rowKey} is already completed.`);
-    }
-    this.interruptAfterCheckPoint();
+    return data;
   }
 
   private async writeOutputRowsAndGenerateTransaction(

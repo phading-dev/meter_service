@@ -14,71 +14,61 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t4#2024-10-28#publisher1",
+            key: "q3#2024-10-28#publisher1",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
             },
           },
           {
-            key: "t4#2024-10-28#publisher2",
+            key: "q3#2024-10-28#publisher2",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
             },
           },
           {
-            key: "t4#2024-10-28#publisher3",
+            key: "q3#2024-10-28#publisher2#checkpoint1",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
             },
           },
           {
-            key: "t4#2024-10-29#publisher1",
+            key: "q3#2024-10-29#publisher1",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
             },
           },
           {
-            key: "t4#2024-10-30#publisher1",
+            key: "q3#2024-10-30#publisher2",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
             },
           },
           {
-            key: "t4#2024-10-30#publisher2",
+            key: "q1#2024-10-30#consumer1",
             data: {
               c: {
                 p: {
                   value: "",
-                },
-              },
-            },
-          },
-          {
-            key: "t1#2024-10-30#consumer1",
-            data: {
-              w: {
-                "season1#ep1": {
-                  value: 10,
                 },
               },
             },
@@ -101,10 +91,10 @@ TEST_RUNNER.run({
             eqMessage(
               {
                 rowKeys: [
-                  "t4#2024-10-28#publisher1",
-                  "t4#2024-10-28#publisher2",
+                  "q3#2024-10-28#publisher1",
+                  "q3#2024-10-28#publisher2",
                 ],
-                cursor: "t4#2024-10-28#publisher2",
+                cursor: "q3#2024-10-28#publisher2",
               },
               GET_DAILY_BATCH_RESPONSE,
             ),
@@ -115,7 +105,7 @@ TEST_RUNNER.run({
         {
           // Execute
           let response = await handler.handle("", {
-            cursor: "t4#2024-10-28#publisher2",
+            cursor: "q3#2024-10-28#publisher2",
           });
 
           // Verify
@@ -124,10 +114,10 @@ TEST_RUNNER.run({
             eqMessage(
               {
                 rowKeys: [
-                  "t4#2024-10-28#publisher3",
-                  "t4#2024-10-29#publisher1",
+                  "q3#2024-10-28#publisher2#checkpoint1",
+                  "q3#2024-10-29#publisher1",
                 ],
-                cursor: "t4#2024-10-29#publisher1",
+                cursor: "q3#2024-10-29#publisher1",
               },
               GET_DAILY_BATCH_RESPONSE,
             ),
@@ -138,7 +128,7 @@ TEST_RUNNER.run({
         {
           // Execute
           let response = await handler.handle("", {
-            cursor: "t4#2024-10-29#publisher1",
+            cursor: "q3#2024-10-29#publisher1",
           });
 
           // Verify
@@ -155,7 +145,7 @@ TEST_RUNNER.run({
         }
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("q");
       },
     },
     {
@@ -164,31 +154,31 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "t4#2024-10-28#publisher1",
+            key: "q3#2024-10-28#publisher1",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
             },
           },
           {
-            key: "t4#2024-11-01#publisher1",
+            key: "q3#2024-11-01#publisher1",
             data: {
               c: {
-                p: {
+                r: {
                   value: "",
                 },
               },
             },
           },
           {
-            key: "t1#2024-11-02#consumer1",
+            key: "q1#2024-11-02#consumer1",
             data: {
-              w: {
-                "season1#ep1": {
-                  value: 10,
+              c: {
+                p: {
+                  value: "",
                 },
               },
             },
@@ -209,7 +199,7 @@ TEST_RUNNER.run({
           response,
           eqMessage(
             {
-              rowKeys: ["t4#2024-10-28#publisher1"],
+              rowKeys: ["q3#2024-10-28#publisher1"],
             },
             GET_DAILY_BATCH_RESPONSE,
           ),
@@ -217,7 +207,7 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("q");
       },
     },
   ],

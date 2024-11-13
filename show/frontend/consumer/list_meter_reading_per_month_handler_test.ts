@@ -16,7 +16,7 @@ TEST_RUNNER.run({
         // Prepare
         await BIGTABLE.insert([
           {
-            key: "f3#consumer1#2024-09",
+            key: "f2#consumer1#2024-09",
             data: {
               t: {
                 w: {
@@ -26,7 +26,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "f3#consumer1#2024-10",
+            key: "f2#consumer1#2024-10",
             data: {
               t: {
                 w: {
@@ -36,7 +36,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "f3#consumer1#2024-12",
+            key: "f2#consumer1#2024-12",
             data: {
               t: {
                 w: {
@@ -46,7 +46,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "f3#consumer1#2025-01",
+            key: "f2#consumer1#2025-01",
             data: {
               t: {
                 w: {
@@ -56,7 +56,7 @@ TEST_RUNNER.run({
             },
           },
           {
-            key: "f3#consumer1#2025-02",
+            key: "f2#consumer1#2025-02",
             data: {
               t: {
                 w: {

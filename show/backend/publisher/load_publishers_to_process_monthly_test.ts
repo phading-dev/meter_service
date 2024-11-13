@@ -17,22 +17,6 @@ import {
 } from "@selfage/test_matcher";
 import { TEST_RUNNER } from "@selfage/test_runner";
 
-let DEFAULT_PUBLISHER_DATA = {
-  t: {
-    w: {
-      value: 0,
-    },
-    mb: {
-      value: 0,
-    },
-  },
-  c: {
-    p: {
-      value: "",
-    },
-  },
-};
-
 TEST_RUNNER.run({
   name: "LoadPublishersToProcessMonthlyTest",
   cases: [
@@ -85,14 +69,14 @@ TEST_RUNNER.run({
           "cursor",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-10#publisher1").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
-          "publisher1 month data",
+          (await BIGTABLE.row("q5#2024-10#publisher1").exists())[0],
+          eq(true),
+          "publisher1 loaded",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-10#publisher2").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
-          "publisher2 month loaded",
+          (await BIGTABLE.row("q5#2024-10#publisher2").exists())[0],
+          eq(true),
+          "publisher2 loaded",
         );
       },
       tearDown: async () => {
@@ -174,13 +158,13 @@ TEST_RUNNER.run({
           "cursor",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-11#publisher1").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2024-11#publisher1").exists())[0],
+          eq(true),
           "publisher1 loaded",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-11#publisher2").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2024-11#publisher2").exists())[0],
+          eq(true),
           "publisher2 loaded",
         );
 
@@ -223,8 +207,8 @@ TEST_RUNNER.run({
           "cursor",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-11#publisher3").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2024-11#publisher3").exists())[0],
+          eq(true),
           "publisher3 loaded",
         );
       },
@@ -334,33 +318,33 @@ TEST_RUNNER.run({
           "cursor",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-12#publisher1").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2024-12#publisher1").exists())[0],
+          eq(true),
           "2024-12#publisher1 loaded",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-12#publisher2").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2024-12#publisher2").exists())[0],
+          eq(true),
           "2024-12#publisher2 loaded",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2024-12#publisher3").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2024-12#publisher3").exists())[0],
+          eq(true),
           "2024-12#publisher3 loaded",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2025-01#publisher1").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2025-01#publisher1").exists())[0],
+          eq(true),
           "2025-01#publisher1 loaded",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2025-01#publisher2").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2025-01#publisher2").exists())[0],
+          eq(true),
           "2025-01#publisher2 loaded",
         );
         assertThat(
-          (await BIGTABLE.row("t7#2025-01#publisher3").get())[0].data,
-          eqData(DEFAULT_PUBLISHER_DATA),
+          (await BIGTABLE.row("q5#2025-01#publisher3").exists())[0],
+          eq(true),
           "2025-01#publisher3 loaded",
         );
       },
