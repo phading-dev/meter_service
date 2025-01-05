@@ -24,7 +24,7 @@ TEST_RUNNER.run({
                 },
               },
               t: {
-                w: {
+                ws: {
                   value: 100,
                 },
               },
@@ -34,7 +34,7 @@ TEST_RUNNER.run({
             key: "f1#consumer1#2024-12-10",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 30000,
                 },
               },
@@ -44,7 +44,7 @@ TEST_RUNNER.run({
             key: "f1#consumer1#2024-12-05",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 2000,
                 },
               },

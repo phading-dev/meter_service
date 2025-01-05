@@ -143,7 +143,7 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 520,
               },
             },
@@ -154,7 +154,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d2#2024-10#consumer1#30").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 520,
               },
             },
@@ -187,7 +187,7 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              n: {
+              nk: {
                 value: 406,
               },
             },
@@ -214,7 +214,7 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              n: {
+              nk: {
                 value: 98,
               },
             },
@@ -314,7 +314,7 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 24,
               },
             },
@@ -325,7 +325,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d2#2024-10#consumer1#30").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 24,
               },
             },
@@ -453,7 +453,7 @@ TEST_RUNNER.run({
             .data,
           eqData({
             t: {
-              n: {
+              nk: {
                 value: 235,
               },
             },
@@ -577,7 +577,7 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 20,
               },
             },
@@ -588,7 +588,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d2#2024-10#consumer1#30").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 20,
               },
             },
@@ -615,7 +615,7 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              n: {
+              nk: {
                 value: 20,
               },
             },

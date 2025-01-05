@@ -40,7 +40,7 @@ Column families:
 - row:
     key: d2#${month}#${consumerId}#${day}
     columns:
-      - name: t:w # total watch time multiplied by grade in sec
+      - name: t:ws # total watch time multiplied by grade in sec
         value: number
 - row:
     key: t2#${month}#${consumerId}
@@ -54,7 +54,7 @@ Column families:
         value: number
       - name: a:${seasonId} # watch time multiplied by grade in sec
         value: number
-      - name: t:n # total transmitted KiB
+      - name: t:nk # total transmitted KiB
         value: number
 - row:
     key: t3#{date}#${publisherId} or t3#{date}#${publisherId}#${checkpointId}
@@ -68,9 +68,9 @@ Column families:
         value: number
       - name: a:${seasonId} # watch time multiplied by grade in sec
         value: number
-      - name: t:w # total watch time multiplied by grade in sec
+      - name: t:ws # total watch time multiplied by grade in sec
         value: number
-      - name: t:n # total network transmitted KiB
+      - name: t:nk # total network transmitted KiB
         value: number
 - row:
     key: d6#${date}#${publisherId}
@@ -91,13 +91,13 @@ Column families:
 - row:
     key: d5#${month}#${publisherId}#${day}
     columns:
-      - name: t:w # total watch time multiplied by grade in sec
+      - name: t:ws # total watch time multiplied by grade in sec
         value: number
-      - name: t:n # total network transmitted KiB
+      - name: t:nk # total network transmitted KiB
         value: number
-      - name: t:u # total uploaded KiB
+      - name: t:uk # total uploaded KiB
         value: number
-      - name: t:s # total storage MiB x min
+      - name: t:smm # total storage MiB x sec
         value: number
 - row:
     key: t5#${month}#${publisherId}
@@ -112,12 +112,12 @@ Column families:
         value: number
       - name: a:${seasonId} # watch time multiplied by grade in sec
         value: number
-      - name: t:w # total watch time multiplied by grade in sec
+      - name: t:ws # total watch time multiplied by grade in sec
         value: number
 - row:
     key: f2#${consumerId}#${month}
     columns:
-      - name: t:w # total watch time multiplied by grade in sec
+      - name: t:ws # total watch time multiplied by grade in sec
         value: number
 - row:
     key: f3#${publisherId}#${date}
@@ -126,24 +126,24 @@ Column families:
         value: number
       - name: a:${seasonId} # watch time multiplied by grade in sec
         value: number
-      - name: t:w # total watch time multiplied by grade in sec
+      - name: t:ws # total watch time multiplied by grade in sec
         value: number
-      - name: t:n # total transmitted KiB
+      - name: t:nk # total transmitted KiB
         value: number
-      - name: t:u  # total uploaded KiB
+      - name: t:uk  # total uploaded KiB
         value: number
-      - name: t:s # total storage MiB x min
+      - name: t:smm # total storage MiB x sec
         value: number
 - row:
     key: f4#${publisherId}#${month}
     columns:
-      - name: t:w # total watch time multiplied by grade in sec
+      - name: t:ws # total watch time multiplied by grade in sec
         value: number
-      - name: t:n # total transmitted MiB
+      - name: t:nm # total transmitted MiB
         value: number
-      - name: t:u # total uploaded MiB
+      - name: t:um # total uploaded MiB
         value: number
-      - name: t:s # total storage MiB x hour
+      - name: t:smh # total storage MiB x hour
         value: number
 ```
 

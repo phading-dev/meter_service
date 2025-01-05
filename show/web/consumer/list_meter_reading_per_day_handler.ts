@@ -75,7 +75,7 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
       (row): MeterReadingPerDay => {
         return {
           date: row.id.split("#")[2],
-          watchTimeSecGraded: row.data["t"]["w"][0].value,
+          watchTimeSecGraded: row.data["t"]["ws"][0].value,
         };
       },
     );

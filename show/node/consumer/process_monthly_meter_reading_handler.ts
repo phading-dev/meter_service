@@ -2,8 +2,8 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { incrementColumn } from "../../../common/bigtable_data_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { generateBillingStatement } from "@phading/commerce_service_interface/backend/consumer/client";
-import { MeterType } from "@phading/commerce_service_interface/backend/consumer/interface";
+import { generateBillingStatement } from "@phading/commerce_service_interface/node/consumer/client";
+import { MeterType } from "@phading/commerce_service_interface/node/consumer/interface";
 import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/consumer/handler";
 import {
   ProcessMonthlyMeterReadingRequestBody,
@@ -68,7 +68,7 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
       },
     });
     for (let row of rows) {
-      incrementColumn(data, "t", "w", row.data["t"]["w"][0].value);
+      incrementColumn(data, "t", "ws", row.data["t"]["ws"][0].value);
     }
 
     await Promise.all([
@@ -84,7 +84,7 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
         readings: [
           {
             meterType: MeterType.SHOW_WATCH_TIME_SEC,
-            reading: data["t"]["w"].value,
+            reading: data["t"]["ws"].value,
           },
         ],
       }),

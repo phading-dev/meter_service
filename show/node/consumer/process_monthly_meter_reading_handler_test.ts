@@ -5,7 +5,7 @@ import {
   GENERATE_BILLING_STATEMENT,
   GENERATE_BILLING_STATEMENT_REQUEST_BODY,
   MeterType,
-} from "@phading/commerce_service_interface/backend/consumer/interface";
+} from "@phading/commerce_service_interface/node/consumer/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq } from "@selfage/test_matcher";
@@ -27,7 +27,7 @@ async function initData() {
       key: "d2#2024-10#consumer1#01",
       data: {
         t: {
-          w: {
+          ws: {
             value: 100,
           },
         },
@@ -37,7 +37,7 @@ async function initData() {
       key: "d2#2024-10#consumer1#18",
       data: {
         t: {
-          w: {
+          ws: {
             value: 300,
           },
         },
@@ -47,7 +47,7 @@ async function initData() {
       key: "d2#2024-10#consumer1#20",
       data: {
         t: {
-          w: {
+          ws: {
             value: 500,
           },
         },
@@ -57,7 +57,7 @@ async function initData() {
       key: "d2#2024-10#consumer2#20",
       data: {
         t: {
-          w: {
+          ws: {
             value: 500,
           },
         },
@@ -91,7 +91,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f2#consumer1#2024-10").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 900,
               },
             },

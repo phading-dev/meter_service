@@ -107,18 +107,18 @@ export class ProcessDailyWatchReadingHandler extends ProcessDailyWatchReadingHan
       },
     });
     for (let row of rows) {
-      if (row.data['w']) {
+      if (row.data["w"]) {
         Object.entries(row.data["w"]).forEach(([seasonId, cells]) => {
           incrementColumn(data, "w", seasonId, (cells as any)[0].value);
         });
         Object.entries(row.data["a"]).forEach(([seasonId, cells]) => {
           let watchTimeSecGraded = (cells as any)[0].value;
           incrementColumn(data, "a", seasonId, watchTimeSecGraded);
-          incrementColumn(data, "t", "w", watchTimeSecGraded);
+          incrementColumn(data, "t", "ws", watchTimeSecGraded);
         });
       }
-      if (row.data["t"] && row.data["t"]["n"]) {
-        incrementColumn(data, "t", "n", row.data["t"]["n"][0].value);
+      if (row.data["t"] && row.data["t"]["nk"]) {
+        incrementColumn(data, "t", "nk", row.data["t"]["nk"][0].value);
       }
     }
     let newCursor =
@@ -146,11 +146,11 @@ export class ProcessDailyWatchReadingHandler extends ProcessDailyWatchReadingHan
     } else {
       let [year, month, day] = date.split("-");
       let monthData: any = {};
-      if (data["t"]["w"]) {
-        incrementColumn(monthData, "t", "w", data["t"]["w"].value);
+      if (data["t"]["ws"]) {
+        incrementColumn(monthData, "t", "ws", data["t"]["ws"].value);
       }
-      if (data["t"]["n"]) {
-        incrementColumn(monthData, "t", "n", data["t"]["n"].value);
+      if (data["t"]["nk"]) {
+        incrementColumn(monthData, "t", "nk", data["t"]["nk"].value);
       }
       await this.bigtable.insert([
         {

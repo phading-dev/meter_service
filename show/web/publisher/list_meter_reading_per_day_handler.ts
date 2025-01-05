@@ -75,17 +75,17 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
       (row): MeterReadingPerDay => {
         return {
           date: row.id.split("#")[2],
-          watchTimeSecGraded: row.data["t"]["w"]
-            ? row.data["t"]["w"][0].value
+          watchTimeSecGraded: row.data["t"]["ws"]
+            ? row.data["t"]["ws"][0].value
             : undefined,
-          transmittedKb: row.data["t"]["n"]
-            ? row.data["t"]["n"][0].value
+          transmittedKb: row.data["t"]["nk"]
+            ? row.data["t"]["nk"][0].value
             : undefined,
-          uploadedKb: row.data["t"]["u"]
-            ? row.data["t"]["u"][0].value
+          uploadedKb: row.data["t"]["uk"]
+            ? row.data["t"]["uk"][0].value
             : undefined,
-          storageMbm: row.data["t"]["s"]
-            ? row.data["t"]["s"][0].value
+          storageMbm: row.data["t"]["smm"]
+            ? row.data["t"]["smm"][0].value
             : undefined,
         };
       },

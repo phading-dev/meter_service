@@ -19,7 +19,7 @@ TEST_RUNNER.run({
             key: "f2#consumer1#2024-09",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 100,
                 },
               },
@@ -29,7 +29,7 @@ TEST_RUNNER.run({
             key: "f2#consumer1#2024-10",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 200,
                 },
               },
@@ -39,7 +39,7 @@ TEST_RUNNER.run({
             key: "f2#consumer1#2024-12",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 300,
                 },
               },
@@ -49,7 +49,7 @@ TEST_RUNNER.run({
             key: "f2#consumer1#2025-01",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 400,
                 },
               },
@@ -59,7 +59,7 @@ TEST_RUNNER.run({
             key: "f2#consumer1#2025-02",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 500,
                 },
               },

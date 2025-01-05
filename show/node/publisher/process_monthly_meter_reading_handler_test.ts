@@ -4,7 +4,7 @@ import { ProcessMonthlyMeterReadingHandler } from "./process_monthly_meter_readi
 import {
   GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
   MeterType,
-} from "@phading/commerce_service_interface/backend/publisher/interface";
+} from "@phading/commerce_service_interface/node/publisher/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq } from "@selfage/test_matcher";
@@ -32,10 +32,10 @@ TEST_RUNNER.run({
             key: "d5#2024-10#publisher1#01",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 12,
                 },
-                n: {
+                nk: {
                   value: 4200,
                 },
               },
@@ -45,10 +45,10 @@ TEST_RUNNER.run({
             key: "d5#2024-10#publisher1#20",
             data: {
               t: {
-                u: {
+                uk: {
                   value: 8000,
                 },
-                s: {
+                smm: {
                   value: 56000,
                 },
               },
@@ -58,16 +58,16 @@ TEST_RUNNER.run({
             key: "d5#2024-10#publisher1#30",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 1300,
                 },
-                n: {
+                nk: {
                   value: 1400,
                 },
-                u: {
+                uk: {
                   value: 88000,
                 },
-                s: {
+                smm: {
                   value: 96000,
                 },
               },
@@ -90,16 +90,16 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f4#publisher1#2024-10").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 1312,
               },
-              n: {
+              nm: {
                 value: 7,
               },
-              u: {
+              um: {
                 value: 94,
               },
-              s: {
+              smh: {
                 value: 2534,
               },
             },
@@ -122,7 +122,7 @@ TEST_RUNNER.run({
                   reading: 7,
                 },
                 {
-                  meterType: MeterType.UPLOAD_MB,
+                  meterType: MeterType.UPLOADED_MB,
                   reading: 94,
                 },
                 {
@@ -166,10 +166,10 @@ TEST_RUNNER.run({
             key: "d5#2024-10#publisher1#01",
             data: {
               t: {
-                u: {
+                uk: {
                   value: 8000,
                 },
-                s: {
+                smm: {
                   value: 56000,
                 },
               },
@@ -192,10 +192,10 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f4#publisher1#2024-10").get())[0].data,
           eqData({
             t: {
-              u: {
+              um: {
                 value: 8,
               },
-              s: {
+              smh: {
                 value: 934,
               },
             },
@@ -218,7 +218,7 @@ TEST_RUNNER.run({
                   reading: 0,
                 },
                 {
-                  meterType: MeterType.UPLOAD_MB,
+                  meterType: MeterType.UPLOADED_MB,
                   reading: 8,
                 },
                 {
@@ -257,10 +257,10 @@ TEST_RUNNER.run({
             key: "d5#2024-10#publisher1#01",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 12,
                 },
-                n: {
+                nk: {
                   value: 4200,
                 },
               },
@@ -283,10 +283,10 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f4#publisher1#2024-10").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 12,
               },
-              n: {
+              nm: {
                 value: 5,
               },
             },
@@ -309,7 +309,7 @@ TEST_RUNNER.run({
                   reading: 5,
                 },
                 {
-                  meterType: MeterType.UPLOAD_MB,
+                  meterType: MeterType.UPLOADED_MB,
                   reading: 0,
                 },
                 {

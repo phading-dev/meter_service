@@ -19,16 +19,16 @@ TEST_RUNNER.run({
             key: "f4#publisher1#2024-09",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 100,
                 },
-                n: {
+                nm: {
                   value: 10,
                 },
-                u: {
+                um: {
                   value: 11,
                 },
-                s: {
+                smh: {
                   value: 111,
                 },
               },
@@ -38,16 +38,16 @@ TEST_RUNNER.run({
             key: "f4#publisher1#2024-10",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 200,
                 },
-                n: {
+                nm: {
                   value: 20,
                 },
-                u: {
+                um: {
                   value: 22,
                 },
-                s: {
+                smh: {
                   value: 222,
                 },
               },
@@ -57,10 +57,10 @@ TEST_RUNNER.run({
             key: "f4#publisher1#2024-12",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 300,
                 },
-                n: {
+                nm: {
                   value: 30,
                 },
               },
@@ -70,10 +70,10 @@ TEST_RUNNER.run({
             key: "f4#publisher1#2025-01",
             data: {
               t: {
-                u: {
+                um: {
                   value: 44,
                 },
-                s: {
+                smh: {
                   value: 444,
                 },
               },
@@ -83,7 +83,7 @@ TEST_RUNNER.run({
             key: "f4#publisher1#2025-02",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 500,
                 },
               },

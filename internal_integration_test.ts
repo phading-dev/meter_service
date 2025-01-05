@@ -25,12 +25,12 @@ import {
   GENERATE_BILLING_STATEMENT,
   GENERATE_BILLING_STATEMENT_REQUEST_BODY,
   MeterType as ConsumerMeterType,
-} from "@phading/commerce_service_interface/backend/consumer/interface";
+} from "@phading/commerce_service_interface/node/consumer/interface";
 import {
   GENERATE_EARNINGS_STATEMENT,
   GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
   MeterType as PublisherMeterType,
-} from "@phading/commerce_service_interface/backend/publisher/interface";
+} from "@phading/commerce_service_interface/node/publisher/interface";
 import {
   LIST_METER_READINGS_PER_DAY_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_DAY_RESPONSE,
   LIST_METER_READINGS_PER_MONTH_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
@@ -434,7 +434,7 @@ TEST_RUNNER.run({
                   reading: 977,
                 },
                 {
-                  meterType: PublisherMeterType.UPLOAD_MB,
+                  meterType: PublisherMeterType.UPLOADED_MB,
                   reading: 3,
                 },
                 {

@@ -94,7 +94,7 @@ export class ProcessDailyStorageReadingHandler extends ProcessDailyStorageReadin
             (bytes / ProcessDailyStorageReadingHandler.ONE_MB_IN_B) *
               (((endTimeMs ?? tomorrowStartMs) - startTimeMs) / 1000 / 60),
           );
-          incrementColumn(aggregationData, "t", "s", mbMin);
+          incrementColumn(aggregationData, "t", "smm", mbMin);
           if (!endTimeMs) {
             // Use incrementColumn to set column.
             incrementColumn(carryOverData, "s", `${name}#b`, bytes);
@@ -111,7 +111,7 @@ export class ProcessDailyStorageReadingHandler extends ProcessDailyStorageReadin
         incrementColumn(
           aggregationData,
           "t",
-          "u",
+          "uk",
           Math.ceil(bytes / ProcessDailyStorageReadingHandler.ONE_KB_IN_B),
         );
       });

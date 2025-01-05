@@ -24,10 +24,10 @@ TEST_RUNNER.run({
                 },
               },
               t: {
-                w: {
+                ws: {
                   value: 100,
                 },
-                n: {
+                nk: {
                   value: 125,
                 },
               },
@@ -37,10 +37,10 @@ TEST_RUNNER.run({
             key: "f3#publisher1#2024-12-10",
             data: {
               t: {
-                u: {
+                uk: {
                   value: 3000,
                 },
-                s: {
+                smm: {
                   value: 3250,
                 },
               },
@@ -50,16 +50,16 @@ TEST_RUNNER.run({
             key: "f3#publisher1#2024-12-05",
             data: {
               t: {
-                w: {
+                ws: {
                   value: 2000,
                 },
-                n: {
+                nk: {
                   value: 2200,
                 },
-                u: {
+                uk: {
                   value: 4000,
                 },
-                s: {
+                smm: {
                   value: 4250,
                 },
               },

@@ -71,10 +71,10 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f3#publisher1#2024-10-31").get())[0].data,
           eqData({
             t: {
-              u: {
+              uk: {
                 value: 3,
               },
-              s: {
+              smm: {
                 value: 53,
               },
             },
@@ -85,10 +85,10 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#31").get())[0].data,
           eqData({
             t: {
-              u: {
+              uk: {
                 value: 3,
               },
-              s: {
+              smm: {
                 value: 53,
               },
             },
@@ -178,7 +178,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f3#publisher1#2024-10-31").get())[0].data,
           eqData({
             t: {
-              u: {
+              uk: {
                 value: 3,
               },
             },
@@ -189,7 +189,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#31").get())[0].data,
           eqData({
             t: {
-              u: {
+              uk: {
                 value: 3,
               },
             },
@@ -249,7 +249,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f3#publisher1#2024-10-31").get())[0].data,
           eqData({
             t: {
-              s: {
+              smm: {
                 value: 15,
               },
             },
@@ -260,7 +260,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#31").get())[0].data,
           eqData({
             t: {
-              s: {
+              smm: {
                 value: 15,
               },
             },
@@ -350,7 +350,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f3#publisher1#2024-10-31").get())[0].data,
           eqData({
             t: {
-              s: {
+              smm: {
                 value: -39,
               },
             },
@@ -361,7 +361,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#31").get())[0].data,
           eqData({
             t: {
-              s: {
+              smm: {
                 value: -39,
               },
             },

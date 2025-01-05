@@ -70,7 +70,7 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
       (row): MeterReadingPerMonth => {
         return {
           month: row.id.split("#")[2],
-          watchTimeSecGraded: row.data["t"]["w"][0].value,
+          watchTimeSecGraded: row.data["t"]["ws"][0].value,
         };
       },
     );

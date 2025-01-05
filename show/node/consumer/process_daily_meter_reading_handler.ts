@@ -187,8 +187,8 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
       );
       incrementColumn(consumerDayDate, "w", seasonId, watchTimeSec);
       incrementColumn(consumerDayDate, "a", seasonId, watchTimeSecGraded);
-      incrementColumn(consumerDayDate, "t", `w`, watchTimeSecGraded);
-      incrementColumn(consumerMonthData, "t", `w`, watchTimeSecGraded);
+      incrementColumn(consumerDayDate, "t", `ws`, watchTimeSecGraded);
+      incrementColumn(consumerMonthData, "t", `ws`, watchTimeSecGraded);
 
       let publisherData = publishers.get(seasonPublisherResponse.publisherId);
       if (!publisherData) {
@@ -227,7 +227,7 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
       incrementColumn(
         publisherData,
         "t",
-        "n",
+        "nk",
         Math.ceil(
           networkTransmittedBytes / ProcessDailyMeterReadingHandler.ONE_KB_IN_B,
         ),

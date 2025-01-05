@@ -70,17 +70,17 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
       (row): MeterReadingPerMonth => {
         return {
           month: row.id.split("#")[2],
-          watchTimeSecGraded: row.data["t"]["w"]
-            ? row.data["t"]["w"][0].value
+          watchTimeSecGraded: row.data["t"]["ws"]
+            ? row.data["t"]["ws"][0].value
             : undefined,
-          transmittedMb: row.data["t"]["n"]
-            ? row.data["t"]["n"][0].value
+          transmittedMb: row.data["t"]["nm"]
+            ? row.data["t"]["nm"][0].value
             : undefined,
-          uploadedMb: row.data["t"]["u"]
-            ? row.data["t"]["u"][0].value
+          uploadedMb: row.data["t"]["um"]
+            ? row.data["t"]["um"][0].value
             : undefined,
-          storageMbh: row.data["t"]["s"]
-            ? row.data["t"]["s"][0].value
+          storageMbh: row.data["t"]["smh"]
+            ? row.data["t"]["smh"][0].value
             : undefined,
         };
       },

@@ -9,9 +9,6 @@ import {
 } from "@selfage/test_matcher";
 import { TEST_RUNNER } from "@selfage/test_runner";
 
-// Add a case without network bytes
-// Add a case without watch time
-
 async function initData() {
   await BIGTABLE.insert([
     {
@@ -44,7 +41,7 @@ async function initData() {
           },
         },
         t: {
-          n: {
+          nk: {
             value: 17,
           },
         },
@@ -70,7 +67,7 @@ async function initData() {
           },
         },
         t: {
-          n: {
+          nk: {
             value: 32,
           },
         },
@@ -90,7 +87,7 @@ async function initData() {
           },
         },
         t: {
-          n: {
+          nk: {
             value: 2,
           },
         },
@@ -110,7 +107,7 @@ async function initData() {
           },
         },
         t: {
-          n: {
+          nk: {
             value: 1,
           },
         },
@@ -130,7 +127,7 @@ async function initData() {
           },
         },
         t: {
-          n: {
+          nk: {
             value: 100,
           },
         },
@@ -186,10 +183,10 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 59,
               },
-              n: {
+              nk: {
                 value: 52,
               },
             },
@@ -200,10 +197,10 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#30").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 59,
               },
-              n: {
+              nk: {
                 value: 52,
               },
             },
@@ -237,10 +234,10 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 54,
               },
-              n: {
+              nk: {
                 value: 49,
               },
             },
@@ -274,10 +271,10 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 59,
               },
-              n: {
+              nk: {
                 value: 52,
               },
             },
@@ -378,10 +375,10 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 54,
               },
-              n: {
+              nk: {
                 value: 49,
               },
             },
@@ -441,10 +438,10 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 59,
               },
-              n: {
+              nk: {
                 value: 52,
               },
             },
@@ -494,10 +491,10 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 59,
               },
-              n: {
+              nk: {
                 value: 52,
               },
             },
@@ -508,10 +505,10 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#30").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 59,
               },
-              n: {
+              nk: {
                 value: 52,
               },
             },
@@ -614,7 +611,7 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 43,
               },
             },
@@ -625,7 +622,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#30").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 43,
               },
             },
@@ -658,7 +655,7 @@ TEST_RUNNER.run({
             key: `d3#2024-10-30#publisher1#consumer1`,
             data: {
               t: {
-                n: {
+                nk: {
                   value: 235,
                 },
               },
@@ -682,7 +679,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("f3#publisher1#2024-10-30").get())[0].data,
           eqData({
             t: {
-              n: {
+              nk: {
                 value: 235,
               },
             },
@@ -693,7 +690,7 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#30").get())[0].data,
           eqData({
             t: {
-              n: {
+              nk: {
                 value: 235,
               },
             },
@@ -747,7 +744,7 @@ TEST_RUNNER.run({
             key: `d3#2024-10-30#publisher1#consumer2`,
             data: {
               t: {
-                n: {
+                nk: {
                   value: 235,
                 },
               },
@@ -787,10 +784,10 @@ TEST_RUNNER.run({
               },
             },
             t: {
-              w: {
+              ws: {
                 value: 43,
               },
-              n: {
+              nk: {
                 value: 235,
               },
             },
@@ -801,10 +798,10 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d5#2024-10#publisher1#30").get())[0].data,
           eqData({
             t: {
-              w: {
+              ws: {
                 value: 43,
               },
-              n: {
+              nk: {
                 value: 235,
               },
             },

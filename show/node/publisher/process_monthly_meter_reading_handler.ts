@@ -2,8 +2,8 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { incrementColumn } from "../../../common/bigtable_data_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { generateEarningsStatement } from "@phading/commerce_service_interface/backend/publisher/client";
-import { MeterType } from "@phading/commerce_service_interface/backend/publisher/interface";
+import { generateEarningsStatement } from "@phading/commerce_service_interface/node/publisher/client";
+import { MeterType } from "@phading/commerce_service_interface/node/publisher/interface";
 import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
 import {
   ProcessMonthlyMeterReadingRequestBody,
@@ -70,29 +70,29 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
       },
     });
     for (let row of rows) {
-      if (row.data["t"]["w"]) {
-        incrementColumn(data, "t", "w", row.data["t"]["w"][0].value);
+      if (row.data["t"]["ws"]) {
+        incrementColumn(data, "t", "ws", row.data["t"]["ws"][0].value);
       }
-      if (row.data["t"]["n"]) {
-        let mbs = Math.ceil(
-          row.data["t"]["n"][0].value /
+      if (row.data["t"]["nk"]) {
+        let mb = Math.ceil(
+          row.data["t"]["nk"][0].value /
             ProcessMonthlyMeterReadingHandler.ONE_MB_IN_KB,
         );
-        incrementColumn(data, "t", "n", mbs);
+        incrementColumn(data, "t", "nm", mb);
       }
-      if (row.data["t"]["u"]) {
-        let mbs = Math.ceil(
-          row.data["t"]["u"][0].value /
+      if (row.data["t"]["uk"]) {
+        let mb = Math.ceil(
+          row.data["t"]["uk"][0].value /
             ProcessMonthlyMeterReadingHandler.ONE_MB_IN_KB,
         );
-        incrementColumn(data, "t", "u", mbs);
+        incrementColumn(data, "t", "um", mb);
       }
-      if (row.data["t"]["s"]) {
+      if (row.data["t"]["smm"]) {
         incrementColumn(
           data,
           "t",
-          "s",
-          Math.ceil(row.data["t"]["s"][0].value / 60),
+          "smh",
+          Math.ceil(row.data["t"]["smm"][0].value / 60),
         );
       }
     }
@@ -110,19 +110,19 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
         readings: [
           {
             meterType: MeterType.SHOW_WATCH_TIME_SEC,
-            reading: data["t"]["w"] ? data["t"]["w"].value : 0,
+            reading: data["t"]["ws"] ? data["t"]["ws"].value : 0,
           },
           {
             meterType: MeterType.NETWORK_TRANSMITTED_MB,
-            reading: data["t"]["n"] ? data["t"]["n"].value : 0,
+            reading: data["t"]["nm"] ? data["t"]["nm"].value : 0,
           },
           {
-            meterType: MeterType.UPLOAD_MB,
-            reading: data["t"]["u"] ? data["t"]["u"].value : 0,
+            meterType: MeterType.UPLOADED_MB,
+            reading: data["t"]["um"] ? data["t"]["um"].value : 0,
           },
           {
             meterType: MeterType.STORAGE_MB_HOUR,
-            reading: data["t"]["s"] ? data["t"]["s"].value : 0,
+            reading: data["t"]["smh"] ? data["t"]["smh"].value : 0,
           },
         ],
       }),
