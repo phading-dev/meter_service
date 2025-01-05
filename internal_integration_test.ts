@@ -1,20 +1,26 @@
 import { BIGTABLE } from "./common/bigtable";
-import { GetDailyBatchHandler as ConsumerGetDailyBatchHandler } from "./show/backend/consumer/get_daily_batch_handler";
-import { GetMonthlyBatchHandler as ConsumerGetMonthlyBatchHandler } from "./show/backend/consumer/get_monthly_batch_handler";
-import { ProcessDailyMeterReadingHandler as ConsumerProcessDailyMeterReadingHandler } from "./show/backend/consumer/process_daily_meter_reading_handler";
-import { ProcessMonthlyMeterReadingHandler as ConsumerProcessMonthlyMeterReadingHandler } from "./show/backend/consumer/process_monthly_meter_reading_handler";
-import { GetDailyBatchHandler as PublisherGetDailyBatchHandler } from "./show/backend/publisher/get_daily_batch_handler";
-import { GetMonthlyBatchHandler as PublisherGetMonthlyBatchHandler } from "./show/backend/publisher/get_monthly_batch_handler";
-import { LoadPublishersToProcessMonthlyHandler } from "./show/backend/publisher/load_publishers_to_process_monthly";
-import { ProcessDailyMeterReadingHandler as PublisherProcessDailyMeterReadingHandler } from "./show/backend/publisher/process_daily_meter_reading_handler";
-import { ProcessMonthlyMeterReadingHandler as PublisherProcessMonthlyMeterReadingHandler } from "./show/backend/publisher/process_monthly_meter_reading_handler";
-import { ListMeterReadingsPerDayHandler as ConsumerListMeterReadingsPerDayHandler } from "./show/frontend/consumer/list_meter_reading_per_day_handler";
-import { ListMeterReadingsPerMonthHandler as ConsumerListMeterReadingsPerMonthHandler } from "./show/frontend/consumer/list_meter_reading_per_month_handler";
-import { ListMeterReadingPerSeasonHandler as ConsumerListMeterReadingPerSeasonHandler } from "./show/frontend/consumer/list_meter_reading_per_season_handler";
-import { SyncMeterReadingHandler } from "./show/frontend/consumer/sync_meter_reading_handler";
-import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandler } from "./show/frontend/publisher/list_meter_reading_per_day_handler";
-import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./show/frontend/publisher/list_meter_reading_per_month_handler";
-import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./show/frontend/publisher/list_meter_reading_per_season_handler";
+import { GetDailyBatchHandler as ConsumerGetDailyBatchHandler } from "./show/node/consumer/get_daily_batch_handler";
+import { GetMonthlyBatchHandler as ConsumerGetMonthlyBatchHandler } from "./show/node/consumer/get_monthly_batch_handler";
+import { ProcessDailyMeterReadingHandler as ConsumerProcessDailyMeterReadingHandler } from "./show/node/consumer/process_daily_meter_reading_handler";
+import { ProcessMonthlyMeterReadingHandler as ConsumerProcessMonthlyMeterReadingHandler } from "./show/node/consumer/process_monthly_meter_reading_handler";
+import { GetDailyStorageBatchHandler as PublisherGetDailyStorageBatchHandler } from "./show/node/publisher/get_daily_storage_batch_handler";
+import { GetDailyWatchBatchHandler as PublisherGetDailyWatchBatchHandler } from "./show/node/publisher/get_daily_watch_batch_handler";
+import { GetMonthlyBatchHandler as PublisherGetMonthlyBatchHandler } from "./show/node/publisher/get_monthly_batch_handler";
+import { ProcessDailyStorageReadingHandler as PublisherProcessDailyStorageReadingHandler } from "./show/node/publisher/process_daily_storage_reading_handler";
+import { ProcessDailyWatchReadingHandler as PublisherProcessDailyWatchReadingHandler } from "./show/node/publisher/process_daily_watch_reading_handler";
+import { ProcessMonthlyMeterReadingHandler as PublisherProcessMonthlyMeterReadingHandler } from "./show/node/publisher/process_monthly_meter_reading_handler";
+import { CachedSessionExchanger } from "./show/web/consumer/common/cached_session_exchanger";
+import { ListMeterReadingsPerDayHandler as ConsumerListMeterReadingsPerDayHandler } from "./show/web/consumer/list_meter_reading_per_day_handler";
+import { ListMeterReadingsPerMonthHandler as ConsumerListMeterReadingsPerMonthHandler } from "./show/web/consumer/list_meter_reading_per_month_handler";
+import { ListMeterReadingPerSeasonHandler as ConsumerListMeterReadingPerSeasonHandler } from "./show/web/consumer/list_meter_reading_per_season_handler";
+import { RecordNetworkTransmissionHandler } from "./show/web/consumer/record_network_transmission_handler";
+import { RecordWatchTimeHandler } from "./show/web/consumer/record_watch_time_handler";
+import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandler } from "./show/web/publisher/list_meter_reading_per_day_handler";
+import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./show/web/publisher/list_meter_reading_per_month_handler";
+import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./show/web/publisher/list_meter_reading_per_season_handler";
+import { RecordStorageEndHandler } from "./show/web/publisher/record_storage_end_handler";
+import { RecordStorageStartHandler } from "./show/web/publisher/record_storage_start_handler";
+import { RecordUploadedHandler } from "./show/web/publisher/record_uploaded_handler";
 import {
   GENERATE_BILLING_STATEMENT,
   GENERATE_BILLING_STATEMENT_REQUEST_BODY,
@@ -29,32 +35,22 @@ import {
   LIST_METER_READINGS_PER_DAY_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_DAY_RESPONSE,
   LIST_METER_READINGS_PER_MONTH_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
   LIST_METER_READING_PER_SEASON_RESPONSE as CONSUMER_LIST_METER_READING_PER_SEASON_RESPONSE,
-} from "@phading/product_meter_service_interface/show/frontend/consumer/interface";
+} from "@phading/product_meter_service_interface/show/web/consumer/interface";
 import {
   LIST_METER_READINGS_PER_DAY_RESPONSE as PUBLISHER_LIST_METER_READINGS_PER_DAY_RESPONSE,
   LIST_METER_READINGS_PER_MONTH_RESPONSE as PUBLISHER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
   LIST_METER_READING_PER_SEASON_RESPONSE as PUBLISHER_LIST_METER_READING_PER_SEASON_RESPONSE,
-} from "@phading/product_meter_service_interface/show/frontend/publisher/interface";
+} from "@phading/product_meter_service_interface/show/web/publisher/interface";
 import {
-  GET_SEASON_NAME,
-  GET_SEASON_PUBLISHER_AND_GRADE,
-  GET_STORAGE_METER_READING,
-  GET_UPLOAD_METER_READING,
-  GET_VIDEO_DURATION_AND_SIZE,
-  GetSeasonNameResponse,
-  GetSeasonPublisherAndGradeResponse,
-  GetStorageMeterReadingResponse,
-  GetUploadMeterReadingResponse,
-  GetVideoDurationAndSizeResponse,
-} from "@phading/product_service_interface/show/backend/interface";
-import {
-  LIST_ACCOUNTS,
-  ListAccountsResponse,
-} from "@phading/user_service_interface/backend/interface";
+  GET_SEASON_GRADE,
+  GET_SEASON_PUBLISHER,
+  GetSeasonGradeResponse,
+  GetSeasonPublisherResponse,
+} from "@phading/product_service_interface/show/node/interface";
 import {
   EXCHANGE_SESSION_AND_CHECK_CAPABILITY,
   ExchangeSessionAndCheckCapabilityResponse,
-} from "@phading/user_session_service_interface/backend/interface";
+} from "@phading/user_session_service_interface/node/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq, isArray } from "@selfage/test_matcher";
@@ -81,32 +77,14 @@ TEST_RUNNER.run({
                   canPublishShows: true,
                 } as ExchangeSessionAndCheckCapabilityResponse;
               }
-            } else if (request.descriptor === GET_SEASON_NAME) {
-              return {
-                seasonName: "name1",
-              } as GetSeasonNameResponse;
-            } else if (request.descriptor === GET_SEASON_PUBLISHER_AND_GRADE) {
+            } else if (request.descriptor === GET_SEASON_PUBLISHER) {
               return {
                 publisherId: "publisher1",
+              } as GetSeasonPublisherResponse;
+            } else if (request.descriptor === GET_SEASON_GRADE) {
+              return {
                 grade: 5,
-              } as GetSeasonPublisherAndGradeResponse;
-            } else if (request.descriptor === GET_VIDEO_DURATION_AND_SIZE) {
-              return {
-                videoSize: 36000,
-                videoDurationSec: 60,
-              } as GetVideoDurationAndSizeResponse;
-            } else if (request.descriptor === LIST_ACCOUNTS) {
-              return {
-                accountIds: ["publisher1"],
-              } as ListAccountsResponse;
-            } else if (request.descriptor === GET_STORAGE_METER_READING) {
-              return {
-                mbh: 132,
-              } as GetStorageMeterReadingResponse;
-            } else if (request.descriptor === GET_UPLOAD_METER_READING) {
-              return {
-                mb: 332,
-              } as GetUploadMeterReadingResponse;
+              } as GetSeasonGradeResponse;
             } else if (
               request.descriptor === GENERATE_BILLING_STATEMENT ||
               request.descriptor === GENERATE_EARNINGS_STATEMENT
@@ -118,11 +96,11 @@ TEST_RUNNER.run({
           }
         })();
 
-        // 2024-11-04 18:xx:xx UTC
-        await new SyncMeterReadingHandler(
+        // 2024-11-04T18:00:00Z
+        await new RecordWatchTimeHandler(
           BIGTABLE,
-          clientMock,
-          () => new Date(1730745230000),
+          new CachedSessionExchanger(clientMock),
+          () => new Date(1730743200000),
         ).handle(
           "",
           {
@@ -133,15 +111,30 @@ TEST_RUNNER.run({
           "consumerSession1",
         );
 
-        // 2024-11-05 18:xx:xx UTC
+        // 2024-11-04T18:00:00Z
+        await new RecordNetworkTransmissionHandler(
+          BIGTABLE,
+          new CachedSessionExchanger(clientMock),
+          () => new Date(1730743200000),
+        ).handle(
+          "",
+          {
+            seasonId: "season1",
+            episodeId: "ep1",
+            transmittedBytes: 1024000000,
+          },
+          "consumerSession1",
+        );
+
+        // 2024-11-05T18:00:00Z
         let consumerDailyBatchResponse = await new ConsumerGetDailyBatchHandler(
           10,
           BIGTABLE,
-          () => new Date(1730831630000),
+          () => new Date(1730829600000),
         ).handle("", {});
         assertThat(
           consumerDailyBatchResponse.rowKeys,
-          isArray([eq("q1#2024-11-04#consumer1")]),
+          isArray([eq("t1#2024-11-04#consumer1")]),
           "consumer daily batch",
         );
 
@@ -152,12 +145,12 @@ TEST_RUNNER.run({
           rowKey: consumerDailyBatchResponse.rowKeys[0],
         });
 
-        // 2024-11-05 18:xx:xx UTC
+        // 2024-11-05T18:00:00Z
         let consumerListPerSeasonResponse =
           await new ConsumerListMeterReadingPerSeasonHandler(
             BIGTABLE,
             clientMock,
-            () => new Date(1730831630000),
+            () => new Date(1730829600000),
           ).handle("", {}, "consumerSession1");
         assertThat(
           consumerListPerSeasonResponse,
@@ -165,10 +158,7 @@ TEST_RUNNER.run({
             {
               readings: [
                 {
-                  season: {
-                    seasonId: "season1",
-                    seasonName: "name1",
-                  },
+                  seasonId: "season1",
                   watchTimeSec: 12300,
                   watchTimeSecGraded: 61500,
                 },
@@ -207,34 +197,97 @@ TEST_RUNNER.run({
           "consumer list per day",
         );
 
-        // 2024-11-05 18:xx:xx UTC
-        let publisherDailyBatchResponse =
-          await new PublisherGetDailyBatchHandler(
+        // 2024-11-05T18:00:00Z
+        let publisherDailyWatchBatchResponse =
+          await new PublisherGetDailyWatchBatchHandler(
             10,
             BIGTABLE,
-            () => new Date(1730831630000),
+            () => new Date(1730829600000),
           ).handle("", {});
         assertThat(
-          publisherDailyBatchResponse.rowKeys,
-          isArray([eq("q3#2024-11-04#publisher1")]),
-          "publisher daily batch",
+          publisherDailyWatchBatchResponse.rowKeys,
+          isArray([eq("t3#2024-11-04#publisher1")]),
+          "publisher daily watch batch",
         );
 
         let checkpointId = 0;
-        await new PublisherProcessDailyMeterReadingHandler(
+        await new PublisherProcessDailyWatchReadingHandler(
           10,
           BIGTABLE,
           () => `${checkpointId++}`,
         ).handle("", {
-          rowKey: publisherDailyBatchResponse.rowKeys[0],
+          rowKey: publisherDailyWatchBatchResponse.rowKeys[0],
         });
 
-        // 2024-11-05 18:xx:xx UTC
+        // 2024-11-04T18:00:00Z
+        await new RecordUploadedHandler(
+          BIGTABLE,
+          clientMock,
+          () => new Date(1730743200000),
+        ).handle(
+          "",
+          {
+            name: "rawVideo1",
+            uploadedBytes: 2345000,
+          },
+          "publisherSession1",
+        );
+
+        // 2024-11-04T18:00:00Z
+        await new RecordStorageStartHandler(
+          BIGTABLE,
+          clientMock,
+          () => new Date(1730743200000),
+        ).handle(
+          "",
+          {
+            name: "video1",
+            storageBytes: 2500000,
+            storageStartMs: 1730743200000,
+          },
+          "publisherSession1",
+        );
+
+        // 2024-11-05T07:00:00Z
+        await new RecordStorageEndHandler(
+          BIGTABLE,
+          clientMock,
+          () => new Date(1730790000000),
+        ).handle(
+          "",
+          {
+            name: "video1",
+            storageEndMs: 1730790000000,
+          },
+          "publisherSession1",
+        );
+
+        // 2024-11-05T18:00:00Z
+        let publisherDailyStorageBatchResponse =
+          await new PublisherGetDailyStorageBatchHandler(
+            10,
+            BIGTABLE,
+            () => new Date(1730829600000),
+          ).handle("", {});
+        assertThat(
+          publisherDailyStorageBatchResponse.rowKeys,
+          isArray([eq("t6#2024-11-04#publisher1")]),
+          "publisher daily storage batch",
+        );
+
+        await new PublisherProcessDailyStorageReadingHandler(BIGTABLE).handle(
+          "",
+          {
+            rowKey: publisherDailyStorageBatchResponse.rowKeys[0],
+          },
+        );
+
+        // 2024-11-05T18:00:00Z
         let publisherListPerSeasonResponse =
           await new PublisherListMeterReadingPerSeasonHandler(
             BIGTABLE,
             clientMock,
-            () => new Date(1730831630000),
+            () => new Date(1730829600000),
           ).handle("", {}, "publisherSession1");
         assertThat(
           publisherListPerSeasonResponse,
@@ -242,10 +295,7 @@ TEST_RUNNER.run({
             {
               readings: [
                 {
-                  season: {
-                    seasonId: "season1",
-                    seasonName: "name1",
-                  },
+                  seasonId: "season1",
                   watchTimeSec: 12300,
                   watchTimeSecGraded: 61500,
                 },
@@ -276,7 +326,9 @@ TEST_RUNNER.run({
                 {
                   date: "2024-11-04",
                   watchTimeSecGraded: 61500,
-                  transmittedKb: 7208,
+                  transmittedKb: 1000000,
+                  uploadedKb: 2291,
+                  storageMbm: 1860,
                 },
               ],
             },
@@ -285,16 +337,16 @@ TEST_RUNNER.run({
           "publisher list per day",
         );
 
-        // 2024-12-05 18:xx:xx UTC
+        // 2024-12-05T18:00:00Z
         let consumerMonthlyBatchResponse =
           await new ConsumerGetMonthlyBatchHandler(
             10,
             BIGTABLE,
-            () => new Date(1733423630000),
+            () => new Date(1733421600000),
           ).handle("", {});
         assertThat(
           consumerMonthlyBatchResponse.rowKeys,
-          isArray([eq("q2#2024-11#consumer1")]),
+          isArray([eq("t2#2024-11#consumer1")]),
           "consumer monthly batch",
         );
 
@@ -347,25 +399,16 @@ TEST_RUNNER.run({
           "consumer list per month",
         );
 
-        // 2024-12-05 18:xx:xx UTC
-        await new LoadPublishersToProcessMonthlyHandler(
-          "2024-10",
-          10,
-          BIGTABLE,
-          clientMock,
-          () => new Date(1733423630000),
-        ).handle("", {});
-
-        // 2024-12-05 18:xx:xx UTC
+        // 2024-12-05T18:00:00Z
         let publisherMonthlyBatchResponse =
           await new PublisherGetMonthlyBatchHandler(
             10,
             BIGTABLE,
-            () => new Date(1733423630000),
+            () => new Date(1733421600000),
           ).handle("", {});
         assertThat(
           publisherMonthlyBatchResponse.rowKeys,
-          isArray([eq("q5#2024-11#publisher1")]),
+          isArray([eq("t5#2024-11#publisher1")]),
           "publisher monthly batch",
         );
 
@@ -388,15 +431,15 @@ TEST_RUNNER.run({
                 },
                 {
                   meterType: PublisherMeterType.NETWORK_TRANSMITTED_MB,
-                  reading: 8,
-                },
-                {
-                  meterType: PublisherMeterType.STORAGE_MB_HOUR,
-                  reading: 132,
+                  reading: 977,
                 },
                 {
                   meterType: PublisherMeterType.UPLOAD_MB,
-                  reading: 332,
+                  reading: 3,
+                },
+                {
+                  meterType: PublisherMeterType.STORAGE_MB_HOUR,
+                  reading: 31,
                 },
               ],
             },
@@ -422,9 +465,9 @@ TEST_RUNNER.run({
                 {
                   month: "2024-11",
                   watchTimeSecGraded: 61500,
-                  transmittedMb: 8,
-                  storageMbh: 132,
-                  uploadMb: 332,
+                  transmittedMb: 977,
+                  uploadedMb: 3,
+                  storageMbh: 31,
                 },
               ],
             },
@@ -435,8 +478,8 @@ TEST_RUNNER.run({
       },
       tearDown: async () => {
         await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("d");
         await BIGTABLE.deleteRows("f");
-        await BIGTABLE.deleteRows("l");
       },
     },
   ],

@@ -9,6 +9,12 @@ export function toDateISOString(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export function toTommorrowISOStringFromString(dateISOString: string): string {
+  let date = new Date(`${dateISOString}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return toDateISOString(date);
+}
+
 export function toMonthISOString(date: Date): string {
   let year = date.getUTCFullYear().toString().padStart(4, "0");
   let month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
@@ -30,9 +36,11 @@ export function toYesterday(date: Date): Date {
   return date;
 }
 
-// Returns the timestamp of the start of the month wrt. the timezone.
-export function toMonthTimeMsWrtTimezone(monthISOString: string): number {
-  return new Date(
-    `${monthISOString}-01T${TIMEZONE_OFFSET_STRING}:00Z`,
-  ).valueOf();
+export function toDateUtc(dateISOString: string): Date {
+  return new Date(`${dateISOString}T00:00Z`);
+}
+
+// Returns the timestamp of the start of the day wrt. the timezone.
+export function toDayTimeMsWrtTimezone(dateISOString: string): number {
+  return new Date(`${dateISOString}T${TIMEZONE_OFFSET_STRING}:00Z`).valueOf();
 }
