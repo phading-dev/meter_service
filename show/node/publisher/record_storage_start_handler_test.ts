@@ -1,39 +1,41 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
-import { RecordUploadedHandler } from "./record_uploaded_handler";
-import { ExchangeSessionAndCheckCapabilityResponse } from "@phading/user_session_service_interface/node/interface";
-import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
+import { RecordStorageStartHandler } from "./record_storage_start_handler";
 import { assertThat, eq } from "@selfage/test_matcher";
 import { TEST_RUNNER } from "@selfage/test_runner";
 
 TEST_RUNNER.run({
-  name: "RecordUploadedHandlerTest",
+  name: "RecordStorageStartHandlerTest",
   cases: [
     {
       name: "Success",
       execute: async () => {
         // Prepare
-        let clientMock = new NodeServiceClientMock();
-        clientMock.response = {
-          accountId: "publisher1",
-          canPublishShows: true,
-        } as ExchangeSessionAndCheckCapabilityResponse;
+        await BIGTABLE.insert([
+          {
+            key: "d6#2024-11-26#publisher1",
+            data: {
+              u: {
+                file: {
+                  value: 1000,
+                },
+              },
+            },
+          },
+        ]);
         // 2024-11-26T11:00:00Z
-        let handler = new RecordUploadedHandler(
+        let handler = new RecordStorageStartHandler(
           BIGTABLE,
-          clientMock,
           () => new Date(1732618800000),
         );
 
         // Execute
-        await handler.handle(
-          "",
-          {
-            name: "newVideoFile",
-            uploadedBytes: 1100,
-          },
-          "sessionStr",
-        );
+        await handler.handle("", {
+          accountId: "publisher1",
+          name: "newVideoFile",
+          storageBytes: 1100,
+          storageStartMs: 1732608800000,
+        });
 
         // Verify
         assertThat(
@@ -45,8 +47,16 @@ TEST_RUNNER.run({
           (await BIGTABLE.row("d6#2024-11-26#publisher1").get())[0].data,
           eqData({
             u: {
-              newVideoFile: {
+              file: {
+                value: 1000,
+              },
+            },
+            s: {
+              "newVideoFile#b": {
                 value: 1100,
+              },
+              "newVideoFile#s": {
+                value: 1732608800000,
               },
             },
           }),
@@ -54,8 +64,8 @@ TEST_RUNNER.run({
         );
       },
       tearDown: async () => {
-        await BIGTABLE.deleteRows("d");
-        await BIGTABLE.deleteRows("t");
+        await BIGTABLE.deleteRows("d6");
+        await BIGTABLE.deleteRows("t6");
       },
     },
   ],

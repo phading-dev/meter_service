@@ -9,6 +9,9 @@ import { GetMonthlyBatchHandler as PublisherGetMonthlyBatchHandler } from "./sho
 import { ProcessDailyStorageReadingHandler as PublisherProcessDailyStorageReadingHandler } from "./show/node/publisher/process_daily_storage_reading_handler";
 import { ProcessDailyWatchReadingHandler as PublisherProcessDailyWatchReadingHandler } from "./show/node/publisher/process_daily_watch_reading_handler";
 import { ProcessMonthlyMeterReadingHandler as PublisherProcessMonthlyMeterReadingHandler } from "./show/node/publisher/process_monthly_meter_reading_handler";
+import { RecordStorageEndHandler } from "./show/node/publisher/record_storage_end_handler";
+import { RecordStorageStartHandler } from "./show/node/publisher/record_storage_start_handler";
+import { RecordUploadedHandler } from "./show/node/publisher/record_uploaded_handler";
 import { CachedSessionExchanger } from "./show/web/consumer/common/cached_session_exchanger";
 import { ListMeterReadingsPerDayHandler as ConsumerListMeterReadingsPerDayHandler } from "./show/web/consumer/list_meter_reading_per_day_handler";
 import { ListMeterReadingsPerMonthHandler as ConsumerListMeterReadingsPerMonthHandler } from "./show/web/consumer/list_meter_reading_per_month_handler";
@@ -18,9 +21,6 @@ import { RecordWatchTimeHandler } from "./show/web/consumer/record_watch_time_ha
 import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandler } from "./show/web/publisher/list_meter_reading_per_day_handler";
 import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./show/web/publisher/list_meter_reading_per_month_handler";
 import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./show/web/publisher/list_meter_reading_per_season_handler";
-import { RecordStorageEndHandler } from "./show/web/publisher/record_storage_end_handler";
-import { RecordStorageStartHandler } from "./show/web/publisher/record_storage_start_handler";
-import { RecordUploadedHandler } from "./show/web/publisher/record_uploaded_handler";
 import {
   GENERATE_BILLING_STATEMENT,
   GENERATE_BILLING_STATEMENT_REQUEST_BODY,
@@ -222,45 +222,33 @@ TEST_RUNNER.run({
         // 2024-11-04T18:00:00Z
         await new RecordUploadedHandler(
           BIGTABLE,
-          clientMock,
           () => new Date(1730743200000),
-        ).handle(
-          "",
-          {
-            name: "rawVideo1",
-            uploadedBytes: 2345000,
-          },
-          "publisherSession1",
-        );
+        ).handle("", {
+          accountId: "publisher1",
+          name: "rawVideo1",
+          uploadedBytes: 2345000,
+        });
 
         // 2024-11-04T18:00:00Z
         await new RecordStorageStartHandler(
           BIGTABLE,
-          clientMock,
           () => new Date(1730743200000),
-        ).handle(
-          "",
-          {
-            name: "video1",
-            storageBytes: 2500000,
-            storageStartMs: 1730743200000,
-          },
-          "publisherSession1",
-        );
+        ).handle("", {
+          accountId: "publisher1",
+          name: "video1",
+          storageBytes: 2500000,
+          storageStartMs: 1730743200000,
+        });
 
         // 2024-11-05T07:00:00Z
         await new RecordStorageEndHandler(
           BIGTABLE,
-          clientMock,
           () => new Date(1730790000000),
-        ).handle(
-          "",
-          {
-            name: "video1",
-            storageEndMs: 1730790000000,
-          },
-          "publisherSession1",
-        );
+        ).handle("", {
+          accountId: "publisher1",
+          name: "video1",
+          storageEndMs: 1730790000000,
+        });
 
         // 2024-11-05T18:00:00Z
         let publisherDailyStorageBatchResponse =

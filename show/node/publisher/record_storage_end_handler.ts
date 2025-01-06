@@ -1,27 +1,16 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { toDateISOString, toToday } from "../../../common/date_helper";
-import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { RecordStorageEndHandlerInterface } from "@phading/product_meter_service_interface/show/web/publisher/handler";
+import { RecordStorageEndHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
 import {
   RecordStorageEndRequestBody,
   RecordStorageEndResponse,
-} from "@phading/product_meter_service_interface/show/web/publisher/interface";
-import { exchangeSessionAndCheckCapability } from "@phading/user_session_service_interface/node/client";
-import {
-  newBadRequestError,
-  newNotAcceptableError,
-  newUnauthorizedError,
-} from "@selfage/http_error";
-import { NodeServiceClient } from "@selfage/node_service_client";
+} from "@phading/product_meter_service_interface/show/node/publisher/interface";
+import { newBadRequestError, newNotAcceptableError } from "@selfage/http_error";
 
 export class RecordStorageEndHandler extends RecordStorageEndHandlerInterface {
   public static create(): RecordStorageEndHandler {
-    return new RecordStorageEndHandler(
-      BIGTABLE,
-      SERVICE_CLIENT,
-      () => new Date(),
-    );
+    return new RecordStorageEndHandler(BIGTABLE, () => new Date());
   }
 
   private static ONE_MONTH_IN_MS = 30 * 24 * 60 * 60 * 1000;
@@ -29,7 +18,6 @@ export class RecordStorageEndHandler extends RecordStorageEndHandlerInterface {
 
   public constructor(
     private bigtable: Table,
-    private serviceClient: NodeServiceClient,
     private getNowDate: () => Date,
   ) {
     super();
@@ -38,7 +26,6 @@ export class RecordStorageEndHandler extends RecordStorageEndHandlerInterface {
   public async handle(
     loggingPrefix: string,
     body: RecordStorageEndRequestBody,
-    sessionStr: string,
   ): Promise<RecordStorageEndResponse> {
     if (!body.name) {
       throw newBadRequestError(`"name" is required.`);
@@ -63,29 +50,29 @@ export class RecordStorageEndHandler extends RecordStorageEndHandlerInterface {
         `"storageEndMs" is unreasonably large, which is ${body.storageEndMs}. It could be a bad actor.`,
       );
     }
-    let { accountId, canPublishShows } =
-      await exchangeSessionAndCheckCapability(this.serviceClient, {
-        signedSession: sessionStr,
-        checkCanPublishShows: true,
-      });
-    if (!canPublishShows) {
-      throw newUnauthorizedError(
-        `Account ${accountId} not allowed to record storage end.`,
-      );
-    }
     let today = toDateISOString(toToday(this.getNowDate()));
-    await this.bigtable.row(`t6#${today}#${accountId}`).save({
-      c: {
-        p: {
-          value: "",
+    await this.bigtable.insert([
+      {
+        key: `d6#${today}#${body.accountId}`,
+        data: {
+          s: {
+            [`${body.name}#e`]: {
+              value: body.storageEndMs,
+            },
+          },
         },
       },
-    });
-    await this.bigtable.row(`d6#${today}#${accountId}`).save({
-      s: {
-        [`${body.name}#e`]: body.storageEndMs,
+      {
+        key: `t6#${today}#${body.accountId}`,
+        data: {
+          c: {
+            p: {
+              value: "",
+            },
+          },
+        },
       },
-    });
+    ]);
     return {};
   }
 }
