@@ -2,10 +2,9 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
 import { ProcessMonthlyMeterReadingHandler } from "./process_monthly_meter_reading_handler";
 import {
-  GENERATE_BILLING_STATEMENT,
-  GENERATE_BILLING_STATEMENT_REQUEST_BODY,
-  MeterType,
-} from "@phading/commerce_service_interface/node/consumer/interface";
+  REPORT_BILLING,
+  REPORT_BILLING_REQUEST_BODY,
+} from "@phading/commerce_service_interface/node/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq } from "@selfage/test_matcher";
@@ -105,7 +104,7 @@ TEST_RUNNER.run({
         );
         assertThat(
           clientMock.request.descriptor,
-          eq(GENERATE_BILLING_STATEMENT),
+          eq(REPORT_BILLING),
           "RC descriptor",
         );
         assertThat(
@@ -114,16 +113,11 @@ TEST_RUNNER.run({
             {
               accountId: "consumer1",
               month: "2024-10",
-              readings: [
-                {
-                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
-                  reading: 900,
-                },
-              ],
+              watchTimeSec: 900,
             },
-            GENERATE_BILLING_STATEMENT_REQUEST_BODY,
+            REPORT_BILLING_REQUEST_BODY,
           ),
-          "generate billing request",
+          "report billing request",
         );
 
         // Execute

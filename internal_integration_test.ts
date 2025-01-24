@@ -22,15 +22,11 @@ import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandl
 import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./show/web/publisher/list_meter_reading_per_month_handler";
 import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./show/web/publisher/list_meter_reading_per_season_handler";
 import {
-  GENERATE_BILLING_STATEMENT,
-  GENERATE_BILLING_STATEMENT_REQUEST_BODY,
-  MeterType as ConsumerMeterType,
-} from "@phading/commerce_service_interface/node/consumer/interface";
-import {
-  GENERATE_EARNINGS_STATEMENT,
-  GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
-  MeterType as PublisherMeterType,
-} from "@phading/commerce_service_interface/node/publisher/interface";
+  REPORT_BILLING,
+  REPORT_BILLING_REQUEST_BODY,
+  REPORT_EARNINGS,
+  REPORT_EARNINGS_REQUEST_BODY,
+} from "@phading/commerce_service_interface/node/interface";
 import {
   LIST_METER_READINGS_PER_DAY_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_DAY_RESPONSE,
   LIST_METER_READINGS_PER_MONTH_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
@@ -64,6 +60,8 @@ TEST_RUNNER.run({
       execute: async () => {
         // Prepare
         let clientMock = new (class extends NodeServiceClientMock {
+          public billingRequest: any;
+          public earningsRequest: any;
           public async send(request: any): Promise<any> {
             if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
               if (request.body.signedSession === "consumerSession1") {
@@ -85,11 +83,10 @@ TEST_RUNNER.run({
               return {
                 grade: 5,
               } as GetSeasonGradeResponse;
-            } else if (
-              request.descriptor === GENERATE_BILLING_STATEMENT ||
-              request.descriptor === GENERATE_EARNINGS_STATEMENT
-            ) {
-              this.request = request;
+            } else if (request.descriptor === REPORT_BILLING) {
+              this.billingRequest = request;
+            } else if (request.descriptor === REPORT_EARNINGS) {
+              this.earningsRequest = request;
             } else {
               throw new Error("Not handled.");
             }
@@ -345,21 +342,16 @@ TEST_RUNNER.run({
           rowKey: consumerMonthlyBatchResponse.rowKeys[0],
         });
         assertThat(
-          clientMock.request.body,
+          clientMock.billingRequest.body,
           eqMessage(
             {
               accountId: "consumer1",
               month: "2024-11",
-              readings: [
-                {
-                  meterType: ConsumerMeterType.SHOW_WATCH_TIME_SEC,
-                  reading: 61500,
-                },
-              ],
+              watchTimeSec: 61500,
             },
-            GENERATE_BILLING_STATEMENT_REQUEST_BODY,
+            REPORT_BILLING_REQUEST_BODY,
           ),
-          "generating billing request",
+          "report billing request for consumer",
         );
 
         let consumerListPerMonthResponse =
@@ -407,33 +399,30 @@ TEST_RUNNER.run({
           rowKey: publisherMonthlyBatchResponse.rowKeys[0],
         });
         assertThat(
-          clientMock.request.body,
+          clientMock.billingRequest.body,
           eqMessage(
             {
               accountId: "publisher1",
               month: "2024-11",
-              readings: [
-                {
-                  meterType: PublisherMeterType.SHOW_WATCH_TIME_SEC,
-                  reading: 61500,
-                },
-                {
-                  meterType: PublisherMeterType.NETWORK_TRANSMITTED_MB,
-                  reading: 977,
-                },
-                {
-                  meterType: PublisherMeterType.UPLOADED_MB,
-                  reading: 3,
-                },
-                {
-                  meterType: PublisherMeterType.STORAGE_MB_HOUR,
-                  reading: 31,
-                },
-              ],
+              transmittedMb: 977,
+              uploadedMb: 3,
+              storageMbh: 31,
             },
-            GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
+            REPORT_BILLING_REQUEST_BODY,
           ),
-          "generating earnings request",
+          "report billing request for publisher",
+        );
+        assertThat(
+          clientMock.earningsRequest.body,
+          eqMessage(
+            {
+              accountId: "publisher1",
+              month: "2024-11",
+              watchTimeSec: 61500,
+            },
+            REPORT_EARNINGS_REQUEST_BODY,
+          ),
+          "report earnings request for publisher",
         );
 
         let publisherListPerMonthResponse =

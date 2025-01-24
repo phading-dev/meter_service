@@ -1,7 +1,11 @@
 import { BIGTABLE } from "../../../common/bigtable";
-import { toMonthISOString } from "../../../common/date_helper";
+import {
+  getMonthDifference,
+  toMonthISOString,
+} from "../../../common/date_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
+import { MAX_MONTH_RANGE } from "@phading/constants/meter";
 import { ListMeterReadingsPerMonthHandlerInterface } from "@phading/product_meter_service_interface/show/web/consumer/handler";
 import {
   ListMeterReadingsPerMonthRequestBody,
@@ -45,6 +49,11 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
     }
     if (startMonth >= endMonth) {
       throw newBadRequestError(`"startMonth" must be smaller than "endMonth".`);
+    }
+    if (getMonthDifference(startMonth, endMonth) > MAX_MONTH_RANGE) {
+      throw newBadRequestError(
+        `The range between "startMonth" and "endMonth" is too large.`,
+      );
     }
     let { accountId, canConsumeShows } =
       await exchangeSessionAndCheckCapability(this.serviceClient, {

@@ -2,9 +2,11 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
 import { ProcessMonthlyMeterReadingHandler } from "./process_monthly_meter_reading_handler";
 import {
-  GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
-  MeterType,
-} from "@phading/commerce_service_interface/node/publisher/interface";
+  REPORT_BILLING,
+  REPORT_BILLING_REQUEST_BODY,
+  REPORT_EARNINGS,
+  REPORT_EARNINGS_REQUEST_BODY,
+} from "@phading/commerce_service_interface/node/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq } from "@selfage/test_matcher";
@@ -74,7 +76,22 @@ TEST_RUNNER.run({
             },
           },
         ]);
-        let clientMock = new NodeServiceClientMock();
+        let billingRequest: any;
+        let earningsRequest: any;
+        let clientMock = new (class extends NodeServiceClientMock {
+          public async send(request: any): Promise<any> {
+            switch (request.descriptor) {
+              case REPORT_BILLING:
+                billingRequest = request;
+                break;
+              case REPORT_EARNINGS:
+                earningsRequest = request;
+                break;
+              default:
+                throw new Error(`Unexpected.`);
+            }
+          }
+        })();
         let handler = new ProcessMonthlyMeterReadingHandler(
           BIGTABLE,
           clientMock,
@@ -107,33 +124,30 @@ TEST_RUNNER.run({
           "final publisher data",
         );
         assertThat(
-          clientMock.request.body,
+          billingRequest.body,
           eqMessage(
             {
               accountId: "publisher1",
               month: "2024-10",
-              readings: [
-                {
-                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
-                  reading: 1312,
-                },
-                {
-                  meterType: MeterType.NETWORK_TRANSMITTED_MB,
-                  reading: 7,
-                },
-                {
-                  meterType: MeterType.UPLOADED_MB,
-                  reading: 94,
-                },
-                {
-                  meterType: MeterType.STORAGE_MB_HOUR,
-                  reading: 2534,
-                },
-              ],
+              transmittedMb: 7,
+              uploadedMb: 94,
+              storageMbh: 2534,
             },
-            GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
+            REPORT_BILLING_REQUEST_BODY,
           ),
-          "generate earnings request",
+          "report billing request",
+        );
+        assertThat(
+          earningsRequest.body,
+          eqMessage(
+            {
+              accountId: "publisher1",
+              month: "2024-10",
+              watchTimeSec: 1312,
+            },
+            REPORT_EARNINGS_REQUEST_BODY,
+          ),
+          "report earnings request",
         );
         assertThat(
           (await BIGTABLE.row("t5#2024-10#publisher1").exists())[0],
@@ -176,7 +190,22 @@ TEST_RUNNER.run({
             },
           },
         ]);
-        let clientMock = new NodeServiceClientMock();
+        let billingRequest: any;
+        let earningsRequest: any;
+        let clientMock = new (class extends NodeServiceClientMock {
+          public async send(request: any): Promise<any> {
+            switch (request.descriptor) {
+              case REPORT_BILLING:
+                billingRequest = request;
+                break;
+              case REPORT_EARNINGS:
+                earningsRequest = request;
+                break;
+              default:
+                throw new Error(`Unexpected.`);
+            }
+          }
+        })();
         let handler = new ProcessMonthlyMeterReadingHandler(
           BIGTABLE,
           clientMock,
@@ -203,33 +232,30 @@ TEST_RUNNER.run({
           "final publisher data",
         );
         assertThat(
-          clientMock.request.body,
+          billingRequest.body,
           eqMessage(
             {
               accountId: "publisher1",
               month: "2024-10",
-              readings: [
-                {
-                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
-                  reading: 0,
-                },
-                {
-                  meterType: MeterType.NETWORK_TRANSMITTED_MB,
-                  reading: 0,
-                },
-                {
-                  meterType: MeterType.UPLOADED_MB,
-                  reading: 8,
-                },
-                {
-                  meterType: MeterType.STORAGE_MB_HOUR,
-                  reading: 934,
-                },
-              ],
+              transmittedMb: 0,
+              uploadedMb: 8,
+              storageMbh: 934,
             },
-            GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
+            REPORT_BILLING_REQUEST_BODY,
           ),
-          "generate earnings request",
+          "report billing request",
+        );
+        assertThat(
+          earningsRequest.body,
+          eqMessage(
+            {
+              accountId: "publisher1",
+              month: "2024-10",
+              watchTimeSec: 0,
+            },
+            REPORT_EARNINGS_REQUEST_BODY,
+          ),
+          "report earnings request",
         );
       },
       tearDown: async () => {
@@ -267,7 +293,22 @@ TEST_RUNNER.run({
             },
           },
         ]);
-        let clientMock = new NodeServiceClientMock();
+        let billingRequest: any;
+        let earningsRequest: any;
+        let clientMock = new (class extends NodeServiceClientMock {
+          public async send(request: any): Promise<any> {
+            switch (request.descriptor) {
+              case REPORT_BILLING:
+                billingRequest = request;
+                break;
+              case REPORT_EARNINGS:
+                earningsRequest = request;
+                break;
+              default:
+                throw new Error(`Unexpected.`);
+            }
+          }
+        })();
         let handler = new ProcessMonthlyMeterReadingHandler(
           BIGTABLE,
           clientMock,
@@ -294,33 +335,30 @@ TEST_RUNNER.run({
           "final publisher data",
         );
         assertThat(
-          clientMock.request.body,
+          billingRequest.body,
           eqMessage(
             {
               accountId: "publisher1",
               month: "2024-10",
-              readings: [
-                {
-                  meterType: MeterType.SHOW_WATCH_TIME_SEC,
-                  reading: 12,
-                },
-                {
-                  meterType: MeterType.NETWORK_TRANSMITTED_MB,
-                  reading: 5,
-                },
-                {
-                  meterType: MeterType.UPLOADED_MB,
-                  reading: 0,
-                },
-                {
-                  meterType: MeterType.STORAGE_MB_HOUR,
-                  reading: 0,
-                },
-              ],
+              transmittedMb: 5,
+              uploadedMb: 0,
+              storageMbh: 0,
             },
-            GENERATE_EARNINGS_STATEMENT_REQUEST_BODY,
+            REPORT_BILLING_REQUEST_BODY,
           ),
-          "generate earnings request",
+          "report billing request",
+        );
+        assertThat(
+          earningsRequest.body,
+          eqMessage(
+            {
+              accountId: "publisher1",
+              month: "2024-10",
+              watchTimeSec: 12,
+            },
+            REPORT_EARNINGS_REQUEST_BODY,
+          ),
+          "report earnings request",
         );
       },
       tearDown: async () => {

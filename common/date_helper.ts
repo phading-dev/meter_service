@@ -44,3 +44,20 @@ export function toDateUtc(dateISOString: string): Date {
 export function toDayTimeMsWrtTimezone(dateISOString: string): number {
   return new Date(`${dateISOString}T${TIMEZONE_OFFSET_STRING}:00Z`).valueOf();
 }
+
+// Inclusive.
+export function getDayDifference(startDate: Date, endDate: Date): number {
+  return Math.floor(
+    (endDate.valueOf() - startDate.valueOf()) / (24 * 60 * 60 * 1000) + 1,
+  );
+}
+
+// Inclusive.
+export function getMonthDifference(startMonth: Date, endMonth: Date): number {
+  return (
+    (endMonth.getUTCFullYear() - startMonth.getUTCFullYear()) * 12 +
+    endMonth.getUTCMonth() -
+    startMonth.getUTCMonth() +
+    1
+  );
+}

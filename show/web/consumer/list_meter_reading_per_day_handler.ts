@@ -1,7 +1,8 @@
 import { BIGTABLE } from "../../../common/bigtable";
-import { toDateISOString } from "../../../common/date_helper";
+import { getDayDifference, toDateISOString } from "../../../common/date_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
+import { MAX_DAY_RANGE } from "@phading/constants/meter";
 import { ListMeterReadingsPerDayHandlerInterface } from "@phading/product_meter_service_interface/show/web/consumer/handler";
 import {
   ListMeterReadingsPerDayRequestBody,
@@ -45,6 +46,11 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
     }
     if (startDate >= endDate) {
       throw newBadRequestError(`"startDate" must be smaller than "endDate".`);
+    }
+    if (getDayDifference(startDate, endDate) > MAX_DAY_RANGE) {
+      throw newBadRequestError(
+        `The range between "startDate" and "endDate" is too large.`,
+      );
     }
     let { accountId, canConsumeShows } =
       await exchangeSessionAndCheckCapability(this.serviceClient, {

@@ -2,8 +2,10 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { incrementColumn } from "../../../common/bigtable_data_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { generateEarningsStatement } from "@phading/commerce_service_interface/node/publisher/client";
-import { MeterType } from "@phading/commerce_service_interface/node/publisher/interface";
+import {
+  reportBilling,
+  reportEarnings,
+} from "@phading/commerce_service_interface/node/client";
 import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
 import {
   ProcessMonthlyMeterReadingRequestBody,
@@ -104,27 +106,17 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
           data: data,
         },
       ]),
-      generateEarningsStatement(this.serviceClient, {
+      reportBilling(this.serviceClient, {
         accountId,
         month,
-        readings: [
-          {
-            meterType: MeterType.SHOW_WATCH_TIME_SEC,
-            reading: data["t"]["ws"] ? data["t"]["ws"].value : 0,
-          },
-          {
-            meterType: MeterType.NETWORK_TRANSMITTED_MB,
-            reading: data["t"]["nm"] ? data["t"]["nm"].value : 0,
-          },
-          {
-            meterType: MeterType.UPLOADED_MB,
-            reading: data["t"]["um"] ? data["t"]["um"].value : 0,
-          },
-          {
-            meterType: MeterType.STORAGE_MB_HOUR,
-            reading: data["t"]["smh"] ? data["t"]["smh"].value : 0,
-          },
-        ],
+        transmittedMb: data["t"]["nm"] ? data["t"]["nm"].value : 0,
+        uploadedMb: data["t"]["um"] ? data["t"]["um"].value : 0,
+        storageMbh: data["t"]["smh"] ? data["t"]["smh"].value : 0,
+      }),
+      reportEarnings(this.serviceClient, {
+        accountId,
+        month,
+        watchTimeSec: data["t"]["ws"] ? data["t"]["ws"].value : 0,
       }),
     ]);
   }
