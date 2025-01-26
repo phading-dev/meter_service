@@ -17,7 +17,9 @@ TEST_RUNNER.run({
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
           accountId: "consumer1",
-          canConsumeShows: true,
+          capabilities: {
+            canConsumeShows: true,
+          },
         } as ExchangeSessionAndCheckCapabilityResponse;
         // 2024-10-26 23:xx:xx
         let handler = new RecordWatchTimeHandler(
@@ -91,7 +93,9 @@ TEST_RUNNER.run({
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
           accountId: "consumer1",
-          canConsumeShows: true,
+          capabilities: {
+            canConsumeShows: true,
+          },
         } as ExchangeSessionAndCheckCapabilityResponse;
         // 2025-01-01 01:xx:xx UTC
         let handler = new RecordWatchTimeHandler(

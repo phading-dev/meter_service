@@ -52,12 +52,16 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
         `The range between "startDate" and "endDate" is too large.`,
       );
     }
-    let { accountId, canPublishShows } =
-      await exchangeSessionAndCheckCapability(this.serviceClient, {
+    let { accountId, capabilities } = await exchangeSessionAndCheckCapability(
+      this.serviceClient,
+      {
         signedSession: sessionStr,
-        checkCanPublishShows: true,
-      });
-    if (!canPublishShows) {
+        capabilitiesMask: {
+          checkCanPublishShows: true,
+        },
+      },
+    );
+    if (!capabilities.canPublishShows) {
       throw newUnauthorizedError(
         `Account ${accountId} not allowed to list meter reading per day.`,
       );

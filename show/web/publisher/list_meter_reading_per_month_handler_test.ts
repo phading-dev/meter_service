@@ -93,7 +93,9 @@ TEST_RUNNER.run({
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
           accountId: "publisher1",
-          canPublishShows: true,
+          capabilities: {
+            canPublishShows: true,
+          },
         } as ExchangeSessionAndCheckCapabilityResponse;
         let handler = new ListMeterReadingsPerMonthHandler(
           BIGTABLE,

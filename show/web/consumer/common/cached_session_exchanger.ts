@@ -28,12 +28,16 @@ export class CachedSessionExchanger {
   ): Promise<string> {
     let accountIdCached = this.lruCache.get(sessionStr);
     if (!accountIdCached) {
-      let { accountId, canConsumeShows } =
-        await exchangeSessionAndCheckCapability(this.serviceClient, {
+      let { accountId, capabilities } = await exchangeSessionAndCheckCapability(
+        this.serviceClient,
+        {
           signedSession: sessionStr,
-          checkCanConsumeShows: true,
-        });
-      if (!canConsumeShows) {
+          capabilitiesMask: {
+            checkCanConsumeShows: true,
+          },
+        },
+      );
+      if (!capabilities.canConsumeShows) {
         throw newUnauthorizedError(
           `Account ${accountId} not allowed to ${purpose}.`,
         );

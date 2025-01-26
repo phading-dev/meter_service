@@ -55,12 +55,16 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
         `The range between "startMonth" and "endMonth" is too large.`,
       );
     }
-    let { accountId, canConsumeShows } =
-      await exchangeSessionAndCheckCapability(this.serviceClient, {
+    let { accountId, capabilities } = await exchangeSessionAndCheckCapability(
+      this.serviceClient,
+      {
         signedSession: sessionStr,
-        checkCanConsumeShows: true,
-      });
-    if (!canConsumeShows) {
+        capabilitiesMask: {
+          checkCanConsumeShows: true,
+        },
+      },
+    );
+    if (!capabilities.canConsumeShows) {
       throw newUnauthorizedError(
         `Account ${accountId} not allowed to list meter reading per month.`,
       );

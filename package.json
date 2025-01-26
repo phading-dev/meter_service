@@ -31,7 +31,7 @@
     "@phading/constants": "^0.3.5",
     "@phading/product_meter_service_interface": "^0.7.6",
     "@phading/product_service_interface": "^0.8.4",
-    "@phading/user_session_service_interface": "^0.10.1",
+    "@phading/user_session_service_interface": "^0.11.1",
     "@selfage/env_var_getter": "^1.0.2",
     "@selfage/http_error": "^1.1.2",
     "@selfage/message": "^3.5.7",

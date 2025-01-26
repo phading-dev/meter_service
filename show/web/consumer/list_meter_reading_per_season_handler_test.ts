@@ -45,7 +45,9 @@ TEST_RUNNER.run({
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
           accountId: "consumer1",
-          canConsumeShows: true,
+          capabilities: {
+            canConsumeShows: true,
+          },
         } as ExchangeSessionAndCheckCapabilityResponse;
         // 2025-01-01 20:xx:xx UTC
         let handler = new ListMeterReadingPerSeasonHandler(
@@ -119,7 +121,9 @@ TEST_RUNNER.run({
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
           accountId: "consumer1",
-          canConsumeShows: true,
+          capabilities: {
+            canConsumeShows: true,
+          },
         } as ExchangeSessionAndCheckCapabilityResponse;
         // 2025-02-02 20:xx:xx UTC
         let handler = new ListMeterReadingPerSeasonHandler(
@@ -199,7 +203,9 @@ TEST_RUNNER.run({
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
           accountId: "consumer1",
-          canConsumeShows: true,
+          capabilities: {
+            canConsumeShows: true,
+          },
         } as ExchangeSessionAndCheckCapabilityResponse;
         // 2025-02-02 20:xx:xx UTC
         let handler = new ListMeterReadingPerSeasonHandler(
@@ -252,7 +258,9 @@ TEST_RUNNER.run({
         let clientMock = new NodeServiceClientMock();
         clientMock.response = {
           accountId: "consumer1",
-          canConsumeShows: true,
+          capabilities: {
+            canConsumeShows: true,
+          },
         } as ExchangeSessionAndCheckCapabilityResponse;
         // 2025-02-02 20:xx:xx UTC
         let handler = new ListMeterReadingPerSeasonHandler(

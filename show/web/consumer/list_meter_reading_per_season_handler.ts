@@ -44,12 +44,16 @@ export class ListMeterReadingPerSeasonHandler extends ListMeterReadingPerSeasonH
     if (isNaN(date.valueOf())) {
       throw newBadRequestError(`"date" is not a valid date.`);
     }
-    let { accountId, canConsumeShows } =
-      await exchangeSessionAndCheckCapability(this.serviceClient, {
+    let { accountId, capabilities } = await exchangeSessionAndCheckCapability(
+      this.serviceClient,
+      {
         signedSession: sessionStr,
-        checkCanConsumeShows: true,
-      });
-    if (!canConsumeShows) {
+        capabilitiesMask: {
+          checkCanConsumeShows: true,
+        },
+      },
+    );
+    if (!capabilities.canConsumeShows) {
       throw newUnauthorizedError(
         `Account ${accountId} not allowed to list meter reading per season.`,
       );
