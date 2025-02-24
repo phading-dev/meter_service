@@ -1,6 +1,8 @@
-import { TIMEZONE_OFFSET } from "./params";
+import { ENV_VARS } from "../env";
 
-export let TIMEZONE_OFFSET_STRING = TIMEZONE_OFFSET.toString().padStart(2, "0");
+export let TIMEZONE_OFFSET_STRING = ENV_VARS.timezoneNegativeOffset
+  .toString()
+  .padStart(2, "0");
 
 export function toDateISOString(date: Date): string {
   let year = date.getUTCFullYear().toString().padStart(4, "0");
@@ -23,7 +25,7 @@ export function toMonthISOString(date: Date): string {
 
 // Coverted to today's date wrt. the timezone. The following calls should always use UTC*() functions. `date` is changed in place.
 export function toToday(date: Date): Date {
-  if (date.getUTCHours() < TIMEZONE_OFFSET) {
+  if (date.getUTCHours() < ENV_VARS.timezoneNegativeOffset) {
     date.setUTCDate(date.getUTCDate() - 1);
   }
   return date;

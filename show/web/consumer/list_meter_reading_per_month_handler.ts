@@ -12,7 +12,7 @@ import {
   ListMeterReadingsPerMonthResponse,
 } from "@phading/product_meter_service_interface/show/web/consumer/interface";
 import { MeterReadingPerMonth } from "@phading/product_meter_service_interface/show/web/consumer/meter_reading";
-import { exchangeSessionAndCheckCapability } from "@phading/user_session_service_interface/node/client";
+import { newExchangeSessionAndCheckCapabilityRequest } from "@phading/user_session_service_interface/node/client";
 import { newBadRequestError, newUnauthorizedError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
@@ -55,14 +55,13 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
         `The range between "startMonth" and "endMonth" is too large.`,
       );
     }
-    let { accountId, capabilities } = await exchangeSessionAndCheckCapability(
-      this.serviceClient,
-      {
+    let { accountId, capabilities } = await this.serviceClient.send(
+      newExchangeSessionAndCheckCapabilityRequest({
         signedSession: sessionStr,
         capabilitiesMask: {
           checkCanConsumeShows: true,
         },
-      },
+      }),
     );
     if (!capabilities.canConsumeShows) {
       throw newUnauthorizedError(

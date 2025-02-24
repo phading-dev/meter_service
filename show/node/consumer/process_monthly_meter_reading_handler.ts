@@ -2,7 +2,7 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { incrementColumn } from "../../../common/bigtable_data_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { reportBilling } from "@phading/commerce_service_interface/node/client";
+import { newReportBillingRequest } from "@phading/commerce_service_interface/node/client";
 import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/consumer/handler";
 import {
   ProcessMonthlyMeterReadingRequestBody,
@@ -77,11 +77,13 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
           data: data,
         },
       ]),
-      reportBilling(this.serviceClient, {
-        accountId,
-        month,
-        watchTimeSec: data["t"]["ws"].value,
-      }),
+      this.serviceClient.send(
+        newReportBillingRequest({
+          accountId,
+          month,
+          watchTimeSec: data["t"]["ws"].value,
+        }),
+      ),
     ]);
   }
 }

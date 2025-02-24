@@ -1,9 +1,9 @@
 import {
   CACHE_SIZE_OF_SESSION,
   CACHE_TTL_MS_OF_SESSION,
-} from "../../../../common/params";
+} from "../../../../common/constants";
 import { SERVICE_CLIENT } from "../../../../common/service_client";
-import { exchangeSessionAndCheckCapability } from "@phading/user_session_service_interface/node/client";
+import { newExchangeSessionAndCheckCapabilityRequest } from "@phading/user_session_service_interface/node/client";
 import { newUnauthorizedError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 import { LRUCache } from "lru-cache";
@@ -28,14 +28,13 @@ export class CachedSessionExchanger {
   ): Promise<string> {
     let accountIdCached = this.lruCache.get(sessionStr);
     if (!accountIdCached) {
-      let { accountId, capabilities } = await exchangeSessionAndCheckCapability(
-        this.serviceClient,
-        {
+      let { accountId, capabilities } = await this.serviceClient.send(
+        newExchangeSessionAndCheckCapabilityRequest({
           signedSession: sessionStr,
           capabilitiesMask: {
             checkCanConsumeShows: true,
           },
-        },
+        }),
       );
       if (!capabilities.canConsumeShows) {
         throw newUnauthorizedError(

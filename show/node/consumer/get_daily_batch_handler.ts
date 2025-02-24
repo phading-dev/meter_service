@@ -1,6 +1,6 @@
 import { BIGTABLE } from "../../../common/bigtable";
+import { BATCH_SIZE_OF_DAILY_PROCESSING_CONSUMERS } from "../../../common/constants";
 import { toDateISOString, toToday } from "../../../common/date_helper";
-import { BATCH_SIZE_OF_DAILY_PROCESSING_CONSUMERS } from "../../../common/params";
 import { Table } from "@google-cloud/bigtable";
 import { GetDailyBatchHandlerInterface } from "@phading/product_meter_service_interface/show/node/consumer/handler";
 import {

@@ -1,8 +1,8 @@
-import { INSTANCE_ID, PROJECT_ID, TABLE_ID } from "./env_vars";
+import { ENV_VARS } from "../env";
 import { Bigtable } from "@google-cloud/bigtable";
 
 export let BIGTABLE = new Bigtable({
-  projectId: PROJECT_ID,
+  projectId: ENV_VARS.projectId,
 })
-  .instance(INSTANCE_ID)
-  .table(TABLE_ID);
+  .instance(ENV_VARS.bigtableInstanceId)
+  .table(ENV_VARS.bigtableDatabaseId);

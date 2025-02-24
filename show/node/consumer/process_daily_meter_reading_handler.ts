@@ -3,7 +3,7 @@ import { incrementColumn } from "../../../common/bigtable_data_helper";
 import {
   CACHE_SIZE_OF_GET_SEASON_GRADE,
   CACHE_SIZE_OF_GET_SEASON_PUBLISHER,
-} from "../../../common/params";
+} from "../../../common/constants";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
 import { ProcessDailyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/consumer/handler";
@@ -12,8 +12,8 @@ import {
   ProcessDailyMeterReadingResponse,
 } from "@phading/product_meter_service_interface/show/node/consumer/interface";
 import {
-  getSeasonGrade,
-  getSeasonPublisher,
+  newGetSeasonGradeRequest,
+  newGetSeasonPublisherRequest,
 } from "@phading/product_service_interface/show/node/client";
 import {
   GetSeasonGradeResponse,
@@ -242,10 +242,12 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
     let seasonAndDate = `${seasonId}#${date}`;
     let responesPromise = this.seasonGradeCache.get(seasonAndDate);
     if (!responesPromise) {
-      responesPromise = getSeasonGrade(this.serviceClient, {
-        seasonId,
-        date,
-      });
+      responesPromise = this.serviceClient.send(
+        newGetSeasonGradeRequest({
+          seasonId,
+          date,
+        }),
+      );
       this.seasonGradeCache.set(seasonAndDate, responesPromise);
     }
     return await responesPromise;
@@ -256,9 +258,11 @@ export class ProcessDailyMeterReadingHandler extends ProcessDailyMeterReadingHan
   ): Promise<GetSeasonPublisherResponse> {
     let responesPromise = this.seasonPublisherCache.get(seasonId);
     if (!responesPromise) {
-      responesPromise = getSeasonPublisher(this.serviceClient, {
-        seasonId,
-      });
+      responesPromise = this.serviceClient.send(
+        newGetSeasonPublisherRequest({
+          seasonId,
+        }),
+      );
       this.seasonPublisherCache.set(seasonId, responesPromise);
     }
     return await responesPromise;

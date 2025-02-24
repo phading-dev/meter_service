@@ -10,4 +10,3 @@ export let CACHE_TTL_MS_OF_SESSION = 60000;
 export let CACHE_SIZE_OF_GET_SEASON_GRADE = 10000;
 export let CACHE_SIZE_OF_GET_SEASON_PUBLISHER = 10000;
 export let DEADLINE_MS_OF_DELAYED_RECORDS = 2 * 60 * 60 * 1000;
-export let TIMEZONE_OFFSET = 8; // GMT-08:00. Only works with negative timezone offset.
