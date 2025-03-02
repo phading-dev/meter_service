@@ -1,4 +1,4 @@
-import { ENV_VARS } from "../env";
+import { ENV_VARS } from "../env_vars";
 
 export let TIMEZONE_OFFSET_STRING = ENV_VARS.timezoneNegativeOffset
   .toString()

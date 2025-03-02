@@ -1,3 +1,4 @@
+import "../../../local/env";
 import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
 import { RecordStorageStartHandler } from "./record_storage_start_handler";

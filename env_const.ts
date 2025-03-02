@@ -1,4 +1,4 @@
-import { ENV_VARS } from "./env";
+import { ENV_VARS } from "./env_vars";
 
 ENV_VARS.bigtableDatabaseId = "product-meter-db";
 ENV_VARS.bigtableClusterId = "product-meter-db-cluster";

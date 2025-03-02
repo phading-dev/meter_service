@@ -1,3 +1,4 @@
+import "../../../local/env";
 import { BIGTABLE } from "../../../common/bigtable";
 import { ListMeterReadingsPerMonthHandler } from "./list_meter_reading_per_month_handler";
 import { LIST_METER_READINGS_PER_MONTH_RESPONSE } from "@phading/product_meter_service_interface/show/web/consumer/interface";

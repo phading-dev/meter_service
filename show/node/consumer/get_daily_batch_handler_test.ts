@@ -1,3 +1,4 @@
+import "../../../local/env";
 import { BIGTABLE } from "../../../common/bigtable";
 import { GetDailyBatchHandler } from "./get_daily_batch_handler";
 import { GET_DAILY_BATCH_RESPONSE } from "@phading/product_meter_service_interface/show/node/consumer/interface";

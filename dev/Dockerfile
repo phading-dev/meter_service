@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json .
 COPY package-lock.json .
 COPY bin/ .
-RUN npm install --production
+RUN npm ci --production
 
 EXPOSE 8080
 CMD ["node", "main_bin"]

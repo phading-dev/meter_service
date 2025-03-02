@@ -1,5 +1,5 @@
 import http = require("http");
-import { ENV_VARS } from "./env";
+import { ENV_VARS } from "./env_vars";
 import { GetDailyBatchHandler as ConsumerGetDailyBatchHandler } from "./show/node/consumer/get_daily_batch_handler";
 import { GetMonthlyBatchHandler as ConsumerGetMonthlyBatchHandler } from "./show/node/consumer/get_monthly_batch_handler";
 import { ProcessDailyMeterReadingHandler as ConsumerProcessDailyMeterReadingHandler } from "./show/node/consumer/process_daily_meter_reading_handler";

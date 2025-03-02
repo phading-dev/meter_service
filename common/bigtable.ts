@@ -1,4 +1,4 @@
-import { ENV_VARS } from "../env";
+import { ENV_VARS } from "../env_vars";
 import { Bigtable } from "@google-cloud/bigtable";
 
 export let BIGTABLE = new Bigtable({

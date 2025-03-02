@@ -1,3 +1,4 @@
+import "../../../local/env";
 import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
 import { ProcessMonthlyMeterReadingHandler } from "./process_monthly_meter_reading_handler";
