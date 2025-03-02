@@ -72,7 +72,7 @@ WORKDIR /app
 COPY package.json .
 COPY package-lock.json .
 COPY bin/ .
-RUN npm ci --production
+RUN npm ci --omit=dev
 
 EXPOSE ${ENV_VARS.port}
 CMD ["node", "main_bin"]
