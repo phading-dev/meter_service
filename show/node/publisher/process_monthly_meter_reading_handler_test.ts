@@ -3,11 +3,11 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
 import { ProcessMonthlyMeterReadingHandler } from "./process_monthly_meter_reading_handler";
 import {
-  REPORT_BILLING,
-  REPORT_BILLING_REQUEST_BODY,
-  REPORT_EARNINGS,
-  REPORT_EARNINGS_REQUEST_BODY,
+  GENERATE_TRANSACTION_STATEMENT,
+  GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
 } from "@phading/commerce_service_interface/node/interface";
+import { ProductID } from "@phading/price";
+import { AmountType } from "@phading/price/amount_type";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq } from "@selfage/test_matcher";
@@ -77,16 +77,11 @@ TEST_RUNNER.run({
             },
           },
         ]);
-        let billingRequest: any;
-        let earningsRequest: any;
         let clientMock = new (class extends NodeServiceClientMock {
           public async send(request: any): Promise<any> {
             switch (request.descriptor) {
-              case REPORT_BILLING:
-                billingRequest = request;
-                break;
-              case REPORT_EARNINGS:
-                earningsRequest = request;
+              case GENERATE_TRANSACTION_STATEMENT:
+                this.request = request;
                 break;
               default:
                 throw new Error(`Unexpected.`);
@@ -125,30 +120,34 @@ TEST_RUNNER.run({
           "final publisher data",
         );
         assertThat(
-          billingRequest.body,
+          clientMock.request.body,
           eqMessage(
             {
               accountId: "publisher1",
               month: "2024-10",
-              transmittedMb: 7,
-              uploadedMb: 94,
-              storageMbh: 2534,
+              positiveAmountType: AmountType.CREDIT,
+              lineItems: [
+                {
+                  productID: ProductID.NETWORK,
+                  quantity: 7,
+                },
+                {
+                  productID: ProductID.UPLOAD,
+                  quantity: 94,
+                },
+                {
+                  productID: ProductID.STORAGE,
+                  quantity: 2534,
+                },
+                {
+                  productID: ProductID.SHOW_CREDIT,
+                  quantity: 1312,
+                },
+              ],
             },
-            REPORT_BILLING_REQUEST_BODY,
+            GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
           ),
-          "report billing request",
-        );
-        assertThat(
-          earningsRequest.body,
-          eqMessage(
-            {
-              accountId: "publisher1",
-              month: "2024-10",
-              watchTimeSec: 1312,
-            },
-            REPORT_EARNINGS_REQUEST_BODY,
-          ),
-          "report earnings request",
+          "generate transaction statement request",
         );
         assertThat(
           (await BIGTABLE.row("t5#2024-10#publisher1").exists())[0],
@@ -191,16 +190,11 @@ TEST_RUNNER.run({
             },
           },
         ]);
-        let billingRequest: any;
-        let earningsRequest: any;
         let clientMock = new (class extends NodeServiceClientMock {
           public async send(request: any): Promise<any> {
             switch (request.descriptor) {
-              case REPORT_BILLING:
-                billingRequest = request;
-                break;
-              case REPORT_EARNINGS:
-                earningsRequest = request;
+              case GENERATE_TRANSACTION_STATEMENT:
+                this.request = request;
                 break;
               default:
                 throw new Error(`Unexpected.`);
@@ -233,30 +227,34 @@ TEST_RUNNER.run({
           "final publisher data",
         );
         assertThat(
-          billingRequest.body,
+          clientMock.request.body,
           eqMessage(
             {
               accountId: "publisher1",
               month: "2024-10",
-              transmittedMb: 0,
-              uploadedMb: 8,
-              storageMbh: 934,
+              positiveAmountType: AmountType.CREDIT,
+              lineItems: [
+                {
+                  productID: ProductID.NETWORK,
+                  quantity: 0,
+                },
+                {
+                  productID: ProductID.UPLOAD,
+                  quantity: 8,
+                },
+                {
+                  productID: ProductID.STORAGE,
+                  quantity: 934,
+                },
+                {
+                  productID: ProductID.SHOW_CREDIT,
+                  quantity: 0,
+                },
+              ],
             },
-            REPORT_BILLING_REQUEST_BODY,
+            GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
           ),
-          "report billing request",
-        );
-        assertThat(
-          earningsRequest.body,
-          eqMessage(
-            {
-              accountId: "publisher1",
-              month: "2024-10",
-              watchTimeSec: 0,
-            },
-            REPORT_EARNINGS_REQUEST_BODY,
-          ),
-          "report earnings request",
+          "generate transaction statement request",
         );
       },
       tearDown: async () => {
@@ -294,16 +292,11 @@ TEST_RUNNER.run({
             },
           },
         ]);
-        let billingRequest: any;
-        let earningsRequest: any;
         let clientMock = new (class extends NodeServiceClientMock {
           public async send(request: any): Promise<any> {
             switch (request.descriptor) {
-              case REPORT_BILLING:
-                billingRequest = request;
-                break;
-              case REPORT_EARNINGS:
-                earningsRequest = request;
+              case GENERATE_TRANSACTION_STATEMENT:
+                this.request = request;
                 break;
               default:
                 throw new Error(`Unexpected.`);
@@ -336,30 +329,34 @@ TEST_RUNNER.run({
           "final publisher data",
         );
         assertThat(
-          billingRequest.body,
+          clientMock.request.body,
           eqMessage(
             {
               accountId: "publisher1",
               month: "2024-10",
-              transmittedMb: 5,
-              uploadedMb: 0,
-              storageMbh: 0,
+              positiveAmountType: AmountType.CREDIT,
+              lineItems: [
+                {
+                  productID: ProductID.NETWORK,
+                  quantity: 5,
+                },
+                {
+                  productID: ProductID.UPLOAD,
+                  quantity: 0,
+                },
+                {
+                  productID: ProductID.STORAGE,
+                  quantity: 0,
+                },
+                {
+                  productID: ProductID.SHOW_CREDIT,
+                  quantity: 12,
+                },
+              ],
             },
-            REPORT_BILLING_REQUEST_BODY,
+            GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
           ),
-          "report billing request",
-        );
-        assertThat(
-          earningsRequest.body,
-          eqMessage(
-            {
-              accountId: "publisher1",
-              month: "2024-10",
-              watchTimeSec: 12,
-            },
-            REPORT_EARNINGS_REQUEST_BODY,
-          ),
-          "report earnings request",
+          "generate transaction statement request",
         );
       },
       tearDown: async () => {

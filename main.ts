@@ -22,9 +22,9 @@ import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandl
 import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./show/web/publisher/list_meter_reading_per_month_handler";
 import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./show/web/publisher/list_meter_reading_per_season_handler";
 import {
-  PRODUCT_METER_NODE_SERVICE,
-  PRODUCT_METER_WEB_SERVICE,
-} from "@phading/product_meter_service_interface/service";
+  METER_NODE_SERVICE,
+  METER_WEB_SERVICE,
+} from "@phading/meter_service_interface/service";
 import { ServiceHandler } from "@selfage/service_handler/service_handler";
 
 async function main() {
@@ -33,7 +33,7 @@ async function main() {
     .addHealthCheckHandler()
     .addMetricsHandler();
   service
-    .addHandlerRegister(PRODUCT_METER_NODE_SERVICE)
+    .addHandlerRegister(METER_NODE_SERVICE)
     .add(ConsumerGetDailyBatchHandler.create())
     .add(ConsumerGetMonthlyBatchHandler.create())
     .add(ConsumerProcessDailyMeterReadingHandler.create())
@@ -48,7 +48,7 @@ async function main() {
     .add(RecordStorageStartHandler.create())
     .add(RecordUploadedHandler.create());
   service
-    .addHandlerRegister(PRODUCT_METER_WEB_SERVICE)
+    .addHandlerRegister(METER_WEB_SERVICE)
     .add(ConsumerListMeterReadingsPerDayHandler.create())
     .add(ConsumerListMeterReadingsPerMonthHandler.create())
     .add(ConsumerListMeterReadingPerSeasonHandler.create())

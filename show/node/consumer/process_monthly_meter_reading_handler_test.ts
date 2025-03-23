@@ -3,9 +3,11 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
 import { ProcessMonthlyMeterReadingHandler } from "./process_monthly_meter_reading_handler";
 import {
-  REPORT_BILLING,
-  REPORT_BILLING_REQUEST_BODY,
+  GENERATE_TRANSACTION_STATEMENT,
+  GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
 } from "@phading/commerce_service_interface/node/interface";
+import { ProductID } from "@phading/price";
+import { AmountType } from "@phading/price/amount_type";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq } from "@selfage/test_matcher";
@@ -105,7 +107,7 @@ TEST_RUNNER.run({
         );
         assertThat(
           clientMock.request.descriptor,
-          eq(REPORT_BILLING),
+          eq(GENERATE_TRANSACTION_STATEMENT),
           "RC descriptor",
         );
         assertThat(
@@ -114,9 +116,15 @@ TEST_RUNNER.run({
             {
               accountId: "consumer1",
               month: "2024-10",
-              watchTimeSec: 900,
+              positiveAmountType: AmountType.DEBIT,
+              lineItems: [
+                {
+                  productID: ProductID.SHOW,
+                  quantity: 900,
+                },
+              ],
             },
-            REPORT_BILLING_REQUEST_BODY,
+            GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
           ),
           "report billing request",
         );

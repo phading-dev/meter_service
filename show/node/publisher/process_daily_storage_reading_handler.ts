@@ -5,11 +5,11 @@ import {
   toTommorrowISOStringFromString,
 } from "../../../common/date_helper";
 import { Table } from "@google-cloud/bigtable";
-import { ProcessDailyStorageReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
+import { ProcessDailyStorageReadingHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   ProcessDailyStorageReadingRequestBody,
   ProcessDailyStorageReadingResponse,
-} from "@phading/product_meter_service_interface/show/node/publisher/interface";
+} from "@phading/meter_service_interface/show/node/publisher/interface";
 import { newBadRequestError } from "@selfage/http_error";
 
 export class ProcessDailyStorageReadingHandler extends ProcessDailyStorageReadingHandlerInterface {

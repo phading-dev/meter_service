@@ -2,7 +2,7 @@ import { ENV_VARS } from "./env_vars";
 import {
   K8S_SERVICE_NAME,
   K8S_SERVICE_PORT,
-} from "@phading/product_meter_service_interface/service_const";
+} from "@phading/meter_service_interface/service_const";
 import { writeFileSync } from "fs";
 
 export function generate(env: string) {
@@ -28,15 +28,14 @@ kubectl create serviceaccount ${ENV_VARS.serviceAccount} --namespace default
 gcloud projects add-iam-policy-binding ${ENV_VARS.projectId} --member=principal://iam.googleapis.com/projects/${ENV_VARS.projectNumber}/locations/global/workloadIdentityPools/${ENV_VARS.projectId}.svc.id.goog/subject/ns/default/sa/${ENV_VARS.serviceAccount} --role=roles/spanner.databaseUser --condition=None
 gcloud projects add-iam-policy-binding ${ENV_VARS.projectId} --member=principal://iam.googleapis.com/projects/${ENV_VARS.projectNumber}/locations/global/workloadIdentityPools/${ENV_VARS.projectId}.svc.id.goog/subject/ns/default/sa/${ENV_VARS.serviceAccount} --role=roles/bigtable.user --condition=None
 
-# Create Bigtable database
-cbt -project ${ENV_VARS.projectId} createinstance ${ENV_VARS.bigtableInstanceId} "${ENV_VARS.bigtableInstanceId}" ${ENV_VARS.bigtableClusterId} ${ENV_VARS.bigtableZone} 1 SSD
-cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createtable ${ENV_VARS.bigtableDatabaseId}
-cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableDatabaseId} w:maxversions=1
-cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableDatabaseId} a:maxversions=1
-cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableDatabaseId} s:maxversions=1
-cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableDatabaseId} u:maxversions=1
-cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableDatabaseId} t:maxversions=1
-cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableDatabaseId} c:maxversions=1
+# Create Bigtable
+cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createtable ${ENV_VARS.bigtableTableId}
+cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableTableId} w:maxversions=1
+cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableTableId} a:maxversions=1
+cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableTableId} s:maxversions=1
+cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableTableId} u:maxversions=1
+cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableTableId} t:maxversions=1
+cbt -project ${ENV_VARS.projectId} -instance ${ENV_VARS.bigtableInstanceId} createfamily ${ENV_VARS.bigtableTableId} c:maxversions=1
 `;
   writeFileSync(`${env}/turnup.sh`, turnupTemplate);
 

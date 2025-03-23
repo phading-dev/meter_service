@@ -1,11 +1,20 @@
 import "./env";
 import { ENV_VARS } from "../env_vars";
 import { spawnSync } from "child_process";
+import { existsSync } from "fs";
 
 async function main() {
-  spawnSync("gcloud", ["auth", "application-default", "login"], {
-    stdio: "inherit",
-  });
+  if (
+    existsSync(
+      `${process.env.HOME}/.config/gcloud/application_default_credentials.json`,
+    )
+  ) {
+    console.log("Application default credentials already exist.");
+  } else {
+    spawnSync("gcloud", ["auth", "application-default", "login"], {
+      stdio: "inherit",
+    });
+  }
   spawnSync("gcloud", ["config", "set", "project", ENV_VARS.projectId], {
     stdio: "inherit",
   });
@@ -26,7 +35,7 @@ async function main() {
     "-instance",
     ENV_VARS.bigtableInstanceId,
     "createtable",
-    ENV_VARS.bigtableDatabaseId,
+    ENV_VARS.bigtableTableId,
   ]);
   spawnSync("cbt", [
     "-project",
@@ -34,7 +43,7 @@ async function main() {
     "-instance",
     ENV_VARS.bigtableInstanceId,
     "createfamily",
-    ENV_VARS.bigtableDatabaseId,
+    ENV_VARS.bigtableTableId,
     "w:maxversions=1",
   ]);
   spawnSync("cbt", [
@@ -43,7 +52,7 @@ async function main() {
     "-instance",
     ENV_VARS.bigtableInstanceId,
     "createfamily",
-    ENV_VARS.bigtableDatabaseId,
+    ENV_VARS.bigtableTableId,
     "a:maxversions=1",
   ]);
   spawnSync("cbt", [
@@ -52,7 +61,7 @@ async function main() {
     "-instance",
     ENV_VARS.bigtableInstanceId,
     "createfamily",
-    ENV_VARS.bigtableDatabaseId,
+    ENV_VARS.bigtableTableId,
     "s:maxversions=1",
   ]);
   spawnSync("cbt", [
@@ -61,7 +70,7 @@ async function main() {
     "-instance",
     ENV_VARS.bigtableInstanceId,
     "createfamily",
-    ENV_VARS.bigtableDatabaseId,
+    ENV_VARS.bigtableTableId,
     "u:maxversions=1",
   ]);
   spawnSync("cbt", [
@@ -70,7 +79,7 @@ async function main() {
     "-instance",
     ENV_VARS.bigtableInstanceId,
     "createfamily",
-    ENV_VARS.bigtableDatabaseId,
+    ENV_VARS.bigtableTableId,
     "t:maxversions=1",
   ]);
   spawnSync("cbt", [
@@ -79,7 +88,7 @@ async function main() {
     "-instance",
     ENV_VARS.bigtableInstanceId,
     "createfamily",
-    ENV_VARS.bigtableDatabaseId,
+    ENV_VARS.bigtableTableId,
     "c:maxversions=1",
   ]);
 }

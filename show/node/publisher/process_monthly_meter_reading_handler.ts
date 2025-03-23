@@ -2,15 +2,14 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { incrementColumn } from "../../../common/bigtable_data_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import {
-  newReportBillingRequest,
-  newReportEarningsRequest,
-} from "@phading/commerce_service_interface/node/client";
-import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
+import { newGenerateTransactionStatementRequest } from "@phading/commerce_service_interface/node/client";
+import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   ProcessMonthlyMeterReadingRequestBody,
   ProcessMonthlyMeterReadingResponse,
-} from "@phading/product_meter_service_interface/show/node/publisher/interface";
+} from "@phading/meter_service_interface/show/node/publisher/interface";
+import { ProductID } from "@phading/price";
+import { AmountType } from "@phading/price/amount_type";
 import { newBadRequestError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
@@ -107,19 +106,28 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
         },
       ]),
       this.serviceClient.send(
-        newReportBillingRequest({
+        newGenerateTransactionStatementRequest({
           accountId,
           month,
-          transmittedMb: data["t"]["nm"] ? data["t"]["nm"].value : 0,
-          uploadedMb: data["t"]["um"] ? data["t"]["um"].value : 0,
-          storageMbh: data["t"]["smh"] ? data["t"]["smh"].value : 0,
-        }),
-      ),
-      this.serviceClient.send(
-        newReportEarningsRequest({
-          accountId,
-          month,
-          watchTimeSec: data["t"]["ws"] ? data["t"]["ws"].value : 0,
+          positiveAmountType: AmountType.CREDIT,
+          lineItems: [
+            {
+              productID: ProductID.NETWORK,
+              quantity: data["t"]["nm"] ? data["t"]["nm"].value : 0,
+            },
+            {
+              productID: ProductID.UPLOAD,
+              quantity: data["t"]["um"] ? data["t"]["um"].value : 0,
+            },
+            {
+              productID: ProductID.STORAGE,
+              quantity: data["t"]["smh"] ? data["t"]["smh"].value : 0,
+            },
+            {
+              productID: ProductID.SHOW_CREDIT,
+              quantity: data["t"]["ws"] ? data["t"]["ws"].value : 0,
+            },
+          ],
         }),
       ),
     ]);

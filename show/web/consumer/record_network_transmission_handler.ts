@@ -1,22 +1,22 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { toDateISOString, toToday } from "../../../common/date_helper";
 import {
-  CACHED_SESSION_EXCHANGER,
-  CachedSessionExchanger,
-} from "./common/cached_session_exchanger";
+  CACHED_SESSION_FETCHER,
+  CachedSessionFetcher,
+} from "./common/cached_session_fetcher";
 import { Table } from "@google-cloud/bigtable";
-import { RecordNetworkTransmissionHandlerInterface } from "@phading/product_meter_service_interface/show/web/consumer/handler";
+import { RecordNetworkTransmissionHandlerInterface } from "@phading/meter_service_interface/show/web/consumer/handler";
 import {
   RecordNetworkTransmissionRequestBody,
   RecordNetworkTransmissionResponse,
-} from "@phading/product_meter_service_interface/show/web/consumer/interface";
+} from "@phading/meter_service_interface/show/web/consumer/interface";
 import { newBadRequestError, newNotAcceptableError } from "@selfage/http_error";
 
 export class RecordNetworkTransmissionHandler extends RecordNetworkTransmissionHandlerInterface {
   public static create(): RecordNetworkTransmissionHandler {
     return new RecordNetworkTransmissionHandler(
       BIGTABLE,
-      CACHED_SESSION_EXCHANGER,
+      CACHED_SESSION_FETCHER,
       () => new Date(),
     );
   }
@@ -25,7 +25,7 @@ export class RecordNetworkTransmissionHandler extends RecordNetworkTransmissionH
 
   public constructor(
     private bigtable: Table,
-    private sessionExchanger: CachedSessionExchanger,
+    private sessionFetcher: CachedSessionFetcher,
     private getNowDate: () => Date,
   ) {
     super();
@@ -50,7 +50,7 @@ export class RecordNetworkTransmissionHandler extends RecordNetworkTransmissionH
         `"transmittedBytes" is unreasonably large, which is ${body.transmittedBytes}. It could be a bad actor.`,
       );
     }
-    let accountId = await this.sessionExchanger.getAccountId(
+    let accountId = await this.sessionFetcher.getAccountId(
       sessionStr,
       "record network transmission",
     );

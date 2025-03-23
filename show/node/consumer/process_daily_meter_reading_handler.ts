@@ -6,11 +6,11 @@ import {
 } from "../../../common/constants";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { ProcessDailyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/consumer/handler";
+import { ProcessDailyMeterReadingHandlerInterface } from "@phading/meter_service_interface/show/node/consumer/handler";
 import {
   ProcessDailyMeterReadingRequestBody,
   ProcessDailyMeterReadingResponse,
-} from "@phading/product_meter_service_interface/show/node/consumer/interface";
+} from "@phading/meter_service_interface/show/node/consumer/interface";
 import {
   newGetSeasonGradeRequest,
   newGetSeasonPublisherRequest,

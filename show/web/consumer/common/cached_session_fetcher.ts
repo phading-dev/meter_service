@@ -3,14 +3,14 @@ import {
   CACHE_TTL_MS_OF_SESSION,
 } from "../../../../common/constants";
 import { SERVICE_CLIENT } from "../../../../common/service_client";
-import { newExchangeSessionAndCheckCapabilityRequest } from "@phading/user_session_service_interface/node/client";
+import { newFetchSessionAndCheckCapabilityRequest } from "@phading/user_session_service_interface/node/client";
 import { newUnauthorizedError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 import { LRUCache } from "lru-cache";
 
-export class CachedSessionExchanger {
-  public static create(): CachedSessionExchanger {
-    return new CachedSessionExchanger(SERVICE_CLIENT);
+export class CachedSessionFetcher {
+  public static create(): CachedSessionFetcher {
+    return new CachedSessionFetcher(SERVICE_CLIENT);
   }
 
   public lruCache: LRUCache<string, string>;
@@ -29,14 +29,14 @@ export class CachedSessionExchanger {
     let accountIdCached = this.lruCache.get(sessionStr);
     if (!accountIdCached) {
       let { accountId, capabilities } = await this.serviceClient.send(
-        newExchangeSessionAndCheckCapabilityRequest({
+        newFetchSessionAndCheckCapabilityRequest({
           signedSession: sessionStr,
           capabilitiesMask: {
-            checkCanConsumeShows: true,
+            checkCanConsume: true,
           },
         }),
       );
-      if (!capabilities.canConsumeShows) {
+      if (!capabilities.canConsume) {
         throw newUnauthorizedError(
           `Account ${accountId} not allowed to ${purpose}.`,
         );
@@ -48,4 +48,4 @@ export class CachedSessionExchanger {
   }
 }
 
-export let CACHED_SESSION_EXCHANGER = CachedSessionExchanger.create();
+export let CACHED_SESSION_FETCHER = CachedSessionFetcher.create();

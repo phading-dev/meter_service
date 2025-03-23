@@ -2,12 +2,14 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { incrementColumn } from "../../../common/bigtable_data_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
-import { newReportBillingRequest } from "@phading/commerce_service_interface/node/client";
-import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/consumer/handler";
+import { newGenerateTransactionStatementRequest } from "@phading/commerce_service_interface/node/client";
+import { ProcessMonthlyMeterReadingHandlerInterface } from "@phading/meter_service_interface/show/node/consumer/handler";
 import {
   ProcessMonthlyMeterReadingRequestBody,
   ProcessMonthlyMeterReadingResponse,
-} from "@phading/product_meter_service_interface/show/node/consumer/interface";
+} from "@phading/meter_service_interface/show/node/consumer/interface";
+import { ProductID } from "@phading/price";
+import { AmountType } from "@phading/price/amount_type";
 import { newBadRequestError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
@@ -78,10 +80,16 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
         },
       ]),
       this.serviceClient.send(
-        newReportBillingRequest({
+        newGenerateTransactionStatementRequest({
           accountId,
           month,
-          watchTimeSec: data["t"]["ws"].value,
+          positiveAmountType: AmountType.DEBIT,
+          lineItems: [
+            {
+              productID: ProductID.SHOW,
+              quantity: data["t"]["ws"].value,
+            },
+          ],
         }),
       ),
     ]);

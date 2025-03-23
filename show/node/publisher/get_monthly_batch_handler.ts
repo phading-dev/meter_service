@@ -2,11 +2,11 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { BATCH_SIZE_OF_MONTHLY_RPOCESSING_PUBLISHERS } from "../../../common/constants";
 import { toDateISOString, toToday } from "../../../common/date_helper";
 import { Table } from "@google-cloud/bigtable";
-import { GetMonthlyBatchHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
+import { GetMonthlyBatchHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   GetMonthlyBatchRequestBody,
   GetMonthlyBatchResponse,
-} from "@phading/product_meter_service_interface/show/node/publisher/interface";
+} from "@phading/meter_service_interface/show/node/publisher/interface";
 
 export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
   public static create(): GetMonthlyBatchHandler {

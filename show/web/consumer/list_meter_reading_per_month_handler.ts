@@ -6,13 +6,13 @@ import {
 import { SERVICE_CLIENT } from "../../../common/service_client";
 import { Table } from "@google-cloud/bigtable";
 import { MAX_MONTH_RANGE } from "@phading/constants/meter";
-import { ListMeterReadingsPerMonthHandlerInterface } from "@phading/product_meter_service_interface/show/web/consumer/handler";
+import { ListMeterReadingsPerMonthHandlerInterface } from "@phading/meter_service_interface/show/web/consumer/handler";
 import {
   ListMeterReadingsPerMonthRequestBody,
   ListMeterReadingsPerMonthResponse,
-} from "@phading/product_meter_service_interface/show/web/consumer/interface";
-import { MeterReadingPerMonth } from "@phading/product_meter_service_interface/show/web/consumer/meter_reading";
-import { newExchangeSessionAndCheckCapabilityRequest } from "@phading/user_session_service_interface/node/client";
+} from "@phading/meter_service_interface/show/web/consumer/interface";
+import { MeterReadingPerMonth } from "@phading/meter_service_interface/show/web/consumer/meter_reading";
+import { newFetchSessionAndCheckCapabilityRequest } from "@phading/user_session_service_interface/node/client";
 import { newBadRequestError, newUnauthorizedError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
@@ -56,14 +56,14 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
       );
     }
     let { accountId, capabilities } = await this.serviceClient.send(
-      newExchangeSessionAndCheckCapabilityRequest({
+      newFetchSessionAndCheckCapabilityRequest({
         signedSession: sessionStr,
         capabilitiesMask: {
-          checkCanConsumeShows: true,
+          checkCanConsume: true,
         },
       }),
     );
-    if (!capabilities.canConsumeShows) {
+    if (!capabilities.canConsume) {
       throw newUnauthorizedError(
         `Account ${accountId} not allowed to list meter reading per month.`,
       );

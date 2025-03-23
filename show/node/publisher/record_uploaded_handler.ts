@@ -1,11 +1,11 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { toDateISOString, toToday } from "../../../common/date_helper";
 import { Table } from "@google-cloud/bigtable";
-import { RecordUploadedHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
+import { RecordUploadedHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   RecordUploadedRequestBody,
   RecordUploadedResponse,
-} from "@phading/product_meter_service_interface/show/node/publisher/interface";
+} from "@phading/meter_service_interface/show/node/publisher/interface";
 import { newBadRequestError } from "@selfage/http_error";
 
 export class RecordUploadedHandler extends RecordUploadedHandlerInterface {

@@ -1,7 +1,7 @@
 import "../../../local/env";
 import { BIGTABLE } from "../../../common/bigtable";
 import { GetDailyWatchBatchHandler } from "./get_daily_watch_batch_handler";
-import { GET_DAILY_WATCH_BATCH_RESPONSE } from "@phading/product_meter_service_interface/show/node/publisher/interface";
+import { GET_DAILY_WATCH_BATCH_RESPONSE } from "@phading/meter_service_interface/show/node/publisher/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { assertThat } from "@selfage/test_matcher";
 import { TEST_RUNNER } from "@selfage/test_runner";

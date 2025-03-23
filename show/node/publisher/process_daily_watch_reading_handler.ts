@@ -6,11 +6,11 @@ import {
 } from "../../../common/bigtable_data_helper";
 import { BATCH_SIZE_OF_DAILY_PROCESSING_CONUMSERS_FOR_ONE_PUBLISHER } from "../../../common/constants";
 import { Table } from "@google-cloud/bigtable";
-import { ProcessDailyWatchReadingHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
+import { ProcessDailyWatchReadingHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   ProcessDailyWatchReadingRequestBody,
   ProcessDailyWatchReadingResponse,
-} from "@phading/product_meter_service_interface/show/node/publisher/interface";
+} from "@phading/meter_service_interface/show/node/publisher/interface";
 import { newBadRequestError } from "@selfage/http_error";
 
 export class ProcessDailyWatchReadingHandler extends ProcessDailyWatchReadingHandlerInterface {

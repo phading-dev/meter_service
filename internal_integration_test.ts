@@ -1,3 +1,4 @@
+import "./local/env";
 import { BIGTABLE } from "./common/bigtable";
 import { GetDailyBatchHandler as ConsumerGetDailyBatchHandler } from "./show/node/consumer/get_daily_batch_handler";
 import { GetMonthlyBatchHandler as ConsumerGetMonthlyBatchHandler } from "./show/node/consumer/get_monthly_batch_handler";
@@ -12,7 +13,7 @@ import { ProcessMonthlyMeterReadingHandler as PublisherProcessMonthlyMeterReadin
 import { RecordStorageEndHandler } from "./show/node/publisher/record_storage_end_handler";
 import { RecordStorageStartHandler } from "./show/node/publisher/record_storage_start_handler";
 import { RecordUploadedHandler } from "./show/node/publisher/record_uploaded_handler";
-import { CachedSessionExchanger } from "./show/web/consumer/common/cached_session_exchanger";
+import { CachedSessionFetcher } from "./show/web/consumer/common/cached_session_fetcher";
 import { ListMeterReadingsPerDayHandler as ConsumerListMeterReadingsPerDayHandler } from "./show/web/consumer/list_meter_reading_per_day_handler";
 import { ListMeterReadingsPerMonthHandler as ConsumerListMeterReadingsPerMonthHandler } from "./show/web/consumer/list_meter_reading_per_month_handler";
 import { ListMeterReadingPerSeasonHandler as ConsumerListMeterReadingPerSeasonHandler } from "./show/web/consumer/list_meter_reading_per_season_handler";
@@ -22,21 +23,21 @@ import { ListMeterReadingsPerDayHandler as PublisherListMeterReadingsPerDayHandl
 import { ListMeterReadingsPerMonthHandler as PublisherListMeterReadingsPerMonthHandler } from "./show/web/publisher/list_meter_reading_per_month_handler";
 import { ListMeterReadingPerSeasonHandler as PublisherListMeterReadingPerSeasonHandler } from "./show/web/publisher/list_meter_reading_per_season_handler";
 import {
-  REPORT_BILLING,
-  REPORT_BILLING_REQUEST_BODY,
-  REPORT_EARNINGS,
-  REPORT_EARNINGS_REQUEST_BODY,
+  GENERATE_TRANSACTION_STATEMENT,
+  GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
 } from "@phading/commerce_service_interface/node/interface";
 import {
   LIST_METER_READINGS_PER_DAY_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_DAY_RESPONSE,
   LIST_METER_READINGS_PER_MONTH_RESPONSE as CONSUMER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
   LIST_METER_READING_PER_SEASON_RESPONSE as CONSUMER_LIST_METER_READING_PER_SEASON_RESPONSE,
-} from "@phading/product_meter_service_interface/show/web/consumer/interface";
+} from "@phading/meter_service_interface/show/web/consumer/interface";
 import {
   LIST_METER_READINGS_PER_DAY_RESPONSE as PUBLISHER_LIST_METER_READINGS_PER_DAY_RESPONSE,
   LIST_METER_READINGS_PER_MONTH_RESPONSE as PUBLISHER_LIST_METER_READINGS_PER_MONTH_RESPONSE,
   LIST_METER_READING_PER_SEASON_RESPONSE as PUBLISHER_LIST_METER_READING_PER_SEASON_RESPONSE,
-} from "@phading/product_meter_service_interface/show/web/publisher/interface";
+} from "@phading/meter_service_interface/show/web/publisher/interface";
+import { ProductID } from "@phading/price";
+import { AmountType } from "@phading/price/amount_type";
 import {
   GET_SEASON_GRADE,
   GET_SEASON_PUBLISHER,
@@ -44,8 +45,8 @@ import {
   GetSeasonPublisherResponse,
 } from "@phading/product_service_interface/show/node/interface";
 import {
-  EXCHANGE_SESSION_AND_CHECK_CAPABILITY,
-  ExchangeSessionAndCheckCapabilityResponse,
+  FETCH_SESSION_AND_CHECK_CAPABILITY,
+  FetchSessionAndCheckCapabilityResponse,
 } from "@phading/user_session_service_interface/node/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
@@ -60,20 +61,23 @@ TEST_RUNNER.run({
       execute: async () => {
         // Prepare
         let clientMock = new (class extends NodeServiceClientMock {
-          public billingRequest: any;
-          public earningsRequest: any;
+          public generateRequest: any;
           public async send(request: any): Promise<any> {
-            if (request.descriptor === EXCHANGE_SESSION_AND_CHECK_CAPABILITY) {
+            if (request.descriptor === FETCH_SESSION_AND_CHECK_CAPABILITY) {
               if (request.body.signedSession === "consumerSession1") {
                 return {
                   accountId: "consumer1",
-                  canConsumeShows: true,
-                } as ExchangeSessionAndCheckCapabilityResponse;
+                  capabilities: {
+                    canConsume: true,
+                  },
+                } as FetchSessionAndCheckCapabilityResponse;
               } else {
                 return {
                   accountId: "publisher1",
-                  canPublishShows: true,
-                } as ExchangeSessionAndCheckCapabilityResponse;
+                  capabilities: {
+                    canPublish: true,
+                  },
+                } as FetchSessionAndCheckCapabilityResponse;
               }
             } else if (request.descriptor === GET_SEASON_PUBLISHER) {
               return {
@@ -83,10 +87,8 @@ TEST_RUNNER.run({
               return {
                 grade: 5,
               } as GetSeasonGradeResponse;
-            } else if (request.descriptor === REPORT_BILLING) {
-              this.billingRequest = request;
-            } else if (request.descriptor === REPORT_EARNINGS) {
-              this.earningsRequest = request;
+            } else if (request.descriptor === GENERATE_TRANSACTION_STATEMENT) {
+              this.generateRequest = request;
             } else {
               throw new Error("Not handled.");
             }
@@ -96,7 +98,7 @@ TEST_RUNNER.run({
         // 2024-11-04T18:00:00Z
         await new RecordWatchTimeHandler(
           BIGTABLE,
-          new CachedSessionExchanger(clientMock),
+          new CachedSessionFetcher(clientMock),
           () => new Date(1730743200000),
         ).handle(
           "",
@@ -111,7 +113,7 @@ TEST_RUNNER.run({
         // 2024-11-04T18:00:00Z
         await new RecordNetworkTransmissionHandler(
           BIGTABLE,
-          new CachedSessionExchanger(clientMock),
+          new CachedSessionFetcher(clientMock),
           () => new Date(1730743200000),
         ).handle(
           "",
@@ -342,16 +344,22 @@ TEST_RUNNER.run({
           rowKey: consumerMonthlyBatchResponse.rowKeys[0],
         });
         assertThat(
-          clientMock.billingRequest.body,
+          clientMock.generateRequest.body,
           eqMessage(
             {
               accountId: "consumer1",
               month: "2024-11",
-              watchTimeSec: 61500,
+              positiveAmountType: AmountType.DEBIT,
+              lineItems: [
+                {
+                  productID: ProductID.SHOW,
+                  quantity: 61500,
+                },
+              ],
             },
-            REPORT_BILLING_REQUEST_BODY,
+            GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
           ),
-          "report billing request for consumer",
+          "generate transaction statement request for consumer",
         );
 
         let consumerListPerMonthResponse =
@@ -399,30 +407,34 @@ TEST_RUNNER.run({
           rowKey: publisherMonthlyBatchResponse.rowKeys[0],
         });
         assertThat(
-          clientMock.billingRequest.body,
+          clientMock.generateRequest.body,
           eqMessage(
             {
               accountId: "publisher1",
               month: "2024-11",
-              transmittedMb: 977,
-              uploadedMb: 3,
-              storageMbh: 31,
+              positiveAmountType: AmountType.CREDIT,
+              lineItems: [
+                {
+                  productID: ProductID.NETWORK,
+                  quantity: 977,
+                },
+                {
+                  productID: ProductID.UPLOAD,
+                  quantity: 3,
+                },
+                {
+                  productID: ProductID.STORAGE,
+                  quantity: 31,
+                },
+                {
+                  productID: ProductID.SHOW_CREDIT,
+                  quantity: 61500,
+                },
+              ],
             },
-            REPORT_BILLING_REQUEST_BODY,
+            GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
           ),
           "report billing request for publisher",
-        );
-        assertThat(
-          clientMock.earningsRequest.body,
-          eqMessage(
-            {
-              accountId: "publisher1",
-              month: "2024-11",
-              watchTimeSec: 61500,
-            },
-            REPORT_EARNINGS_REQUEST_BODY,
-          ),
-          "report earnings request for publisher",
         );
 
         let publisherListPerMonthResponse =

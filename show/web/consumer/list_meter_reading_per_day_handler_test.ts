@@ -1,8 +1,8 @@
 import "../../../local/env";
 import { BIGTABLE } from "../../../common/bigtable";
 import { ListMeterReadingsPerDayHandler } from "./list_meter_reading_per_day_handler";
-import { LIST_METER_READINGS_PER_DAY_RESPONSE } from "@phading/product_meter_service_interface/show/web/consumer/interface";
-import { ExchangeSessionAndCheckCapabilityResponse } from "@phading/user_session_service_interface/node/interface";
+import { LIST_METER_READINGS_PER_DAY_RESPONSE } from "@phading/meter_service_interface/show/web/consumer/interface";
+import { FetchSessionAndCheckCapabilityResponse } from "@phading/user_session_service_interface/node/interface";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat } from "@selfage/test_matcher";
@@ -56,9 +56,9 @@ TEST_RUNNER.run({
         clientMock.response = {
           accountId: "consumer1",
           capabilities: {
-            canConsumeShows: true,
+            canConsume: true,
           },
-        } as ExchangeSessionAndCheckCapabilityResponse;
+        } as FetchSessionAndCheckCapabilityResponse;
         let handler = new ListMeterReadingsPerDayHandler(BIGTABLE, clientMock);
 
         // Execute

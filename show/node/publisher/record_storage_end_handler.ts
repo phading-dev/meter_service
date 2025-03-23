@@ -1,11 +1,11 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { toDateISOString, toToday } from "../../../common/date_helper";
 import { Table } from "@google-cloud/bigtable";
-import { RecordStorageEndHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
+import { RecordStorageEndHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   RecordStorageEndRequestBody,
   RecordStorageEndResponse,
-} from "@phading/product_meter_service_interface/show/node/publisher/interface";
+} from "@phading/meter_service_interface/show/node/publisher/interface";
 import { newBadRequestError, newNotAcceptableError } from "@selfage/http_error";
 
 export class RecordStorageEndHandler extends RecordStorageEndHandlerInterface {

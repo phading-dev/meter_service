@@ -2,11 +2,11 @@ import { BIGTABLE } from "../../../common/bigtable";
 import { BATCH_SIZE_OF_DAILY_WATCH_PROCESSING_PUBLISHERS } from "../../../common/constants";
 import { toDateISOString, toToday } from "../../../common/date_helper";
 import { Table } from "@google-cloud/bigtable";
-import { GetDailyWatchBatchHandlerInterface } from "@phading/product_meter_service_interface/show/node/publisher/handler";
+import { GetDailyWatchBatchHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   GetDailyWatchBatchRequestBody,
   GetDailyWatchBatchResponse,
-} from "@phading/product_meter_service_interface/show/node/publisher/interface";
+} from "@phading/meter_service_interface/show/node/publisher/interface";
 
 export class GetDailyWatchBatchHandler extends GetDailyWatchBatchHandlerInterface {
   public static create(): GetDailyWatchBatchHandler {

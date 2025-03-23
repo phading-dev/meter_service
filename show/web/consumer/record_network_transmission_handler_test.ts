@@ -1,9 +1,9 @@
 import "../../../local/env";
 import { BIGTABLE } from "../../../common/bigtable";
 import { eqData } from "../../../common/bigtable_data_matcher";
-import { CachedSessionExchanger } from "./common/cached_session_exchanger";
+import { CachedSessionFetcher } from "./common/cached_session_fetcher";
 import { RecordNetworkTransmissionHandler } from "./record_network_transmission_handler";
-import { ExchangeSessionAndCheckCapabilityResponse } from "@phading/user_session_service_interface/node/interface";
+import { FetchSessionAndCheckCapabilityResponse } from "@phading/user_session_service_interface/node/interface";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq } from "@selfage/test_matcher";
 import { TEST_RUNNER } from "@selfage/test_runner";
@@ -19,13 +19,13 @@ TEST_RUNNER.run({
         clientMock.response = {
           accountId: "consumer1",
           capabilities: {
-            canConsumeShows: true,
+            canConsume: true,
           },
-        } as ExchangeSessionAndCheckCapabilityResponse;
+        } as FetchSessionAndCheckCapabilityResponse;
         // 2024-10-26 23:xx:xx
         let handler = new RecordNetworkTransmissionHandler(
           BIGTABLE,
-          new CachedSessionExchanger(clientMock),
+          new CachedSessionFetcher(clientMock),
           () => new Date(1729983732156),
         );
 
