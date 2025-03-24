@@ -106,7 +106,7 @@ spec:
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /readinessz
+            path: /readiness
             port: ${ENV_VARS.port}
           initialDelaySeconds: 5
           periodSeconds: 10
