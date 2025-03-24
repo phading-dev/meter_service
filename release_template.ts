@@ -108,7 +108,7 @@ spec:
           httpGet:
             path: /readiness
             port: ${ENV_VARS.port}
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
           periodSeconds: 10
 ---
 apiVersion: monitoring.googleapis.com/v1
