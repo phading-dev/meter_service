@@ -6,16 +6,16 @@ steps:
   entrypoint: npx
   args: ['bundage', 'bfn', 'dev/main', 'main_bin', '-t', 'bin']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/phading-dev/product-meter-service:latest', '-f', 'dev/Dockerfile', '.']
+  args: ['build', '-t', 'gcr.io/phading-dev/meter-service:latest', '-f', 'dev/Dockerfile', '.']
 - name: "gcr.io/cloud-builders/docker"
-  args: ['push', 'gcr.io/phading-dev/product-meter-service:latest']
+  args: ['push', 'gcr.io/phading-dev/meter-service:latest']
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'dev/service.yaml']
   env:
     - 'CLOUDSDK_CONTAINER_CLUSTER=phading-cluster'
     - 'CLOUDSDK_COMPUTE_REGION=us-central1'
 - name: 'gcr.io/cloud-builders/kubectl'
-  args: ['rollout', 'restart', 'deployment', 'product-meter-service-deployment']
+  args: ['rollout', 'restart', 'deployment', 'meter-service-deployment']
   env:
     - 'CLOUDSDK_CONTAINER_CLUSTER=phading-cluster'
     - 'CLOUDSDK_COMPUTE_REGION=us-central1'

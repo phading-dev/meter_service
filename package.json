@@ -38,7 +38,7 @@
     "@selfage/message": "^3.5.7",
     "@selfage/node_service_client": "^2.2.2",
     "@selfage/service_descriptor": "^5.3.1",
-    "@selfage/service_handler": "^7.3.1",
+    "@selfage/service_handler": "^7.4.0",
     "express": "^4.21.1",
     "lru-cache": "^11.0.1"
   }

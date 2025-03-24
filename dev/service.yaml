@@ -1,32 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: product-meter-service-deployment
+  name: meter-service-deployment
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: product-meter-service-pod
+      app: meter-service-pod
   template:
     metadata:
       labels:
-        app: product-meter-service-pod
+        app: meter-service-pod
     spec:
-      serviceAccountName: product-meter-service-account
+      serviceAccountName: meter-service-account
       containers:
-      - name: product-meter-service-container
-        image: gcr.io/phading-dev/product-meter-service:latest
+      - name: meter-service-container
+        image: gcr.io/phading-dev/meter-service:latest
         ports:
         - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readinessz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
 ---
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
-  name: product-meter-service-monitoring
+  name: meter-service-monitoring
 spec:
   selector:
     matchLabels:
-      app: product-meter-service-pod
+      app: meter-service-pod
   endpoints:
   - port: 8080
     path: /metricsz
@@ -35,7 +47,7 @@ spec:
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: product-meter-service-neg-health-check
+  name: meter-service-neg-health-check
 spec:
   healthCheck:
     port: 8080
@@ -45,13 +57,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: product-meter-service
+  name: meter-service
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
-    beta.cloud.google.com/backend-config: '{"default": "product-meter-service-neg-health-check"}'
+    beta.cloud.google.com/backend-config: '{"default": "meter-service-neg-health-check"}'
 spec:
   selector:
-    app: product-meter-service-pod
+    app: meter-service-pod
   ports:
     - protocol: TCP
       port: 80

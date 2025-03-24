@@ -28,9 +28,13 @@ import {
 import { ServiceHandler } from "@selfage/service_handler/service_handler";
 
 async function main() {
-  let service = ServiceHandler.create(http.createServer())
+  let service = ServiceHandler.create(
+    http.createServer(),
+    ENV_VARS.externalOrigin,
+  )
     .addCorsAllowedPreflightHandler()
     .addHealthCheckHandler()
+    .addReadinessHandler()
     .addMetricsHandler();
   service
     .addHandlerRegister(METER_NODE_SERVICE)
