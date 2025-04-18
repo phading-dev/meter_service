@@ -28,17 +28,18 @@
   },
   "dependencies": {
     "@google-cloud/bigtable": "^5.1.2",
-    "@phading/cluster": "^1.0.2",
-    "@phading/commerce_service_interface": "^1.1.1",
+    "@phading/cluster": "^1.0.6",
+    "@phading/commerce_service_interface": "^1.2.0",
     "@phading/constants": "^0.3.7",
     "@phading/meter_service_interface": "^1.0.0",
-    "@phading/product_service_interface": "^1.0.6",
+    "@phading/product_service_interface": "^1.0.16",
     "@phading/user_session_service_interface": "^1.1.0",
     "@selfage/http_error": "^1.1.2",
     "@selfage/message": "^3.5.7",
     "@selfage/node_service_client": "^2.2.2",
     "@selfage/service_descriptor": "^5.3.1",
     "@selfage/service_handler": "^7.4.0",
+    "@selfage/tz_date": "^1.0.1",
     "express": "^4.21.1",
     "lru-cache": "^11.0.1"
   }

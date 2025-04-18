@@ -1,9 +1,6 @@
 import { BIGTABLE } from "../../../common/bigtable";
-import {
-  getMonthDifference,
-  toMonthISOString,
-} from "../../../common/date_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
+import { ENV_VARS } from "../../../env_vars";
 import { Table } from "@google-cloud/bigtable";
 import { MAX_MONTH_RANGE } from "@phading/constants/meter";
 import { ListMeterReadingsPerMonthHandlerInterface } from "@phading/meter_service_interface/show/web/publisher/handler";
@@ -15,6 +12,7 @@ import { MeterReadingPerMonth } from "@phading/meter_service_interface/show/web/
 import { newFetchSessionAndCheckCapabilityRequest } from "@phading/user_session_service_interface/node/client";
 import { newBadRequestError, newUnauthorizedError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
+import { TzDate } from "@selfage/tz_date";
 
 export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthHandlerInterface {
   public static create(): ListMeterReadingsPerMonthHandler {
@@ -39,18 +37,24 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
     if (!body.endMonth) {
       throw newBadRequestError(`"endMonth" is required.`);
     }
-    let startMonth = new Date(body.startMonth);
-    if (isNaN(startMonth.valueOf())) {
+    let startMonth = TzDate.fromLocalDateString(
+      body.startMonth,
+      ENV_VARS.timezoneNegativeOffset,
+    );
+    if (isNaN(startMonth.toTimestampMs())) {
       throw newBadRequestError(`"startMonth" is not a valid date.`);
     }
-    let endMonth = new Date(body.endMonth);
-    if (isNaN(endMonth.valueOf())) {
+    let endMonth = TzDate.fromLocalDateString(
+      body.endMonth,
+      ENV_VARS.timezoneNegativeOffset,
+    );
+    if (isNaN(endMonth.toTimestampMs())) {
       throw newBadRequestError(`"endMonth" is not a valid date.`);
     }
-    if (startMonth >= endMonth) {
+    if (startMonth.toTimestampMs() >= endMonth.toTimestampMs()) {
       throw newBadRequestError(`"startMonth" must be smaller than "endMonth".`);
     }
-    if (getMonthDifference(startMonth, endMonth) > MAX_MONTH_RANGE) {
+    if (endMonth.minusDateInMonths(startMonth) + 1 > MAX_MONTH_RANGE) {
       throw newBadRequestError(
         `The range between "startMonth" and "endMonth" is too large.`,
       );
@@ -70,8 +74,8 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
     }
 
     let [rows] = await this.bigtable.getRows({
-      start: `f4#${accountId}#${toMonthISOString(startMonth)}`,
-      end: `f4#${accountId}#${toMonthISOString(endMonth)}`,
+      start: `f4#${accountId}#${startMonth.toLocalMonthISOString()}`,
+      end: `f4#${accountId}#${endMonth.toLocalMonthISOString()}`,
       filter: {
         column: {
           cellLimit: 1,

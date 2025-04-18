@@ -1,12 +1,13 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { BATCH_SIZE_OF_DAILY_STORAGE_PROCESSING_PUBLISHERS } from "../../../common/constants";
-import { toDateISOString, toToday } from "../../../common/date_helper";
+import { ENV_VARS } from "../../../env_vars";
 import { Table } from "@google-cloud/bigtable";
 import { GetDailyStorageBatchHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   GetDailyStorageBatchRequestBody,
   GetDailyStorageBatchResponse,
 } from "@phading/meter_service_interface/show/node/publisher/interface";
+import { TzDate } from "@selfage/tz_date";
 
 export class GetDailyStorageBatchHandler extends GetDailyStorageBatchHandlerInterface {
   public static create(): GetDailyStorageBatchHandler {
@@ -30,7 +31,10 @@ export class GetDailyStorageBatchHandler extends GetDailyStorageBatchHandlerInte
     body: GetDailyStorageBatchRequestBody,
   ): Promise<GetDailyStorageBatchResponse> {
     // Do not process today's data.
-    let end = `t6#${toDateISOString(toToday(this.getNowDate()))}`;
+    let end = `t6#${TzDate.fromDate(
+      this.getNowDate(),
+      ENV_VARS.timezoneNegativeOffset,
+    ).toLocalDateISOString()}`;
     // Add "0" to skip the start cursor.
     let start = body.cursor ? body.cursor + "0" : `t6#`;
     let [rows] = await this.bigtable.getRows({

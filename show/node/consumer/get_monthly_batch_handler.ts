@@ -1,12 +1,13 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { BATCH_SIZE_OF_MONTHLY_RPOCESSING_CONSUMERS } from "../../../common/constants";
-import { toDateISOString, toToday } from "../../../common/date_helper";
+import { ENV_VARS } from "../../../env_vars";
 import { Table } from "@google-cloud/bigtable";
 import { GetMonthlyBatchHandlerInterface } from "@phading/meter_service_interface/show/node/consumer/handler";
 import {
   GetMonthlyBatchRequestBody,
   GetMonthlyBatchResponse,
 } from "@phading/meter_service_interface/show/node/consumer/interface";
+import { TzDate } from "@selfage/tz_date";
 
 export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
   public static create(): GetMonthlyBatchHandler {
@@ -63,7 +64,10 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
 
   // Either this month or the month of the first unprocessed date from t1# rows.
   private async getEndMonth(): Promise<string> {
-    let todayString = toDateISOString(toToday(this.getNowDate()));
+    let todayString = TzDate.fromDate(
+      this.getNowDate(),
+      ENV_VARS.timezoneNegativeOffset,
+    ).toLocalDateISOString();
     let end = `t1#${todayString}`;
     let start = `t1#`;
     let [rows] = await this.bigtable.getRows({

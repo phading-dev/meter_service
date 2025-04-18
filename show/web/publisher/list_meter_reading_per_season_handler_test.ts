@@ -12,86 +12,7 @@ TEST_RUNNER.run({
   name: "ListMeterReadingPerSeasonHandlerTest",
   cases: [
     {
-      name: "DefaultToYesterday",
-      execute: async () => {
-        // Prepare
-        await BIGTABLE.insert([
-          {
-            key: "f3#publisher1#2024-12-31",
-            data: {
-              w: {
-                season1: {
-                  value: 10,
-                },
-                season2: {
-                  value: 50,
-                },
-              },
-              a: {
-                season1: {
-                  value: 100,
-                },
-                season2: {
-                  value: 200,
-                },
-              },
-              t: {
-                wm: {
-                  value: 300,
-                },
-                nk: {
-                  value: 1000,
-                },
-              },
-            },
-          },
-        ]);
-        let clientMock = new NodeServiceClientMock();
-        clientMock.response = {
-          accountId: "publisher1",
-          capabilities: {
-            canPublish: true,
-          },
-        } as FetchSessionAndCheckCapabilityResponse;
-        // 2025-01-01 20:xx:xx UTC
-        let handler = new ListMeterReadingPerSeasonHandler(
-          BIGTABLE,
-          clientMock,
-          () => new Date(1735762358000),
-        );
-
-        // Execute
-        let response = await handler.handle("", {}, "session1");
-
-        // Verify
-        assertThat(
-          response,
-          eqMessage(
-            {
-              readings: [
-                {
-                  seasonId: "season1",
-                  watchTimeSec: 10,
-                  watchTimeSecGraded: 100,
-                },
-                {
-                  seasonId: "season2",
-                  watchTimeSec: 50,
-                  watchTimeSecGraded: 200,
-                },
-              ],
-            },
-            LIST_METER_READING_PER_SEASON_RESPONSE,
-          ),
-          "response",
-        );
-      },
-      tearDown: async () => {
-        await BIGTABLE.deleteRows("f");
-      },
-    },
-    {
-      name: "InputDate",
+      name: "Success",
       execute: async () => {
         // Prepare
         await BIGTABLE.insert([
@@ -129,11 +50,9 @@ TEST_RUNNER.run({
             canPublish: true,
           },
         } as FetchSessionAndCheckCapabilityResponse;
-        // 2025-02-02 20:xx:xx UTC
         let handler = new ListMeterReadingPerSeasonHandler(
           BIGTABLE,
           clientMock,
-          () => new Date(1738527158000),
         );
 
         // Execute
@@ -211,11 +130,9 @@ TEST_RUNNER.run({
             canPublish: true,
           },
         } as FetchSessionAndCheckCapabilityResponse;
-        // 2025-02-02 20:xx:xx UTC
         let handler = new ListMeterReadingPerSeasonHandler(
           BIGTABLE,
           clientMock,
-          () => new Date(1738527158000),
         );
 
         // Execute
@@ -266,11 +183,9 @@ TEST_RUNNER.run({
             canPublish: true,
           },
         } as FetchSessionAndCheckCapabilityResponse;
-        // 2025-02-02 20:xx:xx UTC
         let handler = new ListMeterReadingPerSeasonHandler(
           BIGTABLE,
           clientMock,
-          () => new Date(1738527158000),
         );
 
         // Execute

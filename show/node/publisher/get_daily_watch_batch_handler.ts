@@ -1,12 +1,13 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { BATCH_SIZE_OF_DAILY_WATCH_PROCESSING_PUBLISHERS } from "../../../common/constants";
-import { toDateISOString, toToday } from "../../../common/date_helper";
+import { ENV_VARS } from "../../../env_vars";
 import { Table } from "@google-cloud/bigtable";
 import { GetDailyWatchBatchHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
   GetDailyWatchBatchRequestBody,
   GetDailyWatchBatchResponse,
 } from "@phading/meter_service_interface/show/node/publisher/interface";
+import { TzDate } from "@selfage/tz_date";
 
 export class GetDailyWatchBatchHandler extends GetDailyWatchBatchHandlerInterface {
   public static create(): GetDailyWatchBatchHandler {
@@ -62,7 +63,10 @@ export class GetDailyWatchBatchHandler extends GetDailyWatchBatchHandlerInterfac
 
   // Either today or the unprocessed date from t1# rows.
   private async getEndDate(): Promise<string> {
-    let todayString = toDateISOString(toToday(this.getNowDate()));
+    let todayString = TzDate.fromDate(
+      this.getNowDate(),
+      ENV_VARS.timezoneNegativeOffset,
+    ).toLocalDateISOString();
     let end = `t1#${todayString}`;
     let start = `t1#`;
     let [rows] = await this.bigtable.getRows({

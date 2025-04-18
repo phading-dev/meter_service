@@ -9,7 +9,6 @@ import {
   ProcessMonthlyMeterReadingResponse,
 } from "@phading/meter_service_interface/show/node/publisher/interface";
 import { ProductID } from "@phading/price";
-import { AmountType } from "@phading/price/amount_type";
 import { newBadRequestError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
 
@@ -109,7 +108,6 @@ export class ProcessMonthlyMeterReadingHandler extends ProcessMonthlyMeterReadin
         newGenerateTransactionStatementRequest({
           accountId,
           month,
-          positiveAmountType: AmountType.CREDIT,
           lineItems: [
             {
               productID: ProductID.NETWORK,

@@ -37,7 +37,6 @@ import {
   LIST_METER_READING_PER_SEASON_RESPONSE as PUBLISHER_LIST_METER_READING_PER_SEASON_RESPONSE,
 } from "@phading/meter_service_interface/show/web/publisher/interface";
 import { ProductID } from "@phading/price";
-import { AmountType } from "@phading/price/amount_type";
 import {
   GET_SEASON_GRADE,
   GET_SEASON_PUBLISHER,
@@ -144,13 +143,17 @@ TEST_RUNNER.run({
           rowKey: consumerDailyBatchResponse.rowKeys[0],
         });
 
-        // 2024-11-05T18:00:00Z
         let consumerListPerSeasonResponse =
           await new ConsumerListMeterReadingPerSeasonHandler(
             BIGTABLE,
             clientMock,
-            () => new Date(1730829600000),
-          ).handle("", {}, "consumerSession1");
+          ).handle(
+            "",
+            {
+              date: "2024-11-04",
+            },
+            "consumerSession1",
+          );
         assertThat(
           consumerListPerSeasonResponse,
           eqMessage(
@@ -269,13 +272,17 @@ TEST_RUNNER.run({
           },
         );
 
-        // 2024-11-05T18:00:00Z
         let publisherListPerSeasonResponse =
           await new PublisherListMeterReadingPerSeasonHandler(
             BIGTABLE,
             clientMock,
-            () => new Date(1730829600000),
-          ).handle("", {}, "publisherSession1");
+          ).handle(
+            "",
+            {
+              date: "2024-11-04",
+            },
+            "publisherSession1",
+          );
         assertThat(
           publisherListPerSeasonResponse,
           eqMessage(
@@ -349,7 +356,6 @@ TEST_RUNNER.run({
             {
               accountId: "consumer1",
               month: "2024-11",
-              positiveAmountType: AmountType.DEBIT,
               lineItems: [
                 {
                   productID: ProductID.SHOW,
@@ -412,7 +418,6 @@ TEST_RUNNER.run({
             {
               accountId: "publisher1",
               month: "2024-11",
-              positiveAmountType: AmountType.CREDIT,
               lineItems: [
                 {
                   productID: ProductID.NETWORK,

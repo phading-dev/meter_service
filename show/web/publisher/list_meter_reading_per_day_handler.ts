@@ -1,6 +1,6 @@
 import { BIGTABLE } from "../../../common/bigtable";
-import { getDayDifference, toDateISOString } from "../../../common/date_helper";
 import { SERVICE_CLIENT } from "../../../common/service_client";
+import { ENV_VARS } from "../../../env_vars";
 import { Table } from "@google-cloud/bigtable";
 import { MAX_DAY_RANGE } from "@phading/constants/meter";
 import { ListMeterReadingsPerDayHandlerInterface } from "@phading/meter_service_interface/show/web/publisher/handler";
@@ -12,6 +12,7 @@ import { MeterReadingPerDay } from "@phading/meter_service_interface/show/web/pu
 import { newFetchSessionAndCheckCapabilityRequest } from "@phading/user_session_service_interface/node/client";
 import { newBadRequestError, newUnauthorizedError } from "@selfage/http_error";
 import { NodeServiceClient } from "@selfage/node_service_client";
+import { TzDate } from "@selfage/tz_date";
 
 export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandlerInterface {
   public static create(): ListMeterReadingsPerDayHandler {
@@ -36,18 +37,24 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
     if (!body.endDate) {
       throw newBadRequestError(`"endDate" is required.`);
     }
-    let startDate = new Date(body.startDate);
-    if (isNaN(startDate.valueOf())) {
+    let startDate = TzDate.fromLocalDateString(
+      body.startDate,
+      ENV_VARS.timezoneNegativeOffset,
+    );
+    if (isNaN(startDate.toTimestampMs())) {
       throw newBadRequestError(`"startDate" is not a valid date.`);
     }
-    let endDate = new Date(body.endDate);
-    if (isNaN(endDate.valueOf())) {
+    let endDate = TzDate.fromLocalDateString(
+      body.endDate,
+      ENV_VARS.timezoneNegativeOffset,
+    );
+    if (isNaN(endDate.toTimestampMs())) {
       throw newBadRequestError(`"endDate" is not a valid date.`);
     }
-    if (startDate >= endDate) {
+    if (startDate.toTimestampMs() >= endDate.toTimestampMs()) {
       throw newBadRequestError(`"startDate" must be smaller than "endDate".`);
     }
-    if (getDayDifference(startDate, endDate) > MAX_DAY_RANGE) {
+    if (endDate.minusDateInDays(startDate) + 1 > MAX_DAY_RANGE) {
       throw newBadRequestError(
         `The range between "startDate" and "endDate" is too large.`,
       );
@@ -67,8 +74,8 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
     }
 
     let [rows] = await this.bigtable.getRows({
-      start: `f3#${accountId}#${toDateISOString(startDate)}`,
-      end: `f3#${accountId}#${toDateISOString(endDate)}`,
+      start: `f3#${accountId}#${startDate.toLocalDateISOString()}`,
+      end: `f3#${accountId}#${endDate.toLocalDateISOString()}`,
       filter: [
         {
           family: /^t$/,

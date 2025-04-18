@@ -1,5 +1,5 @@
 import { BIGTABLE } from "../../../common/bigtable";
-import { toDateISOString, toToday } from "../../../common/date_helper";
+import { ENV_VARS } from "../../../env_vars";
 import { Table } from "@google-cloud/bigtable";
 import { RecordStorageStartHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
@@ -7,6 +7,7 @@ import {
   RecordStorageStartResponse,
 } from "@phading/meter_service_interface/show/node/publisher/interface";
 import { newBadRequestError, newNotAcceptableError } from "@selfage/http_error";
+import { TzDate } from "@selfage/tz_date";
 
 export class RecordStorageStartHandler extends RecordStorageStartHandlerInterface {
   public static create(): RecordStorageStartHandler {
@@ -53,10 +54,13 @@ export class RecordStorageStartHandler extends RecordStorageStartHandlerInterfac
         `"storageStartMs" is unreasonably large, which is ${body.storageStartMs}.`,
       );
     }
-    let today = toDateISOString(toToday(nowDate));
+    let todayString = TzDate.fromDate(
+      this.getNowDate(),
+      ENV_VARS.timezoneNegativeOffset,
+    ).toLocalDateISOString();
     await this.bigtable.insert([
       {
-        key: `d6#${today}#${body.accountId}`,
+        key: `d6#${todayString}#${body.accountId}`,
         data: {
           s: {
             [`${body.name}#b`]: {
@@ -69,7 +73,7 @@ export class RecordStorageStartHandler extends RecordStorageStartHandlerInterfac
         },
       },
       {
-        key: `t6#${today}#${body.accountId}`,
+        key: `t6#${todayString}#${body.accountId}`,
         data: {
           c: {
             p: {

@@ -19,3 +19,4 @@ import "../show/web/consumer/record_watch_time_handler_test";
 import "../show/web/publisher/list_meter_reading_per_day_handler_test";
 import "../show/web/publisher/list_meter_reading_per_month_handler_test";
 import "../show/web/publisher/list_meter_reading_per_season_handler_test";
+import "../internal_integration_test";

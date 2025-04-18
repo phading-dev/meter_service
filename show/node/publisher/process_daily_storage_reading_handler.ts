@@ -1,9 +1,6 @@
 import { BIGTABLE } from "../../../common/bigtable";
 import { incrementColumn } from "../../../common/bigtable_data_helper";
-import {
-  toDayTimeMsWrtTimezone,
-  toTommorrowISOStringFromString,
-} from "../../../common/date_helper";
+import { ENV_VARS } from "../../../env_vars";
 import { Table } from "@google-cloud/bigtable";
 import { ProcessDailyStorageReadingHandlerInterface } from "@phading/meter_service_interface/show/node/publisher/handler";
 import {
@@ -11,6 +8,7 @@ import {
   ProcessDailyStorageReadingResponse,
 } from "@phading/meter_service_interface/show/node/publisher/interface";
 import { newBadRequestError } from "@selfage/http_error";
+import { TzDate } from "@selfage/tz_date";
 
 export class ProcessDailyStorageReadingHandler extends ProcessDailyStorageReadingHandlerInterface {
   public static create(): ProcessDailyStorageReadingHandler {
@@ -77,8 +75,10 @@ export class ProcessDailyStorageReadingHandler extends ProcessDailyStorageReadin
   ): Promise<void> {
     let carryOverData: any = {};
     let aggregationData: any = {};
-    let tomorrow = toTommorrowISOStringFromString(date);
-    let tomorrowStartMs = toDayTimeMsWrtTimezone(tomorrow);
+    let nextDay = TzDate.fromLocalDateString(
+      date,
+      ENV_VARS.timezoneNegativeOffset,
+    ).addDays(1);
     let bytes: number;
     let endTimeMs: number;
     if (inputData["s"]) {
@@ -90,15 +90,21 @@ export class ProcessDailyStorageReadingHandler extends ProcessDailyStorageReadin
           endTimeMs = (cells as any)[0].value;
         } else if (category === "s") {
           let startTimeMs = (cells as any)[0].value;
+          let nextDayStartTimeMs = nextDay.toTimestampMs();
           let mbMin = Math.ceil(
             (bytes / ProcessDailyStorageReadingHandler.ONE_MB_IN_B) *
-              (((endTimeMs ?? tomorrowStartMs) - startTimeMs) / 1000 / 60),
+              (((endTimeMs ?? nextDayStartTimeMs) - startTimeMs) / 1000 / 60),
           );
           incrementColumn(aggregationData, "t", "smm", mbMin);
           if (!endTimeMs) {
             // Use incrementColumn to set column.
             incrementColumn(carryOverData, "s", `${name}#b`, bytes);
-            incrementColumn(carryOverData, "s", `${name}#s`, tomorrowStartMs);
+            incrementColumn(
+              carryOverData,
+              "s",
+              `${name}#s`,
+              nextDayStartTimeMs,
+            );
           }
           bytes = undefined;
           endTimeMs = undefined;
@@ -140,13 +146,14 @@ export class ProcessDailyStorageReadingHandler extends ProcessDailyStorageReadin
       },
     );
     if (carryOverData["s"]) {
+      let nextDayStr = nextDay.toLocalDateISOString();
       entries.push(
         {
-          key: `d6#${tomorrow}#${accountId}`,
+          key: `d6#${nextDayStr}#${accountId}`,
           data: carryOverData,
         },
         {
-          key: `t6#${tomorrow}#${accountId}`,
+          key: `t6#${nextDayStr}#${accountId}`,
           data: {
             c: {
               p: {

@@ -7,7 +7,6 @@ import {
   GENERATE_TRANSACTION_STATEMENT_REQUEST_BODY,
 } from "@phading/commerce_service_interface/node/interface";
 import { ProductID } from "@phading/price";
-import { AmountType } from "@phading/price/amount_type";
 import { eqMessage } from "@selfage/message/test_matcher";
 import { NodeServiceClientMock } from "@selfage/node_service_client/client_mock";
 import { assertThat, eq } from "@selfage/test_matcher";
@@ -116,7 +115,6 @@ TEST_RUNNER.run({
             {
               accountId: "consumer1",
               month: "2024-10",
-              positiveAmountType: AmountType.DEBIT,
               lineItems: [
                 {
                   productID: ProductID.SHOW,

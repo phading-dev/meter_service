@@ -1,5 +1,5 @@
 import { BIGTABLE } from "../../../common/bigtable";
-import { toDateISOString, toToday } from "../../../common/date_helper";
+import { ENV_VARS } from "../../../env_vars";
 import {
   CACHED_SESSION_FETCHER,
   CachedSessionFetcher,
@@ -11,6 +11,7 @@ import {
   RecordWatchTimeResponse,
 } from "@phading/meter_service_interface/show/web/consumer/interface";
 import { newBadRequestError, newNotAcceptableError } from "@selfage/http_error";
+import { TzDate } from "@selfage/tz_date";
 
 export class RecordWatchTimeHandler extends RecordWatchTimeHandlerInterface {
   public static create(): RecordWatchTimeHandler {
@@ -54,8 +55,11 @@ export class RecordWatchTimeHandler extends RecordWatchTimeHandlerInterface {
       sessionStr,
       "record watch time",
     );
-    let today = toDateISOString(toToday(this.getNowDate()));
-    await this.bigtable.row(`t1#${today}#${accountId}`).save({
+    let todayString = TzDate.fromDate(
+      this.getNowDate(),
+      ENV_VARS.timezoneNegativeOffset,
+    ).toLocalDateISOString();
+    await this.bigtable.row(`t1#${todayString}#${accountId}`).save({
       c: {
         p: {
           value: "",
@@ -63,7 +67,7 @@ export class RecordWatchTimeHandler extends RecordWatchTimeHandlerInterface {
       },
     });
     await this.bigtable
-      .row(`d1#${today}#${accountId}`)
+      .row(`d1#${todayString}#${accountId}`)
       .increment(`w:${body.seasonId}#${body.episodeId}#w`, body.watchTimeMs);
     return {};
   }
