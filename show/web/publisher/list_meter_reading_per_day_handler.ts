@@ -51,7 +51,7 @@ export class ListMeterReadingsPerDayHandler extends ListMeterReadingsPerDayHandl
     if (isNaN(endDate.toTimestampMs())) {
       throw newBadRequestError(`"endDate" is not a valid date.`);
     }
-    if (startDate.toTimestampMs() >= endDate.toTimestampMs()) {
+    if (startDate.toTimestampMs() > endDate.toTimestampMs()) {
       throw newBadRequestError(`"startDate" must be smaller than "endDate".`);
     }
     if (endDate.minusDateInDays(startDate) + 1 > MAX_DAY_RANGE) {

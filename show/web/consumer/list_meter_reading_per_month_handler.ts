@@ -51,7 +51,7 @@ export class ListMeterReadingsPerMonthHandler extends ListMeterReadingsPerMonthH
     if (isNaN(endMonth.toTimestampMs())) {
       throw newBadRequestError(`"endMonth" is not a valid date.`);
     }
-    if (startMonth.toTimestampMs() >= endMonth.toTimestampMs()) {
+    if (startMonth.toTimestampMs() > endMonth.toTimestampMs()) {
       throw newBadRequestError(`"startMonth" must be smaller than "endMonth".`);
     }
     if (endMonth.minusDateInMonths(startMonth) + 1 > MAX_MONTH_RANGE) {
