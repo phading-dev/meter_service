@@ -51,7 +51,7 @@ export class RecordStorageEndHandler extends RecordStorageEndHandlerInterface {
         `"storageEndMs" is unreasonably large, which is ${body.storageEndMs}. It could be a bad actor.`,
       );
     }
-    let todayString = TzDate.fromDate(
+    let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
     ).toLocalDateISOString();

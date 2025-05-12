@@ -31,7 +31,7 @@ export class RecordUploadedHandler extends RecordUploadedHandlerInterface {
     if (!body.uploadedBytes) {
       throw newBadRequestError(`"uploadedBytes" is required.`);
     }
-    let todayString = TzDate.fromDate(
+    let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
     ).toLocalDateISOString();

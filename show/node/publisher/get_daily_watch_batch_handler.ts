@@ -63,7 +63,7 @@ export class GetDailyWatchBatchHandler extends GetDailyWatchBatchHandlerInterfac
 
   // Either today or the unprocessed date from t1# rows.
   private async getEndDate(): Promise<string> {
-    let todayString = TzDate.fromDate(
+    let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
     ).toLocalDateISOString();

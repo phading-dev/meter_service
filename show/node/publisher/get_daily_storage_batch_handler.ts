@@ -31,7 +31,7 @@ export class GetDailyStorageBatchHandler extends GetDailyStorageBatchHandlerInte
     body: GetDailyStorageBatchRequestBody,
   ): Promise<GetDailyStorageBatchResponse> {
     // Do not process today's data.
-    let end = `t6#${TzDate.fromDate(
+    let end = `t6#${TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
     ).toLocalDateISOString()}`;

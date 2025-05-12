@@ -31,7 +31,7 @@ export class GetDailyBatchHandler extends GetDailyBatchHandlerInterface {
     body: GetDailyBatchRequestBody,
   ): Promise<GetDailyBatchResponse> {
     // Do not process today's data.
-    let end = `t1#${TzDate.fromDate(this.getNowDate(), ENV_VARS.timezoneNegativeOffset).toLocalDateISOString()}`;
+    let end = `t1#${TzDate.fromNewDate(this.getNowDate(), ENV_VARS.timezoneNegativeOffset).toLocalDateISOString()}`;
     // Add "0" to skip the start cursor.
     let start = body.cursor ? body.cursor + "0" : `t1#`;
     let [rows] = await this.bigtable.getRows({

@@ -54,7 +54,7 @@ export class RecordStorageStartHandler extends RecordStorageStartHandlerInterfac
         `"storageStartMs" is unreasonably large, which is ${body.storageStartMs}.`,
       );
     }
-    let todayString = TzDate.fromDate(
+    let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
     ).toLocalDateISOString();

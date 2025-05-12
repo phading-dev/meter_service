@@ -64,7 +64,7 @@ export class GetMonthlyBatchHandler extends GetMonthlyBatchHandlerInterface {
 
   // Either this month or the month of the first unprocessed date from t1# rows.
   private async getEndMonth(): Promise<string> {
-    let todayString = TzDate.fromDate(
+    let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
     ).toLocalDateISOString();

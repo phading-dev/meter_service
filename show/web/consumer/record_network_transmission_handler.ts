@@ -55,7 +55,7 @@ export class RecordNetworkTransmissionHandler extends RecordNetworkTransmissionH
       sessionStr,
       "record network transmission",
     );
-    let todayString = TzDate.fromDate(
+    let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
     ).toLocalDateISOString();

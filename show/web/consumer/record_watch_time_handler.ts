@@ -55,7 +55,7 @@ export class RecordWatchTimeHandler extends RecordWatchTimeHandlerInterface {
       sessionStr,
       "record watch time",
     );
-    let todayString = TzDate.fromDate(
+    let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
     ).toLocalDateISOString();
