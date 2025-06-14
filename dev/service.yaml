@@ -30,6 +30,13 @@ spec:
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
+        resources:
+          requests:
+            cpu: "400m"
+            memory: "512Mi"
+          limits:
+            cpu: "400m"
+            memory: "512Mi"
 ---
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring

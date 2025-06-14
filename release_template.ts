@@ -110,6 +110,13 @@ spec:
             port: ${ENV_VARS.port}
           initialDelaySeconds: 10
           periodSeconds: 10
+        resources:
+          requests:
+            cpu: "${ENV_VARS.cpu}"
+            memory: "${ENV_VARS.memory}"
+          limits:
+            cpu: "${ENV_VARS.cpu}"
+            memory: "${ENV_VARS.memory}"
 ---
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
