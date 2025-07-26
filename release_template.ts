@@ -95,7 +95,7 @@ spec:
       serviceAccountName: ${ENV_VARS.serviceAccount}
       containers:
       - name: ${ENV_VARS.releaseServiceName}-container
-        image: gcr.io/phading-dev/${ENV_VARS.releaseServiceName}:latest
+        image: gcr.io/${ENV_VARS.projectId}/${ENV_VARS.releaseServiceName}:latest
         ports:
         - containerPort: ${ENV_VARS.port}
         livenessProbe:
@@ -167,3 +167,6 @@ import "../main";
 
 import "./dev/env";
 generate("dev");
+
+import "./prod/env";
+generate("prod");
