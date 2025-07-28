@@ -55,6 +55,7 @@ export class RecordWatchTimeHandler extends RecordWatchTimeHandlerInterface {
       sessionStr,
       "record watch time",
     );
+    console.log(`${loggingPrefix} Record watch time ${JSON.stringify(body)} for accountId: ${accountId}`);
     let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
