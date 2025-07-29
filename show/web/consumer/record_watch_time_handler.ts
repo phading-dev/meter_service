@@ -51,11 +51,15 @@ export class RecordWatchTimeHandler extends RecordWatchTimeHandlerInterface {
         `"watchTimeMs" is unreasonably large, which is ${body.watchTimeMs}. It could be a bad actor.`,
       );
     }
+    if (body.watchTimeMs < 0) {
+      throw newBadRequestError(`"watchTimeMs" cannot be negative.`);
+    }
     let accountId = await this.sessionFetcher.getAccountId(
       sessionStr,
       "record watch time",
     );
-    console.log(`${loggingPrefix} Record watch time ${JSON.stringify(body)} for accountId: ${accountId}`);
+    // TODO: Cleanup later when system is stable.
+    console.log(`${loggingPrefix} Record watch time ${JSON.stringify(body)} for accountId ${accountId}`);
     let todayString = TzDate.fromNewDate(
       this.getNowDate(),
       ENV_VARS.timezoneNegativeOffset,
