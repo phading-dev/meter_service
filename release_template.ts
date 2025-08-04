@@ -1,8 +1,8 @@
 import { ENV_VARS } from "./env_vars";
 import {
-  K8S_SERVICE_NAME,
-  K8S_SERVICE_PORT,
-} from "@phading/meter_service_interface/service_const";
+  METER_NODE_SERVICE,
+  METER_WEB_SERVICE,
+} from "@phading/meter_service_interface/service";
 import { writeFileSync } from "fs";
 
 export function generate(env: string) {
@@ -131,37 +131,77 @@ spec:
     path: /metricsz
     interval: 30s
 ---
-apiVersion: cloud.google.com/v1
-kind: BackendConfig
-metadata:
-  name: ${ENV_VARS.releaseServiceName}-neg-health-check
-spec:
-  healthCheck:
-    port: ${ENV_VARS.port}
-    type: HTTP
-    requestPath: /healthz
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: ${K8S_SERVICE_NAME}
+  name: ${ENV_VARS.releaseServiceName}
   annotations:
-    cloud.google.com/neg: '{"ingress": true}'
-    beta.cloud.google.com/backend-config: '{"default": "${ENV_VARS.releaseServiceName}-neg-health-check"}'
 spec:
   selector:
     app: ${ENV_VARS.releaseServiceName}-pod
   ports:
     - protocol: TCP
-      port: ${K8S_SERVICE_PORT}
+      port: ${ENV_VARS.port}
       targetPort: ${ENV_VARS.port}
   type: ClusterIP
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: ${ENV_VARS.releaseServiceName}-lb-health-check
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: ${ENV_VARS.port}
+        requestPath: /healthz
+  targetRef:
+    group: ""
+    kind: Service
+    name: ${ENV_VARS.releaseServiceName}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ${ENV_VARS.releaseServiceName}-route-internal
+spec:
+  parentRefs:
+  - name: ${ENV_VARS.internalGatewayName}
+    sectionName: http
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: ${METER_NODE_SERVICE.path}
+    backendRefs:
+    - name: ${ENV_VARS.releaseServiceName}
+      port: ${ENV_VARS.port}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ${ENV_VARS.releaseServiceName}-route-external
+spec:
+  parentRefs:
+  - name: ${ENV_VARS.externalGatewayName}
+    sectionName: https
+  hostnames:
+  - ${ENV_VARS.externalDomain}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: ${METER_WEB_SERVICE.path}
+    backendRefs:
+    - name: ${ENV_VARS.releaseServiceName}
+      port: ${ENV_VARS.port}
 `;
   writeFileSync(`${env}/service.yaml`, serviceTemplate);
 
   let mainTemplate = `import "./env";
 import "../main";
-`
+`;
   writeFileSync(`${env}/main.ts`, mainTemplate);
 }
 

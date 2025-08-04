@@ -51,28 +51,68 @@ spec:
     path: /metricsz
     interval: 30s
 ---
-apiVersion: cloud.google.com/v1
-kind: BackendConfig
-metadata:
-  name: meter-service-neg-health-check
-spec:
-  healthCheck:
-    port: 8080
-    type: HTTP
-    requestPath: /healthz
----
 apiVersion: v1
 kind: Service
 metadata:
   name: meter-service
   annotations:
-    cloud.google.com/neg: '{"ingress": true}'
-    beta.cloud.google.com/backend-config: '{"default": "meter-service-neg-health-check"}'
 spec:
   selector:
     app: meter-service-pod
   ports:
     - protocol: TCP
-      port: 80
+      port: 8080
       targetPort: 8080
   type: ClusterIP
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: meter-service-lb-health-check
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: 8080
+        requestPath: /healthz
+  targetRef:
+    group: ""
+    kind: Service
+    name: meter-service
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: meter-service-route-internal
+spec:
+  parentRefs:
+  - name: phading-gateway-internal
+    sectionName: http
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /mn
+    backendRefs:
+    - name: meter-service
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: meter-service-route-external
+spec:
+  parentRefs:
+  - name: phading-gateway-external
+    sectionName: https
+  hostnames:
+  - dev.secount.com
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /mw
+    backendRefs:
+    - name: meter-service
+      port: 8080
