@@ -61,7 +61,7 @@ spec:
     app: meter-service-pod
   ports:
     - protocol: TCP
-      port: 8080
+      port: 80
       targetPort: 8080
   type: ClusterIP
 ---
@@ -80,39 +80,3 @@ spec:
     group: ""
     kind: Service
     name: meter-service
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: meter-service-route-internal
-spec:
-  parentRefs:
-  - name: phading-gateway-internal
-    sectionName: http
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /mn
-    backendRefs:
-    - name: meter-service
-      port: 8080
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: meter-service-route-external
-spec:
-  parentRefs:
-  - name: phading-gateway-external
-    sectionName: https
-  hostnames:
-  - dev.secount.com
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /mw
-    backendRefs:
-    - name: meter-service
-      port: 8080
